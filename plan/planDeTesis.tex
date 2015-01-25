@@ -1,0 +1,180 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{fullpage}
+\usepackage[spanish]{babel}
+\usepackage{wrapfig}
+\usepackage{url}
+\usepackage[font={scriptsize}]{caption}
+
+\title{Modelos de c\'omputo, hardware heterog\'eneo y t\'ecnicas computacionales avanzadas aplicadas a la simulaci\'on de biomol\'eculas}
+\author{Ignacio Eguinoa \\ 
+\small Departamento de Computaci\'on, Facultad de Ciencias Exactas y Naturales, UBA
+}
+\date{\today}
+
+\addtolength{\topmargin}{-35pt}
+\addtolength{\textwidth}{80pt}
+\addtolength{\textheight}{100pt}
+\addtolength{\oddsidemargin}{-40pt}
+
+
+\begin{document}
+
+\maketitle
+
+
+\section*{Objetivos} 
+   
+Consiste en implementar, desarrollar y optimizar t\'ecnicas de computaci\'on de alto desempe\~no en programas de simulaci\'on num\'erica con el fin de aprovechar al m\'aximo las nuevas tecnolog\'ias de procesadores que est\'an accesibles hoy en d\'ia (o a punto de estarlo), como ser : un gran n\'umero de n\'ucleos por procesador, coprocesadores espec\'ificos de c\'alculo y placas de v\'ideo con cientos de procesadores adicionales. 
+En particular, se desarrollar\'an t\'ecnicas computacionales que tengan una alta efectividad en el uso de los recursos computacionales disponibles y que disminuyan al m\'inimo posible las fuentes de degradaci\'on en la perfomance de los programas tanto paralelos como secuenciales (latencia, \emph{overhead}, \emph{starvation}). 
+Tambi\'en se evaluar\'a la utilizaci\'on de hardware espec\'ifico con el fin de lograr una mejora en la perfomance de los programas mencionados: tanto la \emph{many-cores-architecture} de Intel como las placas de v\'ideo con gran poder de c\'omputo (como la l\'inea Tesla de Nvidia).
+
+La aplicaci\'on que se utilizar\'a como caso de estudio corresponde a la simulaci\'on computacional de biomol\'eculas en un esquema de Din\'amica Molecular (MD), utilizando funciones num\'ericas para las interacciones de no uni\'on (que involucran c\'alculo de distancias entre part\'iculas en el espacio cartesiano) y con el foco puesto en la exploraci\'on de la superficie de energ\'ia libre y el uso de modelos (simplificados) de grano medio y grano grueso para la descripci\'on fisicoqu\'imica de los sistemas.  
+
+El objetivo final de esta tesis consiste en mejorar las herramientas computacionales para que sean m\'as eficientes en el uso de los recursos computacionales. 
+En otras palabras, que permita simular sistemas m\'as grandes (o por m\'as tiempo de simulaci\'on) en un menor tiempo real. 
+Al mismo tiempo, se considera que el \emph{know-how} y bagaje de t\'ecnicas a desarrollar permitir\'an aplicar las conclusiones obtenidas en los sistemas estudiados a otros con el fin de utilizar al m\'aximo las caracter\'isticas de las tecnolog\'ias disponibles hoy en d\'ia y las que lo ser\'an en el corto y mediano plazo.
+
+
+\section*{Antecedentes}
+
+\subsubsection*{Evoluci\'on de la capacidad de c\'omputo}
+
+\begin{wrapfigure}{r}{0.40\textwidth}
+\includegraphics[keepaspectratio, width=0.40\textwidth]{img/g005_Moore_Law_2011.pdf}
+\caption{Durante a\~nos, las aplicaciones pod\'ian incrementar sus capacidades de c\'omputo en base a la aparici\'on de nuevos procesadores. A partir del a\~no 2005, esta situaci\'on cambi\'o radicalmente.}
+\label{Fig:Moore}
+\end{wrapfigure}
+
+Existe un consenso a nivel mundial acerca de que los desaf\'ios cient\'ificos de este siglo no podr\'an ser abordados solo con el modelo tradicional de investigaci\'on en un laboratorio aislado.
+Hoy en d\'ia, una parte fundamental del ciclo de generaci\'on del conocimiento se basa fuertemente en la simulaci\'on num\'erica, la cual se ha convertido en un herramienta insustituible, a la par de la experimentaci\'on tradicional, para el avance de la ciencia en todas sus ramas.
+
+En coincidencia con esto, durante los \'ultimos a\~nos se ha incrementado notablemente la necesidad de poder c\'omputo, la cual ha intentado paliarse por medio de los clusters tipo \textsl{Beowulf}~\cite{Sterling1995} (conjunto de computadoras interconectadas por una red local) y \textsl{Grid Computing}~\cite{Foster2005}, consistente en una plataforma para compartir recursos altamente especializados conectados por medio de una red a nivel global.
+\'Ultimamente tambi\'en se ha extendido el uso de \textsl{Cloud Computing}~\cite{Wernsing2010}, una tecnolog\'ia que utiliza la virtualizaci\'on como la tecnolog\'ia clave que permite el uso el\'astico y bajo demanda de recursos computacionales.
+
+Por otro lado, la tendencia en la evoluci\'on de la tecnolog\'ia de los procesadores ha cambiado de un aumento progresivo de la velocidad a un aumento en la cantidad de n\'ucleos que incluye cada chip manteniendo la velocidad dentro de un mismo rango acotado (para minimizar los problemas de consumo).
+
+Una estrategia seguida por muchos usuarios de aplicaciones num\'ericas tanto en la Industria como en la Academia era \emph{simplemente} actualizar el hardware comprando procesadores m\'as r\'apidos para lograr un aumento en la capacidad de c\'alculo y en la velocidad de procesamiento de sus aplicaciones.
+Siguiendo la Ley de Moore (figura~\ref{Fig:Moore}), se sab\'ia que cada $18$ o $24$ meses era posible adquirir un procesador mucho m\'as r\'apido.
+De este modo, al actualizar la plataforma computacional, se lograba un incremento en la velocidad de la aplicaci\'on, evitando tener que enfrentar un proceso de desarrollo que, dependiendo de la aplicaci\'on, pod\'ia ser mucho m\'as largo y complicado que encarar una \emph{simple} compra de equipamiento.
+
+Sin embargo, a partir del a\~no 2005, la evoluci\'on de los procesadores cambi\'o radicalmente: su velocidad de funcionamiento ha permanecido relativamente constante, pero se multiplic\'o la cantidad de n\'ucleos por procesador. 
+El avance en las t\'ecnicas de manufactura de procesadores hace prever que este n\'umero se ir\'a incrementando con las generaciones futuras de procesadores.
+Esta situaci\'on rompe con el camino delineado anteriormente: dado que la velocidad global de los procesadores es relativamente la misma y presumiendo que la aplicaci\'on solo utiliza un \'unico n\'ucleo, ya no es posible lograr mejoras en la velocidad de procesamiento \'unicamente con la actualizaci\'on de la plataforma, se vuelve imperativo actualizar las aplicaciones para que utilicen todos los recursos disponibles.
+
+Adicionalmente durante el \'ultimo tiempo han resurgido elementos de c\'alculo heterog\'eneos como ser GPU's\cite{Nvidia-HPC,Stone2010} y la Xeon-Phi de Intel.
+El desarrollo del procesador Cell de IBM \cite{Gschwind2006} tambi\'en avanz\'o en este sentido ya que posee una arquitectura que incorpora elementos heterog\'eneos de c\'alculo junto con procesadores con m\'ultiples n\'ucleos.
+
+Esto refleja la creciente necesidad de contar con nuevos m\'etodos y t\'ecnicas de programaci\'on, as\'i como las herramientas que las soporten, para lograr que las aplicaciones aprovechen eficientemente las caracter\'isticas de los nuevos procesadores.
+En los \'ultimos meses la incorporaci\'on de esta tecnolog\'ia y su uso como plataforma de c\'alculo (y no solamente para visualizaci\'on o juegos en tres dimensiones) ha permitido aceleraciones muy interesantes, algunos ejemplos de aplicaciones en las que han sido utilizadas estas tecnolog\'ias son de f\'acil acceso \cite{Galoppo2005,Rodrigues2008,Nitsche2014}.
+Por otro lado, dado el inter\'es generado en este tipo de arquitecturas de c\'alculo, se est\'an comenzando a realizar estudios haciendo foco en el elemento de c\'alculo en s\'i, un buen ejemplo de esto es el trabajo de Ryoo et. al\cite{Ryoo2008}, en el que se intenta avanzar sobre algunas claves para maximizar la perfomance de las aplicaciones sobre estas plataformas.
+
+\subsubsection*{Din\'amica molecular y el costo computacional asociado}
+
+Desde el punto de vista de la aplicaci\'on objetivo a la cual se le aplicar\'an las optimizaciones y desarrollos realizados durante este trabajo, estas comprenden las simulaciones computacionales de biomol\'eculas utilizando un esquema de din\'amica molecular (DM). 
+Las simulaciones de DM consisten en representar sistemas moleculares mediante la posici\'on (en coordenadas cartesianas) de las ``N'' part\'iculas que las componen (usualmente los \'atomos) y una funci\'on de las mismas $f(r_N)$ denominada \emph{campo de fuerzas}. 
+Dada una configuraci\'on, el campo de fuerzas permite determinar la Energ\'ia ($E$) y fuerzas que ``sentir\'ia'' cada part\'icula. 
+Estas fuerzas son, luego, utilizadas para propagar la evoluci\'on temporal del sistema utilizando las ecuaciones de movimiento de Newton. 
+Es decir, se genera una nueva configuraci\'on en un instante de tiempo ``dt'' (usualmente de 1 femtosegundo) posterior. 
+La realizaci\'on iterativa de este proceso resulta en una serie de configuraciones en funci\'on del tiempo, que constituyen una trayectoria del sistema y es lo que com\'unmente se conoce como una DM.
+
+Para obtener informaci\'on relevante de los sistemas a analizar, las simulaciones deben ser extensas (del orden de los microsegundos) en tiempo de simulaci\'on, lo que resulta en la necesidad de realizar miles de millones de iteraciones y en un costo computacional muy significativo. 
+Por otro lado, el costo computacional de resolver las ecuaciones escala como $O(N^2)$ con el n\'umero de part\'iculas ($N$), o sea el tama\~no del sistema, hecho que pone l\'imites pr\'acticos al tipo de sistemas que se pueden estudiar en tiempos razonables. 
+Por estos motivos, existe una continua presi\'on por desarrollar m\'etodos o programas de DM que sean cada vez mas eficientes computacionalmente. 
+
+En los \'ultimos 20 a\~nos por ejemplo, para reducir los tiempos computacionales, se han desarrollado para DM esquemas de c\'omputo paralelo que subdividen al sistema en diferentes procesadores, el problema es que para cada paso de DM se requiere tener la informaci\'on de las fuerzas de todo el sistema, por lo que es necesario un eficiente esquema de comunicaci\'on entre los nodos de c\'alculo. Estas necesidades generan cuellos de botella que resultan en un pobre escalamiento y en una mala utilizaci\'on de los recursos computacionales.
+
+\subsubsection*{Nuevos modelos de c\'omputo en HPC}
+
+A medida que la tecnolog\'ia de los semiconductores ha ido evolucionando, la arquitectura de las computadoras ha cambiado para explotar las nuevas oportunidades ofrecidas y compensar sus falencias. 
+Esta evoluci\'on involucr\'o el desarrollo de estrategias alternativas para la organizaci\'on del c\'omputo as\'i como de las estructuras de la arquitectura, acompa\~nado por una adaptaci\'on del software a nivel de sistema para proveer los principios sem\'anticos que las soportan. 
+En otras palabras, se requiere programar nuevos c\'odigos para que funcionen eficientemente con las nuevas tecnolog\'ias disponibles.
+
+Entre los modelos de programaci\'on paralela, por m\'as de una d\'ecada el modelo dominante de c\'omputo ha sido el de pasaje de mensajes (\emph{message passing}). 
+Las varias implementaciones de MPI existentes~\texttt{MPI}~\cite{Gropp1999a,Gropp1999b,Pachecho2011} (i.e. \texttt{MPICH-2}, \texttt{OpenMPI} entre las de c\'odigo abierto) fueron adoptadas tanto en computadoras masivamente paralelas (MPP's) como clusters con hardware est\'andar (\texttt{COTS} - Commidity Off The Shelf). 
+Tambi\'en se han desarrollado y utilizado otros modelos como ser m\'ultiples hilos (\texttt{OpenMP}), vectoriales y \texttt{SIMD} (Single Instruction/Multiple Data), pero claramente \texttt{MPI} es el dominante hoy en d\'ia.
+Sin embargo, como la tecnolog\'ia de los semiconductores ha continuado evolucionando, han surgido tanto nuevas oportunidades como problemas que demandan mejoras en la arquitectura.
+Uno de los cambios m\'as dram\'aticos es la migraci\'on hacia m\'ultiples n\'ucleos por procesador y el resurgimiento de los elementos de c\'omputo heterog\'eneos tales como tarjetas de v\'ideo (GPU's), placas SIMD como la Clearspeed o la Many-cores-architecture (MIC). 
+El desarrollo de los procesadores tambi\'en ha incorporado elementos de arquitecturas heterog\'eneas como lo demuestra el procesador Cell de IBM.
+
+A la hora de evaluar el camino a seguir para paralelizar un programa, es necesario tener en cuenta diversos factores que influyen en la degradaci\'on de la perfomance. Entre estos se encuentran el tiempo de latencia, el c\'omputo extra que se debe realizar para administrar recursos y tareas en un entorno de concurrencia, el correcto balance de carga entre las unidades de procesamiento, la contenci\'on por acceso a recursos compartidos, y la facilidad a la hora de programar sobre el modelo de c\'omputo elegido, asociado directamente al nivel de abstracci\'on provisto por las herramientas asociadas.  Asimismo, existen otros puntos a considerar que, en el \'ultimo tiempo, han tomado una relevancia cada vez mayor: consumo y confiabilidad.
+La hip\'otesis b\'asica en la que se basa este proyecto es que las aplicaciones num\'ericas (como la DM) poseen un amplio campo para la mejora en el uso de los recursos.
+Estos recursos corresponden, principalmente, a poder computacional, pero no se limitan solo a eso. Tambi\'en se debe tener en cuenta los recursos humanos necesarios para mantener el hardware en funcionamiento, la electricidad que utiliza, el espacio que ocupa y la capacidad de refrigeraci\'on instalada que cualquier cluster necesita hoy en d\'ia.
+El uso de tarjetas gr\'aficas y placas aceleradoras proporciona una oportunidad adicional para obtener mejoras en la perfomance de las aplicaciones, pero lograrlo requiere de un dise\~no cuidadoso de la arquitectura de la aplicaci\'on nueva o un proceso de reingenier\'ia de una existente.
+Si bien las GPU's proveen un tremendo poder de c\'alculo, el costo que se paga es una flexibilidad reducida. 
+Las GPU's son distintas a los procesadores generales por varias razones, y es importante conocer estas diferencias para poder obtener una aplicaci\'on que posea buena perfomance. 
+Entre las m\'as importantes que analizaremos en relaci\'on con la perfomance del c\'odigo a desarrollar, podemos citar:
+\begin{description}
+\item[Escalabilidad:] los procesadores t\'ipicamente proveen unos pocos n\'ucleos muy r\'apidos, mientras que las GPUs proveen un n\'umero mucho mayor de unidades de ejecuci\'on, pero de menor velocidad. Por ejemplo, un Intel Xeon de hoy en d\'ia posee ocho n\'ucleos, mientras que una GPU Nvidia (K20) tiene m\'as de $2496$ unidades de c\'omputo.
+
+\item[Acceso a memoria:] En las GPU's que el acceso a la memoria es mucho m\'as lento que el c\'alculo en s\'i mismo, y por otro lado, las GPU's tiene solo una peque\~na cantidad de memoria cach\'e y la estrategia principal para evitar los ciclos muertos es el uso masivo de m\'ultiples hilos. Los programas no pueden confiar en la estructura de cach\'e para esconder la latencia producida por los accesos a memoria. En lugar de eso, el objetivo es adaptar el patr\'on de accesos a memoria, accediendo a bloques contiguos de datos para explotar el gran ancho de banda que provee la memoria on-chip.
+
+\item[Comunicaci\'on entre el procesador y la GPU:] el acceso a los datos desde las unidades matem\'aticas a la memoria local de la GPU es lenta comparada con el c\'alculo, pero transferir datos entre la GPU y el procesador a trav\'es del bus PCIe es a\'un m\'as lento. Esto requiere que todas las parte del c\'alculo sean implementadas en la GPU, de otro modo ser\'a necesario transferir datos entre el procesador y la GPU en cada paso de tiempo, lo que reducir\'a necesariamente la perfomance.
+
+\item [Control de flujo:] Otra importante caracter\'istica de las GPU's es que los procesadores no son independientes unos de otros. Los hilos se ordenan en grupos (t\'ipicamente entre 16 y 64 en las GPU's de hoy en d\'ia) y todos los hilos deben ejecutar exactamente la misma instrucci\'on al mismo tiempo (Single Instruction Multiple Data/SIMD). El objetivo durante la programaci\'on es evitar la divergencia en el flujo de ejecuci\'on debido a sentencias de control condicionales dentro de los hilos de un mismo grupo. De ocurrir la divergencia, todos los hilos deben pagar el costo de ejecutar los dos posibles caminos generando una gran p\'erdida de perfomance.
+\end{description}
+
+Por otro lado, el ya mencionado incremento en la cantidad de n\'ucleos por procesador hace imprescindible tener un modelo de c\'omputo que cumpla con las siguientes caracter\'isticas:
+\begin{itemize}
+\item Espacios de nombres globales a nivel de sistema tanto para los datos como para las tareas activas con mecanismos de traducci\'on de direcciones que sea eficiente y que soporte ruteo de la comunicaci\'on en presencia de objetos de distribuci\'on din\'amica.
+
+\item Sem\'anticas de paralelismo y granularidad para explotar la diversidad de formas volver utilizar paralelismo a nivel de mill\'on o miles de millones de unidades como ser\'a normal en los sistemas que estar\'an disponibles la pr\'oxima d\'ecada.
+
+\item Soporte directo para procesamiento de estructuras de datos ralas que var\'ian en el tiempo, como se presentan en las aplicaciones tipo N-Body, grafos dirigidos(mallas auto-adaptativas), y de part\'iculas en celdas (magneto-hidro-din\'amica).
+
+\item Mecanismos intr\'insecos para el ocultamiento autom\'atico de la latencia para mitigar la degradaci\'on de la perfomance debido al bloqueo por acceso a recursos remotos, disminuyendo los ciclos muertos de procesador.
+
+\item Incorporar mecanismos de bajo \emph{overhead} para manejar paralelismo a nivel global de sistema incluyendo sincronizaci\'on, \emph{scheduling}, movimiento de datos y balance de carga.
+
+\item Sem\'anticas para establecer relaciones de afinidad que podr\'ian conducir a explotar oportunidades interacciones localizadas utilizando tanto la compilaci\'on como t\'ecnicas de runtime.
+
+\end{itemize}
+
+En este contexto, un objetivo importante y general de esta tesis consiste en explorar, incorporar y, eventualmente, contribuir al desarrollo de nuevos modelos de ejecuci\'on que utilicen todo el potencial de las tecnolog\'ias de semiconductores mientras que se simplifique o disminuya la carga impuesta al programador, teniendo en cuenta los puntos mencionados anteriormente. Esto involucra entre otras cosas, determinar las herramientas a utilizar ya que existen varias alternativas para cada una de las etapas de desarrollo: desde la elecci\'on del modelo de c\'omputo ya mencionado hasta las herramientas de soporte al programador (\emph{debug}) pasando por el lenguaje y compilador a utilizar. Este camino incluye el complejo proceso de realizar pruebas profundas en los distintos niveles mencionados para determinar las ventajas y desventajas de las herramientas disponibles y c\'omo se relacionan estas con los elementos de c\'alculo disponibles, siendo este \'ultimo uno de los resultados m\'as interesantes que se 
+espera obtener como una de los resultados de esta tesis.
+
+\section*{Actividades y metodolog\'ia}
+% Enumerar las tareas a desarrollar y las metodolog\'ias experimentales y t\'ecnicas a emplear en el plan de trabajo propuesto para la obtenci\'on de resultados y la demostraci\'on de hip\'otesis.
+
+Para desarrollar un c\'odigo eficiente para la implementaci\'on de DM que aproveche al m\'aximo las nuevas tecnolog\'ias, proponemos las siguientes actividades: 
+
+\begin{enumerate}
+\item Inicialmente, se realizar\'a un estudio del hardware complementario heterog\'eneo de c\'alculo (placa de v\'ideo y aceleradora) y de las herramientas que proveen los distintos fabricantes como parte del kit de desarrollo. Se espera obtener un conocimiento profundo tanto de las ventajas de estos elementos desde el punto de vista del hardware y de la arquitectura como de las posibilidades de desarrollo,  flexibilidad y soporte que poseen las herramientas evaluadas CUDA (Nvidia) y OpenCL (AMD/Intel).
+Estos kits de desarrollo incluyen reemplazos para bibliotecas de funciones de uso habitual en c\'alculo cient\'ifico para, por ejemplo, multiplicaci\'on de matrices.
+Adem\'as, d\'ia a d\'ia se presentan nuevos desarrollos adicionales como implementaciones de la transformada r\'apida de fourier.
+
+\item Se realizar\'a un estudio de modelos de programaci\'on paralelos alternativos y complementarios al de pasaje de mensajes(MPI), como ser el Unified Parallel C, OpenMP, CAF o Titanium entre otros.
+Los t\'opicos que se tendr\'an en cuenta son las caracter\'isticas del lenguaje, las posibilidades que da para explotar el paralelismo, cu\'anto control brinda al programador, cu\'anta carga adicional impone al mismo. \label{lenguajes_2}
+
+\item Otro objetivo es determinar qu\'e herramientas de debug y profiling hay disponibles y con qu\'e tipo de soporte para cada uno de los lenguajes o modelos considerados en el punto anterior.
+En principio se considerar\'an: GASP\footnote{\url{http://gasp.hcs.ufl.edu}}, Mupc\footnote{\url{http://www.upc.mtu.edu/}}, AMD Code Analysis\footnote{\url{http://developer.amd.com/CPU/CODEANALYST/Pages/default.aspx}}, Dynaprof\footnote{\url{http://www.cs.utk.edu/~mucci/dynaprof}}, Intel Inspector XE\footnote{\url{https://software.intel.com/en-us/intel-inspector-xe}}, entre otras.
+
+\item Se buscar\'a conocer sobre las posibilidades de integraci\'on entre las herramientas evaluadas en el punto \ref{lenguajes_2} y los kits de desarrollo mencionados en el punto 1.
+
+\item Un punto importante adicional corresponde con la evaluaci\'on del uso de m\'ultiples dispositivos de c\'alculo adicionales. El uso de varias GPU's impone mayores restricciones respecto a la comunicaci\'on de datos entre ellas y al uso eficiente de los recursos de las diversas placas cuando colaboran en la resoluci\'on de un mismo problema. De una manera similar aparece una situaci\'on similar cuando se consideran las MIC's de Intel.
+
+\item Tomando como base una herramienta computacional de Din\'amica Molecular (AMBER) se aplicar\'an las t\'ecnicas descriptas y se buscar\'an las optimizaciones que pueden incorporarse de manera de ampliar las capacidades de la herramienta en cuanto a funcionamiento en entornos paralelos. Se analizar\'a el patr\'on de uso de memoria, el uso de estructuras intermedias de cache y las posibilidades de que la aplicaci\'on puede sacar provecho de las ventajas de arquitectura provistas por cada plataforma.
+
+\end{enumerate}
+
+De esta manera, se podr\'a ir avanzando en dos aspectos: por un lado el estudio de las distintas herramientas, entornos de programaci\'on y arquitecturas disponibles y, por el otro, en el an\'alisis de una herramienta de alto impacto con el fin de obtener mejoras en el uso de los recursos computacionales en distintos escenarios.
+
+
+\section*{Factibilidad}
+% Indicar si el lugar de trabajo cuenta con la infraestructura, los servicios y el equipamiento a emplear. Detallar el origen de los recursos financieros requeridos para la realizaci\'on del plan propuesto. 
+% Enumerar los equipos m\'as importantes a ser utilizados en el desarrollo de su plan de trabajo en la instituci\'on propuesta como lugar de trabajo para la beca o en otra.
+El grupo del director de beca propuesto cuenta con un espacio propio dentro del Departamento de Computaci\'on, FCEN-UBA (pabell\'on 1 de Ciudad Universitaria) con lugar suficiente para alojar a todos los investigadores que se desempe\~nan en \'el. Tambi\'en se cuenta con un cluster de pruebas de ocho procesadores AMD/Opteron, una estaci\'on de video-conferencia ``Polycom'', estaciones de trabajo para desarrollo de c\'odigo, pruebas menores de simulaci\'on, y visualizaci\'on y post-procesamiento de datos. 
+Adicionalmente, se tiene acceso al cluster de la FCEN que forma parte del CeCAR (\url{cecar.fcen.uba.ar}) que consta de $224$ procesadores conectados con red de muy baja latencia (infiniband).
+
+El grupo del co-director de beca propuesto en el INQUIMAE-FCEN poseen unas ocho estaciones de trabajo dotadas con procesadores de \'ultima generaci\'on, conectadas en red a un servidor de almacenamiento de informaci\'on de alta capacidad. 
+Se cuenta, adem\'as, con un cluster local de procesamiento de alrededor de $100$ procesadores y acceso a diversos clusters nacionales e internacionales por medio de colaboraciones (Cluster CMG Univ. Nac. Cordoba, Mare Nostrum (Barcelona Supercomputing Center), Cluster de HPC de la Univ de Florida Gainsville). 
+El Co-director cuenta adem\'as con financiamiento de los proyectos tipo PICT-2012, y UBACyT y, en directa relaci\'on con el presente proyecto, PIP-2012 ``Determinantes Moleculares de la Interacci\'on droga-receptor: desarrollo metodol\'ogico y aplicaclones'' y Raices-Siembra 2014/2105 ``Desarrollo y aplicaci\'on de tecnolog\'ias de Computaci\'on de Alta Performance en simulaci\'on de Sistemas Moleculares de Inter\'es Biol\'ogico''. 
+El codirector y su grupo poseen ademas amplia experiencia en el desarrollo de m\'etodos de simulaci\'on computacional en biomol\'eculas y tiene acceso al c\'odigo fuente de diversos programas de amplia distribuci\'on (AMBER, Siesta-Hybrid, Autodock, etc.).
+
+
+\footnotesize 
+\bibliographystyle{elsart-num}%Used BibTeX style is unsrt
+\bibliography{journalsLong,hpc}
+
+\end{document}

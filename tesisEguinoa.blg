@@ -1,0 +1,50 @@
+This is BibTeX, Version 0.99d (TeX Live 2013/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: tesisEguinoa.aux
+The style file: elsart-num.bst
+Database file #1: journalsLong.bib
+Database file #2: hpc.bib
+Warning--I'm ignoring Sterling1995's extra "booktitle" field
+--line 1416 of file hpc.bib
+You've used 13 entries,
+            2332 wiz_defined-function locations,
+            747 strings with 9116 characters,
+and the built_in function-call counts, 3580 in all, are:
+= -- 245
+> -- 159
+< -- 11
++ -- 60
+- -- 47
+* -- 296
+:= -- 468
+add.period$ -- 13
+call.type$ -- 13
+change.case$ -- 15
+chr.to.int$ -- 12
+cite$ -- 13
+duplicate$ -- 176
+empty$ -- 425
+format.name$ -- 58
+if$ -- 845
+int.to.chr$ -- 0
+int.to.str$ -- 13
+missing$ -- 15
+newline$ -- 49
+num.names$ -- 14
+pop$ -- 103
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 105
+stack$ -- 0
+substring$ -- 198
+swap$ -- 51
+text.length$ -- 7
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 0
+while$ -- 35
+width$ -- 15
+write$ -- 118
+(There was 1 warning)

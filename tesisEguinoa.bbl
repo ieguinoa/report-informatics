@@ -1,0 +1,78 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+
+\bibitem{Sterling1995}
+T.~L. Sterling, D.~Savarese, D.~J. Becker, J.~E. Dorband, U.~A. Ranawake, C.~V.
+  Packer, Beowulf: A parallel workstation for scientific computation, in: ICPP
+  (1), CRC Press, 1995, pp. 11--14.
+
+\bibitem{Foster2005}
+I.~Foster, {Globus {T}oolkit {V}ersion 4: {S}oftware for {S}ervice-{O}riented
+  {S}ystems}, in: H.~Jin, D.~Reed, W.~Jiang (Eds.), {IFIP International
+  Conference on Network and Parallel Computing 2005}, Vol. 3779 of Lecture
+  Notes in Computer Science, Springer Berlin / Heidelberg, 2005, pp. 2--13.
+
+\bibitem{Wernsing2010}
+J.~R. Wernsing, G.~Stitt, Elastic computing: A framework for transparent,
+  portable, and adaptive multi-core heterogeneous computing, in: Proceedings of
+  the ACM SIGPLAN/SIGBED 2010 Conference on Languages, Compilers, and Tools for
+  Embedded Systems, LCTES '10, ACM, New York, NY, USA, 2010, pp. 115--124.
+\newline\urlprefix\url{http://doi.acm.org/10.1145/1755888.1755906}
+
+\bibitem{Nvidia-HPC}
+{NVIDIA Tesla computing solutions}, last visited on 25/06/2014.
+\newline\urlprefix\url{http://www.nvidia.com/page/hpc.html}
+
+\bibitem{Stone2010}
+J.~E. Stone, D.~Gohara, G.~Shi, Opencl: A parallel programming standard for
+  heterogeneous computing systems, Computing in Science \& Engineering 12~(3)
+  (2010) 66--73.
+\newline\urlprefix\url{http://scitation.aip.org/content/aip/journal/cise/12/3/10.1109/MCSE.2010.69}
+
+\bibitem{Gschwind2006}
+M.~Gschwind, H.~P. Hofstee, B.~Flachs, M.~Hopkins, Y.~Watanabe, T.~Yamazaki,
+  {Synergistic Processing in Cell's Multicore Architecture}, IEEE Micro 26~(2)
+  (2006) 10--24.
+
+\bibitem{Galoppo2005}
+N.~Galoppo, N.~K. Govindaraju, M.~Henson, D.~Manocha, {LU-GPU: Efficient
+  Algorithms for Solving Dense Linear Systems on Graphics Hardware}, in: {SC
+  '05: Proceedings of the 2005 ACM/IEEE conference on Supercomputing}, IEEE
+  Computer Society, Washington, DC, USA, 2005, p.~3.
+
+\bibitem{Rodrigues2008}
+C.~I. Rodrigues, D.~J. Hardy, J.~E. Stone, K.~Schulten, W.-M.~W. Hwu, {GPU
+  acceleration of cutoff pair potentials for molecular modeling applications},
+  in: {CF '08: Proceedings of the 2008 conference on Computing frontiers}, ACM,
+  New York, NY, USA, 2008, pp. 273--282.
+
+\bibitem{Nitsche2014}
+M.~A. Nitsche, M.~Ferreria, E.~E. Mocskos, M.~C. Gonz\'alez~Lebrero, {GPU
+  Accelerated Implementation of Density Functional Theory for Hybrid QM/MM
+  Simulations}, Journal of Chemical Theory and Computation 10~(3) (2014)
+  959--967.
+\newline\urlprefix\url{http://pubs.acs.org/doi/abs/10.1021/ct400308n}
+
+\bibitem{Ryoo2008}
+Shane, C.~I. Rodrigues, S.~S. Baghsorkhi, S.~S. Stone, D.~B. Kirk, W.-m.~W.
+  Hwu, {Optimization principles and application performance evaluation of a
+  multithreaded GPU using CUDA}, in: {PPoPP '08: Proceedings of the 13th ACM
+  SIGPLAN Symposium on Principles and practice of parallel programming}, ACM,
+  New York, NY, USA, 2008, pp. 73--82.
+
+\bibitem{Gropp1999a}
+W.~Gropp, E.~Lusk, A.~Skjellum, {Using MPI: Portable Parallel Programming with
+  the Message-Passing Interface}, 2nd Edition, MIT Press, 1999.
+
+\bibitem{Gropp1999b}
+W.~Gropp, E.~Lusk, R.~Thakur, {Using MPI-2: Advanced Features of the
+  Message-Passing Interface}, 2nd Edition, MIT Press, 1999.
+
+\bibitem{Pachecho2011}
+P.~S. Pacheco, {An Introduction to Parallel Programming}, Morgan Kaufmann
+  Publishers Inc., 30 Corporate Drive, Suite 400, Burlington, MA 01803, USA,
+  2011.
+
+\end{thebibliography}

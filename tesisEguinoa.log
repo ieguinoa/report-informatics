@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.12.23)  25 JAN 2015 01:00
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.12.23)  25 JAN 2015 22:46
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -331,16 +331,9 @@ Package caption3 Info: TeX engine: e-TeX on input line 57.
 \c@ContinuedFloat=\count93
 Package caption Info: wrapfig package is loaded.
 )
-(/usr/share/texlive/texmf-dist/tex/latex/base/makeidx.sty
-Package: makeidx 2000/03/29 v1.0m Standard LaTeX package
-)
-\@indexfile=\write3
-\openout3 = `tesisEguinoa.idx'.
+LaTeX Info: Redefining \. on input line 12.
+LaTeX Info: Redefining \% on input line 12.
 
-
-Writing index file tesisEguinoa.idx
-LaTeX Info: Redefining \. on input line 15.
-LaTeX Info: Redefining \% on input line 15.
 (./tesisEguinoa.aux
 LaTeX Info: Redefining \. on input line 6.
 LaTeX Info: Redefining \% on input line 6.
@@ -349,18 +342,18 @@ LaTeX Info: Redefining \% on input line 10.
 )
 \openout1 = `tesisEguinoa.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 28.
+LaTeX Font Info:    ... okay on input line 28.
 
 (/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -423,16 +416,16 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-LaTeX Info: Redefining \. on input line 31.
-LaTeX Info: Redefining \% on input line 31.
+LaTeX Info: Redefining \. on input line 28.
+LaTeX Info: Redefining \% on input line 28.
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 33.
+(Font)              <12> on input line 30.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 33.
+(Font)              <8> on input line 30.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 33.
+(Font)              <6> on input line 30.
 
 [1
 
@@ -446,8 +439,8 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <5> on input line 4.
 )
-\tf@toc=\write4
-\openout4 = `tesisEguinoa.toc'.
+\tf@toc=\write3
+\openout3 = `tesisEguinoa.toc'.
 
 [2
 
@@ -457,10 +450,10 @@ Cap\'{\i }tulo 1.
 File: img/mdalgorithm.png Graphic file (type png)
 
 <use img/mdalgorithm.png>
-Package pdftex.def Info: img/mdalgorithm.png used on input line 112.
+Package pdftex.def Info: img/mdalgorithm.png used on input line 109.
 (pdftex.def)             Requested size: 532.9679pt x 276.62427pt.
 
-Overfull \hbox (15.0pt too wide) in paragraph at lines 112--116
+Overfull \hbox (15.0pt too wide) in paragraph at lines 109--113
 [][] 
  []
 
@@ -470,39 +463,45 @@ Overfull \hbox (15.0pt too wide) in paragraph at lines 112--116
 File: img/ecPotencialAmber.png Graphic file (type png)
 
 <use img/ecPotencialAmber.png>
-Package pdftex.def Info: img/ecPotencialAmber.png used on input line 170.
+Package pdftex.def Info: img/ecPotencialAmber.png used on input line 165.
 (pdftex.def)             Requested size: 532.9679pt x 73.96213pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 166--175
+Underfull \hbox (badness 10000) in paragraph at lines 161--170
 
  []
 
 [4 <./img/mdalgorithm.png>]
-Overfull \hbox (29.44966pt too wide) in paragraph at lines 273--274
-[]\OT1/cmr/m/n/10 Las ca-pa-ci-da-des de c^^Salcu-lo ac-tua-les per-mi-ten rea-
-li-zar si-mu-la-cio-nes de din^^Sami-ca mo-le-cu-lar en sis-te-mas de has-ta XX
-XXXXXXXX
- []
+LaTeX Font Info:    Calculating math sizes for size <14> on input line 196.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <14> on input line 196.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <9.79996> on input line 196.
 
-[5 <./img/ecPotencialAmber.png>]
+<img/LennardJonesFull.png, id=28, 602.25pt x 423.5825pt>
+File: img/LennardJonesFull.png Graphic file (type png)
+
+<use img/LennardJonesFull.png>
+Package pdftex.def Info: img/LennardJonesFull.png used on input line 219.
+(pdftex.def)             Requested size: 323.62955pt x 227.61945pt.
+ [5 <./img/ecPotencialAmber.png> <./img/LennardJonesFull.png>] [6]
 Cap\'{\i }tulo 2.
-[6
+[7
 
 ]
 Cap\'{\i }tulo 3.
-[7
+[8
 
-] [8]
+] [9]
 Cap\'{\i }tulo 4.
-[9
-
-]
-Cap\'{\i }tulo 5.
 [10
 
 ]
-Cap\'{\i }tulo 6.
+Cap\'{\i }tulo 5.
 [11
+
+]
+Cap\'{\i }tulo 6.
+[12
 
 ] (./tesisEguinoa.aux
 LaTeX Info: Redefining \. on input line 6.
@@ -511,26 +510,28 @@ LaTeX Info: Redefining \. on input line 10.
 LaTeX Info: Redefining \% on input line 10.
 ) ) 
 Here is how much of TeX's memory you used:
- 3680 strings out of 494966
- 54160 string characters out of 6179558
- 118980 words of memory out of 5000000
- 6848 multiletter control sequences out of 15000+600000
- 9406 words of font info for 33 fonts, out of 8000000 for 9000
+ 3689 strings out of 494966
+ 54318 string characters out of 6179558
+ 119935 words of memory out of 5000000
+ 6860 multiletter control sequences out of 15000+600000
+ 10021 words of font info for 35 fonts, out of 8000000 for 9000
  40 hyphenation exceptions out of 8191
- 38i,7n,38p,606b,289s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 38i,7n,38p,619b,289s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></u
 sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/sha
 re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/tex
-live/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/te
-xmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dis
-t/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts
-/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/
-public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmr9.pfb>
-Output written on tesisEguinoa.pdf (12 pages, 178464 bytes).
+live/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-di
+st/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/font
+s/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1
+/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cms
+y10.pfb>
+Output written on tesisEguinoa.pdf (13 pages, 268634 bytes).
 PDF statistics:
- 83 PDF objects out of 1000 (max. 8388607)
- 56 compressed objects within 1 object stream
+ 96 PDF objects out of 1000 (max. 8388607)
+ 65 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 11 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 16 words of extra memory for PDF output out of 10000 (max. 10000000)
 

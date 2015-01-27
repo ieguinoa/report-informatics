@@ -7,11 +7,8 @@
 \usepackage{wrapfig}
 \usepackage{url}
 \usepackage[font={scriptsize}]{caption}
-\usepackage{makeidx}
 \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{3}
-\makeindex
-
 \selectlanguage{spanish}
 
 
@@ -83,12 +80,12 @@ De esta forma, se espera que la modificacion resulte en una mejora de la perform
 
 
 Los sistemas químicos de interés como las proteínas suelen ser complejos de estudiar debido a su gran tamaño. 
-La superficie de energia libre es la funcion que describe la energia del sistema, y a partir de la cual se podrian
-derivar todas las propiedades termodinamicas y cineticas de interes. Esta, sin embargo, es una funcion 3N dimensional (siendo N el numero de particulas del sistema), lo que hace imposible derivar analiticamente las propiedades debido al altisimo costo computacional asociado.
-Otra forma de analizar estos sistemas es mediante una aproximación numérica, a través de simulaciones computacionales.  	
+La superficie de energia libre, funcion que describe la energia del sistema y a partir de la cual se podrian derivar todas las propiedades termodinamicas y cineticas de interes, es una funcion 3N dimensional (siendo N el numero de particulas del sistema), lo que hace imposible derivar analiticamente las propiedades debido al altisimo costo computacional asociado.
 
+Otra forma de analizar estos sistemas es mediante una aproximación numérica, a través de simulaciones computacionales.  	
 La simulación computacional de biomoléculas involucra la exploración de su superficie de energía libre, la cual, debido a la complejidad de estos sistemas, es altamente accidentada, contiene una gran cantidad de mínimos locales y de barreras de energéticas. 
 De esta forma, si los parametros de la simulacion estan correctamente definidos, el conjunto de conformaciones adoptadas durante la ejecucion sera representativo del ensamble real de conformaciones posibles del sistema, lo que nos permite estimar las propiedades de interes.
+
 Los métodos de simulación molecular nos permiten, entonces, obtener una serie de configuraciones representativas del sistema, de modo que las propiedades termodinámicas extraídas del mismo se correspondan de manera precisa con los valores reales.
 Una de las formas de obtener estas configuraciones es mediante el metodo de dinamica molecular. Este metodo implica simular la progresion temporal "real" del sistema, obteniendo distintas conformaciones a medida que avanza el tiempo de simulacion.
 
@@ -128,8 +125,8 @@ El esquema general del método es el siguiente:
 
 
 
-El resultado de una simulación de dinámica molecular es principalmente una trayectoria representada por la posición de cada una de las particulas a lo largo de un cierto tiempo.
-No se va a detallar acerca de los metodos para el procesamiento de este resultado pero es relevante decir que la longitud de trayectoria que podamos obtener en un tiempo de cómputo razonable es lo que limita el tipo de proceso químico que podremos estudiar.
+El resultado de una simulación de dinámica molecular es principalmente una trayectoria, representada por las posiciónes de cada una de las particulas a lo largo de un cierto tiempo.
+No se va a detallar acerca de los metodos para el procesamiento de este resultado, pero es relevante decir que la longitud de trayectoria que podamos obtener en un tiempo de cómputo razonable es lo que limita el tipo de proceso químico que podremos estudiar.
 Para poder estudiar un cierto proceso de interés es necesario que la simulacion alcance la escala de tiempo en la cual este ocurre. Un mayor tiempo de simulación equivale a realizar mas pasos y por lo tanto mas calculos totales, aumentando asi el tiempo de computo requerido.
 
 Por su parte, simular sistemas mas grandes (con mayor cantidad de particulas) implica una mayor cantidad de calculos en cada paso y por lo tanto un mayor costo computacional. Además, la funcion que describe las propiedades del sistema tiene por naturaleza una mayor cantidad de variables, debido a esto es necesario  correr la simulacion durante mas tiempo para poder llegar a un conjunto de conformaciones que sea representativo del ensamble real.
@@ -142,21 +139,19 @@ Por su parte, simular sistemas mas grandes (con mayor cantidad de particulas) im
 
 
 En la utilización del método de dinámica molecular, el potencial(V) que permite derivar las fuerzas entre particulas se obtiene modelando al sistema molecular mediante la mecanica clasica (metodo de mecanica molecular, MM).
-Usando un método de MM [12] , se ignoran los electrones y la naturaleza cuántica de estos. La energía potencial del sistema, entonces, depende exclusivamente de las posiciones de los núcleos atómicos. Se modela cada molécula como un conjunto de sitios -que representan los átomos que la componen- y resortes -que representan los enlaces químicos entre estos- junto con un potencial parametrizado ad hoc.
-Este potencial es una función matemática que depende exclusivamente de las posiciones de los atomos, intentando ajustarse a las interacciones entre los componentes del sistema sistema real. Este tipo de repesentacion simplificada del sistema permite reducir la complejidad de los calculos necesarios para la simulacion, y por lo tanto el costo computacional asociado, pero limita el tipo de procesos que se pueden estudiar. Por ej. no se pueden estudiar reacciones quimicas que impliquen ruptura o formación de enlaces ya que estos no son considerados con suficiente detalle.
+Usando un método de MM, se ignoran los electrones y la naturaleza cuántica de estos. La energía potencial del sistema, entonces, depende exclusivamente de las posiciones de los núcleos atómicos. Se modela cada molécula como un conjunto de sitios -que representan los átomos que la componen- y resortes -que representan los enlaces químicos entre estos- junto con un potencial parametrizado ad hoc.
+Este potencial es una función matemática que depende exclusivamente de las posiciones de los atomos, la cual se ajusta a las interacciones observadas experimentalmente entre los componentes del sistema. Este tipo de repesentacion simplificada del sistema permite reducir la complejidad de los calculos necesarios para la simulacion, y por lo tanto el costo computacional asociado, pero limita el tipo de procesos que se pueden estudiar. Por ej. no se pueden estudiar reacciones quimicas que impliquen ruptura o formación de enlaces ya que estos no son considerados con suficiente detalle.
 
 % The choice of the molecular mechanics force fields is an important aspect of the MD simulation . The forcefield governs how the parts of a molecule relate to each other, how each atom is affected by its atomic environment and how these forces can contribute to the structure of the molecule under a certain set of constraints
 Las interacciones representadas en el método de MM se pueden agrupar en dos tipos:
 
 \begin{description}
- \item [De unión:] Describen las interacciones entre dos átomos unidos entre si directamente o hasta 2 enlaces de distancia. Consisten en aquellos términos del potencial cuya energía se ve afectada por los
-estiramientos de los enlaces, las flexiones de los ángulos entre 2 átomos, y la rotación de dos átomos adyacentes sobre un eje (ángulos dihedros). Los estiramientos y las flexiones angulares son modeladas
+ \item [De unión:] Describen las interacciones entre dos átomos unidos entre si directamente o hasta 2 enlaces de distancia. 
+ Consisten en aquellos términos del potencial cuya energía se ve afectada por los estiramientos de los enlaces, las flexiones de los ángulos entre 2 átomos, y la rotación de dos átomos adyacentes sobre un eje (ángulos dihedros). Los estiramientos y las flexiones angulares son modeladas
 mediante un oscilador armónico, mientras que las rotaciones de los enlaces en el plano son modeladas mediante una función trigonométrica.
 
-\item [De no unión:] describen la interacción entre átomos ubicados a más de 3 enlaces de distancia de la
-misma molécula, o bien entre átomos de moléculas distintas, y consisten en un término para la
-contribución electrostática computada con la Ley de Coulomb, y un término para la contribución de
-Vaan Der Waals modelada por un potencial de Leenard-Jones 12-6.
+\item [De no unión:] describen la interacción entre átomos ubicados a más de 3 enlaces de distancia de la misma molécula, o bien entre átomos de moléculas distintas, y consisten en un término para la
+contribución electrostática computada con la Ley de Coulomb, y un término para la contribución de Vaan Der Waals modelada por un potencial de Leenard-Jones 12-6.
 
 
 \end{description}
@@ -181,13 +176,9 @@ las constantes A y B correspondientes al potencial Lenard-Jones, y las cargas q)
 simulación. Estos parámetros se suelen obtener tanto de datos experimentales, como así también de rigurosos cálculos cuanticos, y en ocasiones emplean correcciones empíricas.
 Al conjunto o "set" de parámetros derivados para utilizarse de forma conjunta en una simulación se lo conoce como Campo de Fuerzas.
 
-% *************************
-% ********ACA DEBERIA HABLAR DE LOS DISTINTOS CAMPOS DE FUERZAS QUE EXISTEN, QUE GENERAN DIFERENTES VERSIONES DEL ALGORITMO, LOS CUALES PUEDEN SER  MAS GENERALES O APUNTAR A DISTINTOS TIPOS DE SISTEMAS
-% ******************************
-
-
-El modelo de interaccion(campo de fuerzas) es la principal diferencia entre los distintos paquetes de software para simulaciones de dinamica molecular.
-Este campo de fuerzas esta parametrizado especificamente para el tipo de sistema que se intenta simular, de forma que se ajuste lo mejor posible a la realidad. De esta forma, existen versiones especificas para simular sistemas biologicos (proteinas, acidos nucleicos), otros que intentan abarcar a sistemas de quimica organica en general, etc.
+Esta parametrización del modelo de interacciones es lo que diferencia los distintos paquetes de software para simulacion mediante dinamica molecular. 
+Las distintas versiones suelen tener uno o mas campos de fuerzas propios para realizar las simulaciones. 
+Estos campos de fuerzas estan parametrizado especificamente para el tipo de sistema que se intenta simular, logarando que se ajuste lo mejor posible a la realidad. De esta forma, existen versiones especificas para simular distintos sistemas biologicos (proteinas, acidos nucleicos), otros que intentan abarcar a sistemas de quimica organica en general, etc.
 
 
 
@@ -195,29 +186,66 @@ Este campo de fuerzas esta parametrizado especificamente para el tipo de sistema
 \subsubsection{Potencial de Lennard-Jones}
 
 
-El calculo del potencial de no union es una parte importante en la implementacion del algoritmo ya que implica la mayor parte del costo computacional asociado a la simulacion. 
+El calculo de las interacciones de no union es una parte importante en la implementacion del algoritmo ya que implica la mayor parte del costo computacional asociado a la simulacion. 
 Esto se debe a que se debe calcular entre todos los elementos del sistema. 
 En particular, es importante el termino correspondiente al potencial de Lennard-Jones porque este existe siempre, independientemente de la carga neta en las particulas que interaccionan.
 
-La ecuacion que representa este potencial es:
+La expresión mas común que representa este potencial es: 
+\begingroup
+\fontsize{14pt}{5pt}
+\begin{equation} V_{LJ}(r)= 4 \epsilon [ (\sigma/r)^{12} - (\sigma/r)^6] \end{equation}
+\endgroup
+
+Esta ecuacion esta compuesta por 2 terminos representando fuerzas opuestas:
+El primer termino ($(\sigma/r)^{12}$) representa fuerzas de repulsion que actuan a corta distancia.
+El segundo termino ($(\sigma/r)^{6}$) representa fuerzas de atraccion que actuan en un rango mayor de distancias.
+
+\vspace{10pt}
+Es usual reagrupar los terminos $\sigma$ y  $\epsilon$ usando  
+$A=4\epsilon\sigma^{12}  $  y  $B=4\epsilon\sigma^6$ para obtener una forma simplificada de la ecuación:   \begin{equation}  V_{LJ}(r)= [ (A/r^{12}) - (B/r^6)] \end{equation}
 
 
 % TENGO QUE EXPLICAR QUE LOS PARAMETROS SIGMA Y EPSILON DEPENDEN DE LOS TIPOS DE PARTICULAS QUE ESTAN INTERACTUANDO, ES IMPORTANTE DEJARLO CLARO PORQUE ES RELEVANTE PARA LA IMPLEMENTACION DEL ALGORITMO YA QUE VOY A NECESITAR MATRICES CON LOS VALORES PARA TODAS LAS COMBINACIONES DE TIPOS DE ELEMENTOS
-
-La forma funcional de esta interaccion resulta: 
-% ****PONER GRAFICO DEL POTENCIAL vs DISTANCIA
-
-A partir de los valores del grafico, resulta razonable pensar que, si se desprecia el aporte de este potencial para interacciones entre particulas a una distancia mayor que cierto valor de corte, se podra obtener una buena aproximacion del comportamiento a la vez que se reduce considerablemente la cantidad de calculos necesarios en cada paso de la simulacion.
+\vspace{20pt}
 
 
-\begin{comment}
-***************LA INTRODUCCION PUEDE TERMINAR ACA, APUNTANDO AL POTENCIAL DE LENNARD-JONES, O PUEDE INCLUIR TAMBIEN LO QUE SIGUE*********
+En la siguiente figura se puede ver el comportamiento fisico que describe este modelo de interacción:
 
-*********************ESTO QUE SIGUE PUEDE IR DIRECTAMENTE EN LA PARTE DE ALGORITMOS ***************************
-*******HABLA DE LA DIVERSIDAD DE VARIANTES QUE EXISTEN, Y ALGO DE LAS OPTIMIZACIONES DEL ALGORITMO (OPTIMIZACIONES RELACIONADAS CON EL METODO EN SI Y VARIACIONES EN LOS CALCULOS QUE HAY QUE HACER)*******
 
-*****PUEDO ARRANCAR EXPLICANDO POR QUE ES NECESARIO OPTIMIZAR EL METODO PARA PODER EJECUTAR MAS TIEMPO. TENGO QUE OPTIMIZARLO PARA REALIZAR EJECUCIONES MAS EFICIENTEMENTE Y PARA PODER AMPLIAR LA UTILIZACION DEL METODO PARA SIMULAR SISTEMAS MAS GRANDES Y DURANTE MAS TIEMPO, PARA PODER APLICARLO A OTROS SISTEMAS Y PROCESOS DE INTERES***
-\end{comment}
+% ****PONER GRAFICO DEL POTENCIAL vs DISTANCIA lo mas detallado posible  
+% ***ESTE ES EL PRIMERO QUE ENCONTRE, ESTA EN INGLES PERO TIENE CASI TODO DETALLADO
+\vspace{14pt}
+\begin{center}
+\includegraphics[height=8cm,keepaspectratio, width=\textwidth]{img/LennardJonesFull.png}
+\end{center}
+
+
+% *************DESCRIBIR UN POCO LO QUE MUESTRA EL GRAFICO***********
+
+
+En el grafico se pueden observar dos regiones separadas que representan las fuerzas opuestas de la ecuacion. 
+Estos segmentos estan separados por un valor mínimo que se corresponden con el equilibrio entre el componente repulsivo y el de atraccion. 
+La distancia de equilibrio (que toma un valor de $2^{1/6}\approx1.12$) se obtiene derivando el potencial e igualandolo a 0.
+
+En el primer segmento de la curva ($r<1.12\sigma$), el valor del potencial esta gobernado por el componente repulsivo. 
+Este valor aumenta exponencialmente al disminuir la distancia, toma un valor $V=0$ cuando $r=\sigma$, y se hace positivo para valores de $r<\sigma$ indicando una fuerza repulsiva entre los átomos.
+
+En el punto de equilibrio ($r=1.12\sigma$) el potencial toma un valor minimo $V=-\epsilon$.
+
+En el segundo segmento de la curva ($r>1.12\sigma$), el valor del potencial esta gobernado por el componente atractivo. El valor del potencial (siempre negativo, indicando una fuerza de atraccion) se acerca a 0 a medida que la distancia se acerca a infinito. 
+
+
+A partir de la forma que toma el potencial de L-J resulta razonable pensar que, si se desprecia el de este potencial para interacciones entre particulas a una distancia mayor que cierto valor de corte, se podra obtener una buena aproximacion del comportamiento a la vez que se reduce considerablemente la cantidad de calculos necesarios en cada paso de la simulacion.
+Esta es una aproximación que proveen varias de las versiones implementadas del método, permitiendo que el usuario defina un valor de cutoff. 
+En cada paso, si dos particulas esta separadas por una distancia mayor que el cutoff se les asigna automaticamente un valor de potencial $V_{LJ}=0$ asumiendo que se está realizando una buena aproximación, lo que evita tener que calcular el valor real. 
+Depende del usuario definir un cutoff que sea coherente con el sistema y simulacion a realizar.
+
+
+
+
+
+
+
 
 
 Como se mencionó previamente, el potencial de L-J es uno de los componentes que se encuentra en la mayoria los campos de fuerza existentes, por lo que optimizar el calculo de este tendria una gran ventaja. 
@@ -230,7 +258,33 @@ Ademas, al ser una interaccion de no union, existe, al menos debilmente, entre t
 % **********************************************************
 % ************** EXPLICAR CONDICIONES DE PERIODICIDAD
 % *************************************************************
-\subsection{Condiciones de periodicidad}
+\subsection{Condiciones de frontera}
+
+Hasta aqui hemos definido al sistema como el conjunto de atomos sobre los cuales realizamos la simulacion. Sin embargo, los sistemas reales tienen, en terminos practicos, un tamano infinito. 
+Es decir, independientemente de cuantos elementos podamos incluir en nuestro conjunto de simulacion, el numero de particulas(N) sera siempre despreciable con respecto al numero de componentes del sistema macroscopico real.
+Se debe tener en cuenta, entonces, las condiciones que tendran los limites en la simulacion, para que estos representen de forma realista al sistema.
+
+Existen distintas aproximaciones para plantear estas condiciones sobre el conjunto reducido de particulas sobre el cual estamos realizando la simulacion.
+Si no se implementa ninguna condicion particular a los limites de nuestro sistema, se podria pensar que el conjunto de particulas se encuentra en el vacio. De esta forma, las interacciones solo ocurren entre las particulas que se estan simulando. 
+Además, no hay limites definidos para las posibles posiciones de las particulas las cuales pueden, por lo tanto difundir libremente en durante la simulacion.
+Este tipo de simulaciones raramente es util ya que, como se menciono antes, no representan de forma realista a los sistemas de interes.
+
+Usando condiciones periodicas de borde, las particulas son encerradas en una caja de simulacion con un tamaño definido, la cual es replicada virtualmente al infinito en las tres direcciones del eje cartesiano, llenando completamente el espacio.
+
+All the images particles move solidary with their ”original” particle from the simulated box and, in fact, only one of them is effectively simul
+. When a particle enters or leaves the simulation region, an image particle leaves or enters this region, such that the number of particles from the simulation region is always conserved
+One can easily see that the surface effects are thus virtually eliminated and the position of the box boundaries plays no role
+As a result of using periodic boundary
+conditions, each particle i in the simulation box appears to be interacting
+not only with the other particles in the box, but also with their images. 
+
+Al parecer, el numero de interacciones que hay que calcular se incrementa enormemente. Sin embargo, esto puede evitarse si se utiliza un potencial con un rango finito en el cual las interacciones entre particulas separadas por una distancia mayor al cutoff pueden ser ignoradas.
+% ......COPIAR EL RESTO DEL TEXTO QUE ESTA EN EL LINK QUE GUARDE*****
+De esta forma se puede cumplir con las propiedades infinitas del sistema real y las propiedades impuestas por el potencial.
+
+
+
+
 
 
 Real systems are almost infinite in size
@@ -244,6 +298,7 @@ Periodic boundary conditions:
 
 -Problem: physical properties depend on box size
 
+-el tamano de la caja debe ser mayor que 2*cutoff
 
 
 

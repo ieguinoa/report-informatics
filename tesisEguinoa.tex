@@ -106,7 +106,10 @@ El esquema general del método es el siguiente:
 
 
 % \begin{figure}[!ht]
-\includegraphics[keepaspectratio, width=\textwidth]{img/mdalgorithm.png}
+\begin{center}
+\includegraphics[keepaspectratio, width=0.5\textwidth]{img/mdalgorithm.png}
+\end{center}
+
 % \caption{Esquema general del algoritmo de dinámica molecular}
 % \label{Fig:esquemaMD}
 % \end{figure}
@@ -125,7 +128,7 @@ El esquema general del método es el siguiente:
 
 
 
-El resultado de una simulación de dinámica molecular es principalmente una trayectoria, representada por las posiciónes de cada una de las particulas a lo largo de un cierto tiempo.
+El resultado de una simulación de dinámica molecular es, fundamentalmente, una trayectoria representada por las posiciónes de cada una de las particulas a lo largo de un cierto tiempo.
 No se va a detallar acerca de los metodos para el procesamiento de este resultado, pero es relevante decir que la longitud de trayectoria que podamos obtener en un tiempo de cómputo razonable es lo que limita el tipo de proceso químico que podremos estudiar.
 Para poder estudiar un cierto proceso de interés es necesario que la simulacion alcance la escala de tiempo en la cual este ocurre. Un mayor tiempo de simulación equivale a realizar mas pasos y por lo tanto mas calculos totales, aumentando asi el tiempo de computo requerido.
 
@@ -252,53 +255,48 @@ Como se mencionó previamente, el potencial de L-J es uno de los componentes que
 Ademas, al ser una interaccion de no union, existe, al menos debilmente, entre todos los pares de particulas del sistema, lo que implica una gran cantidad de calculos por paso. El calculo de potenciales de no union representa asi la mayor parte del costo computacional asociado a la simulacion, existen algunas optimizaciones para el calculo del aporte electroestatico pero no para el componente de L-J de manera que este genera un cuello de botella en las mejoras del tiempo de ejecucion.
 
 
-
-
-
-% **********************************************************
-% ************** EXPLICAR CONDICIONES DE PERIODICIDAD
-% *************************************************************
 \subsection{Condiciones de frontera}
 
-Hasta aqui hemos definido al sistema como el conjunto de atomos sobre los cuales realizamos la simulacion. Sin embargo, los sistemas reales tienen, en terminos practicos, un tamano infinito. 
+Hasta aqui hemos definido al sistema como el conjunto de atomos sobre los cuales realizamos la simulacion. 
+Sin embargo, los sistemas reales tienen, en terminos practicos, un tamano infinito. 
 Es decir, independientemente de cuantos elementos podamos incluir en nuestro conjunto de simulacion, el numero de particulas(N) sera siempre despreciable con respecto al numero de componentes del sistema macroscopico real.
-Se debe tener en cuenta, entonces, las condiciones que tendran los limites en la simulacion, para que estos representen de forma realista al sistema.
 
-Existen distintas aproximaciones para plantear estas condiciones sobre el conjunto reducido de particulas sobre el cual estamos realizando la simulacion.
-Si no se implementa ninguna condicion particular a los limites de nuestro sistema, se podria pensar que el conjunto de particulas se encuentra en el vacio. De esta forma, las interacciones solo ocurren entre las particulas que se estan simulando. 
-Además, no hay limites definidos para las posibles posiciones de las particulas las cuales pueden, por lo tanto difundir libremente en durante la simulacion.
-Este tipo de simulaciones raramente es util ya que, como se menciono antes, no representan de forma realista a los sistemas de interes.
+Si no se implementa ninguna condicion particular a los limites de nuestro sistema, se estaria simulando un conjunto de particulas que se encuentra en el vacio. 
+De esta forma, las interacciones solo ocurren entre las particulas del conjunto de simulacion que definimos, sin tener en cuenta ningun elemento en el contexto.
+Además, no hay limites definidos para las posibles posiciones de las particulas, las cuales pueden, por lo tanto, difundir libremente durante la ejecucion.
 
-Usando condiciones periodicas de borde, las particulas son encerradas en una caja de simulacion con un tamaño definido, la cual es replicada virtualmente al infinito en las tres direcciones del eje cartesiano, llenando completamente el espacio.
+Este tipo de simulaciones raramente es util ya que no representan sistemas realistas.Se debe tener en cuenta, entonces, condiciones especiales que tendran los limites en la simulacion para que estos representen de forma adecuada a los sistemas de interes.
+Existen distintas aproximaciones para implementar estas condiciones en los limites manteniendo un conjunto reducido de particulas. 
 
-All the images particles move solidary with their ”original” particle from the simulated box and, in fact, only one of them is effectively simul
-. When a particle enters or leaves the simulation region, an image particle leaves or enters this region, such that the number of particles from the simulation region is always conserved
-One can easily see that the surface effects are thus virtually eliminated and the position of the box boundaries plays no role
-As a result of using periodic boundary
-conditions, each particle i in the simulation box appears to be interacting
-not only with the other particles in the box, but also with their images. 
+Utilizar condiciones periodicas de borde es la forma mas comun de simular un sistema infinito. Aplicando esta condicion, las particulas estan contenidas en una caja de simulacion con un tamaño definido. 
+Esta caja es replicada virtualmente al infinito en las tres direcciones del eje cartesiano, llenando completamente el espacio.
+Todas las imagenes de las particulas se mueven de forma identica a la particula original. De hecho, solo una de ellas(la que se encuentra en la caja central) es la que efectivamente se esta simulando.
+Cuando una particula entra o sale de la caja central, una imagen de ella entra o sale por la cara opuesta de esta region, de manera tal que el numero de particulas en la region de simulacion siempre se conserva.
+Se puede ver que, de esta forma, los limites del sistema que se esta simulando(la caja central) son virtualmente eliminados y no tienen ningun efecto sobre la simulacion.
+Como resultado de esto, cada particula perteneciente al conjunto de simulacion interactua no solo con las demas particulas de este, sino tambien con las imagenes virtuales que estamos teniendo en cuenta.
 
-Al parecer, el numero de interacciones que hay que calcular se incrementa enormemente. Sin embargo, esto puede evitarse si se utiliza un potencial con un rango finito en el cual las interacciones entre particulas separadas por una distancia mayor al cutoff pueden ser ignoradas.
-% ......COPIAR EL RESTO DEL TEXTO QUE ESTA EN EL LINK QUE GUARDE*****
-De esta forma se puede cumplir con las propiedades infinitas del sistema real y las propiedades impuestas por el potencial.
+Al parecer, el numero de interacciones (y por lo tanto la cantidad de calculos a realizar) se incrementara enormemente con esta nueva condicion. 
+Sin embargo, esto puede evitarse si se utiliza un potencial con un rango finito, dado que en este caso se pueden ignorar las interacciones entre particulas separadas por una distancia mayor a cierto valor de cutoff.
+En este caso, teniendo un valor de cutoff $R_{c}$ y definiendo una caja de simulacion cuyo lado menor tenga una longitud $L_m$: 
+Si hacemos cumplir que $L_m>2R_{c}$, entonces se vera que, como maximo, solo una de las imagenes de cada particula quedara dentro del rango del cutoff y por lo tanto debera ser considerada.
+Este método, conocido como el criterio de imagen mínima, que permite limitar el número de cálculos necesarios considerando solo la imagen mas cercana e ignorando el resto. 
+De esta se forma se puede cumplir con las características infinitas del sistema real y las propiedades impuestas por el potencial, logrando una mejor aproximación en la simulacion.
+La figura \ref{minimage} muestra una representación gráfica de este método. 
+
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[keepaspectratio, height=10cm ,width=0.5\textwidth]{img/minimage.png}
+\caption{Criterio de imagen minima para condiciones periodicas de frontera}
+\label{minimage}
+\end{figure}
+
+
+% propiedades fisicas van a depender del tamano de la caja
+% Agregar detalles de sumatoria de Ewald ?
 
 
 
-
-
-
-Real systems are almost infinite in size
-
-In vacuo simulation are rarely a good idea
-
-Periodic boundary conditions: 
--Simulation boxes and nearest image conventions
-
--Infinite electrostatics: Ewald summation
-
--Problem: physical properties depend on box size
-
--el tamano de la caja debe ser mayor que 2*cutoff
 
 
 
@@ -342,7 +340,25 @@ Esta situación hace que se destine una gran cantidad de esfuerzo para continuar
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% LO DEJO PARA ESCRIBIR MAS ADELANTE: ACÁ VA LA DESCRIPCION GENERAL DE LA ARQUITECTURA Y ALGUNOS DETALLES QUE USO EN LAS IMPLEMENTACIONES 
 \chapter{La arquitectura GPU}
+
+
 
 
 
@@ -354,7 +370,6 @@ Esta situación hace que se destine una gran cantidad de esfuerzo para continuar
 PRIMERO HAY UNA PARTE GENERAL DE ´INTRODUCCION´:  EN ESTA PARTE TENGO QUE ACLARAR BIEN LOS FUNDAMENTOS DE LA MODIFICACION 
 -EN PRIMER LUGAR TENGO QUE EXPLICAR QUE ES LO QUE YA EXISTE EN CUANTO A IMPLEMENTACIONES DE DINAMICA MOLECULAR (AMBER GPU, ETC). P 
 PUEDO ARRANCAR ´ASUMIENDO´ QUE LA IMPLEMENTACION SECUENCIAL ES CASI OBVIA Y DIRECTA A PARTIR DE LA ESPECIFICACION QUE SE DIO EN LA INTRODUCCION.
-VOY PLANTEANDO TODAS LAS OPTIMIZACIONES QUE SE FUERON HICIENDO(APROVECHANDO AVANCES EN LAS ARQUITECTURAS/MODELOS DE COMPUTO). EN LA INTRODUCCION YA HABLE DE OPTIMIZACIONES REFERIDAS AL METODO EN SI MISMO Y TERMINE DICIENDO QUE LA PARTE DE L-J ES LA QUE MAS CUESTA Y LA QUE MENOS OPTIMIZACIONES TIENE.
 -DESPUES EXPLICO POR QUE SE PUEDE PENSAR QUE USANDO LA GPU (Y ASUMIENDO LA IMPLEMENTACION SOBRE GPU COMO BASE) PUEDO USAR UNA TABLA PARA BUSCAR LOS RESULTADOS DE LA FUNCION (POTENCIAL L-J). ACA PUEDO DECIR QUE LA TABLA PUEDE SER IMPLEMENTADA EN CUALQUIER SISTEMA DE MEMORIA. ES DEICR, SI BIEN SE PUEDE IMPLEMENTAR SOBRE CPU ESTA SOLUCION (Y DE HECHO LO HICE) USAMOS LA GPU POR LA MEMORIA DE TEXTURA Y POR SER HOY EN DIA UN ESTANDAR EN LO QUE RESPECTA A DINAMICA MOLECULAR
 
 DESPUES DE LA INTRODUCCION ARMO UNA SECCION (3.1, 3.2, etc) PARA CADA UNA DE LAS VARIANTES. AHI DETALLO CADA VARIANTE:

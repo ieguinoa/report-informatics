@@ -260,18 +260,34 @@ Ademas, al ser una interaccion de no union, existe, al menos debilmente, entre t
 % *************************************************************
 \subsection{Condiciones de frontera}
 
-Hasta aqui hemos definido al sistema como el conjunto de atomos sobre los cuales realizamos la simulacion. Sin embargo, los sistemas reales tienen, en terminos practicos, un tamano infinito. 
+Hasta aqui hemos definido al sistema como el conjunto de atomos sobre los cuales realizamos la simulacion. 
+Sin embargo, los sistemas reales tienen, en terminos practicos, un tamano infinito. 
 Es decir, independientemente de cuantos elementos podamos incluir en nuestro conjunto de simulacion, el numero de particulas(N) sera siempre despreciable con respecto al numero de componentes del sistema macroscopico real.
-Se debe tener en cuenta, entonces, las condiciones que tendran los limites en la simulacion, para que estos representen de forma realista al sistema.
 
-Existen distintas aproximaciones para plantear estas condiciones sobre los
-Si no se implementa ninguna condicion particular a los limites de nuestro sistema, se podria pensar en esto como la simulacion de un sistema en el vacio, 
+Si no se implementa ninguna condicion particular a los limites de nuestro sistema, se estaria simulando un conjunto de particulas que se encuentra en el vacio. 
+De esta forma, las interacciones solo ocurren entre las particulas del conjunto de simulacion que definimos, sin tener en cuenta ningun elemento en el contexto.
+Además, no hay limites definidos para las posibles posiciones de las particulas, las cuales pueden, por lo tanto, difundir libremente durante la ejecucion.
+
+Este tipo de simulaciones raramente es util ya que no representan sistemas realistas.Se debe tener en cuenta, entonces, condiciones especiales que tendran los limites en la simulacion para que estos representen de forma adecuada a los sistemas de interes.
+Existen distintas aproximaciones para implementar estas condiciones en los limites manteniendo un conjunto reducido de particulas. 
+
+Utilizar condiciones periodicas de borde es la forma mas comun de simular un sistema infinito. Aplicando esta condicion, las particulas estan contenidas en una caja de simulacion con un tamaño definido. 
+Esta caja es replicada virtualmente al infinito en las tres direcciones del eje cartesiano, llenando completamente el espacio.
+Todas las imagenes de las particulas se mueven de forma identica a la particula original. De hecho, solo una de ellas(la que se encuentra en la caja central) es la que efectivamente se esta simulando.
+Cuando una particula entra o sale de la caja central, una imagen de ella entra o sale de esta region de manera tal que el numero de particulas en la region de simulacion siempre se conserva.
+Se puede ver que, de esta forma, los limites del sistema que se esta simulando(la caja central) son virtualmente eliminados y no tienen ningun efecto sobre la simulacion.
+Como resultado de esto, cada particula perteneciente al conjunto de simulacion interactua no solo con las demas particulas de este, sino tambien con las imagenes virtuales que estamos teniendo en cuenta.
+
+Al parecer, el numero de interacciones (y por lo tanto la cantidad de calculos a realizar) se incrementara enormemente con esta nueva condicion. 
+Sin embargo, esto puede evitarse si se utiliza un potencial con un rango finito, dado que en este caso se pueden ignorar las interacciones entre particulas separadas por una distancia mayor a cierto valor de cutoff.
+En este caso, teniendo un valor de cutoff $R_{cutoff}$ y definiendo una caja de simulacion cuyo lado menor tenga una longitud $L_m$: 
+Si hacemos cumplir que $L_m>2*R_{cutoff}$ entonces se vera que, como maximo una de las imagenes de cada particula quedara dentro del rango del cutoff y por lo tanto debera ser considerada.
+Este metodo, conocido como el criterio de imagen minima, permite limitar el numero de calculos necesarios considerando solo la imagen mas cercana e ignorando el resto. 
+De esta se forma se puede cumplir con las caracteristicas infinitas del sistema real y las propiedades impuestas por el potencial logrando una mejor aproximacion.
 
 
-Usando condiciones periodicas de borde, las particulas son encerradas en una caja de simulacion con un tamaño definido, la cual es replicada virtualmente al infinito en las tres direcciones del eje cartesiano, llenando completamente el espacio.
 
-All the images particles move solidary with their ”original” particle from the simulated box and, in fact, only one of them is effectively simul
-. When a particle enters or leaves the simulation region, an image particle leaves or enters this region, such that the number of particles from the simulation region is always conserved
+
 
 
 Real systems are almost infinite in size

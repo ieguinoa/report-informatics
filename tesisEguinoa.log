@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.12.23)  25 JAN 2015 22:46
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.12.23)  27 JAN 2015 16:19
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -450,58 +450,61 @@ Cap\'{\i }tulo 1.
 File: img/mdalgorithm.png Graphic file (type png)
 
 <use img/mdalgorithm.png>
-Package pdftex.def Info: img/mdalgorithm.png used on input line 109.
-(pdftex.def)             Requested size: 532.9679pt x 276.62427pt.
+Package pdftex.def Info: img/mdalgorithm.png used on input line 110.
+(pdftex.def)             Requested size: 266.48395pt x 138.30304pt.
+ [3
 
-Overfull \hbox (15.0pt too wide) in paragraph at lines 109--113
-[][] 
- []
-
-[3
-
-] <img/ecPotencialAmber.png, id=23, 710.655pt x 98.61844pt>
+]
+<img/ecPotencialAmber.png, id=23, 710.655pt x 98.61844pt>
 File: img/ecPotencialAmber.png Graphic file (type png)
 
 <use img/ecPotencialAmber.png>
-Package pdftex.def Info: img/ecPotencialAmber.png used on input line 165.
+Package pdftex.def Info: img/ecPotencialAmber.png used on input line 168.
 (pdftex.def)             Requested size: 532.9679pt x 73.96213pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 161--170
+Underfull \hbox (badness 10000) in paragraph at lines 164--173
 
  []
 
-[4 <./img/mdalgorithm.png>]
-LaTeX Font Info:    Calculating math sizes for size <14> on input line 196.
+[4 <./img/mdalgorithm.png> <./img/ecPotencialAmber.png>]
+LaTeX Font Info:    Calculating math sizes for size <14> on input line 199.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <14> on input line 196.
+(Font)              <14> on input line 199.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9.79996> on input line 196.
+(Font)              <9.79996> on input line 199.
 
 <img/LennardJonesFull.png, id=28, 602.25pt x 423.5825pt>
 File: img/LennardJonesFull.png Graphic file (type png)
 
 <use img/LennardJonesFull.png>
-Package pdftex.def Info: img/LennardJonesFull.png used on input line 219.
+Package pdftex.def Info: img/LennardJonesFull.png used on input line 222.
 (pdftex.def)             Requested size: 323.62955pt x 227.61945pt.
- [5 <./img/ecPotencialAmber.png> <./img/LennardJonesFull.png>] [6]
+ [5 <./img/LennardJonesFull.png>]
+<img/minimage.png, id=37, 444.66125pt x 445.665pt>
+File: img/minimage.png Graphic file (type png)
+ <use img/minimage.png>
+Package pdftex.def Info: img/minimage.png used on input line 297.
+(pdftex.def)             Requested size: 266.4799pt x 267.08145pt.
+
+[6] [7 <./img/minimage.png>]
 Cap\'{\i }tulo 2.
-[7
+[8
 
 ]
 Cap\'{\i }tulo 3.
-[8
+[9
 
-] [9]
+] [10]
 Cap\'{\i }tulo 4.
-[10
-
-]
-Cap\'{\i }tulo 5.
 [11
 
 ]
-Cap\'{\i }tulo 6.
+Cap\'{\i }tulo 5.
 [12
+
+]
+Cap\'{\i }tulo 6.
+[13
 
 ] (./tesisEguinoa.aux
 LaTeX Info: Redefining \. on input line 6.
@@ -510,10 +513,10 @@ LaTeX Info: Redefining \. on input line 10.
 LaTeX Info: Redefining \% on input line 10.
 ) ) 
 Here is how much of TeX's memory you used:
- 3689 strings out of 494966
- 54318 string characters out of 6179558
- 119935 words of memory out of 5000000
- 6860 multiletter control sequences out of 15000+600000
+ 3698 strings out of 494966
+ 54479 string characters out of 6179558
+ 120945 words of memory out of 5000000
+ 6868 multiletter control sequences out of 15000+600000
  10021 words of font info for 35 fonts, out of 8000000 for 9000
  40 hyphenation exceptions out of 8191
  38i,7n,38p,619b,289s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -528,10 +531,10 @@ s/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1
 /amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
 s/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cms
 y10.pfb>
-Output written on tesisEguinoa.pdf (13 pages, 268634 bytes).
+Output written on tesisEguinoa.pdf (14 pages, 282759 bytes).
 PDF statistics:
- 96 PDF objects out of 1000 (max. 8388607)
- 65 compressed objects within 1 object stream
+ 101 PDF objects out of 1000 (max. 8388607)
+ 67 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 16 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 21 words of extra memory for PDF output out of 10000 (max. 10000000)
 

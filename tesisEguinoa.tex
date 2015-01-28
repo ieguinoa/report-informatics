@@ -14,7 +14,7 @@
 
 \title{Implementación en GPU de un algoritmo eficiente de dinámica molecular con potenciales numéricos}
 \author{Ignacio Eguinoa \\ 
-\small Facultad de Informatica, UNLP
+\small Facultad de Informática, UNLP
 \date{}
 }
 
@@ -179,8 +179,8 @@ las constantes A y B correspondientes al potencial Lenard-Jones, y las cargas q)
 simulación. Estos parámetros se suelen obtener tanto de datos experimentales, como así también de rigurosos cálculos cuanticos, y en ocasiones emplean correcciones empíricas.
 Al conjunto o "set" de parámetros derivados para utilizarse de forma conjunta en una simulación se lo conoce como Campo de Fuerzas.
 
-Esta parametrización del modelo de interacciones es lo que diferencia los distintos paquetes de software para simulacion mediante dinamica molecular. 
-Las distintas versiones suelen tener uno o mas campos de fuerzas propios para realizar las simulaciones. 
+Esta parametrización del modelo de interacciones representa la principal diferencia entre los distintos paquetes de software para simulaciones de dinamica molecular. 
+Las distintas versiones suelen tener uno o mas campos de fuerzas propios para utilizar en las simulaciones. 
 Estos campos de fuerzas estan parametrizado especificamente para el tipo de sistema que se intenta simular, logarando que se ajuste lo mejor posible a la realidad. De esta forma, existen versiones especificas para simular distintos sistemas biologicos (proteinas, acidos nucleicos), otros que intentan abarcar a sistemas de quimica organica en general, etc.
 
 
@@ -243,16 +243,9 @@ Esta es una aproximación que proveen varias de las versiones implementadas del 
 En cada paso, si dos particulas esta separadas por una distancia mayor que el cutoff se les asigna automaticamente un valor de potencial $V_{LJ}=0$ asumiendo que se está realizando una buena aproximación, lo que evita tener que calcular el valor real. 
 Depende del usuario definir un cutoff que sea coherente con el sistema y simulacion a realizar.
 
-
-
-
-
-
-
-
-
-Como se mencionó previamente, el potencial de L-J es uno de los componentes que se encuentra en la mayoria los campos de fuerza existentes, por lo que optimizar el calculo de este tendria una gran ventaja. 
-Ademas, al ser una interaccion de no union, existe, al menos debilmente, entre todos los pares de particulas del sistema, lo que implica una gran cantidad de calculos por paso. El calculo de potenciales de no union representa asi la mayor parte del costo computacional asociado a la simulacion, existen algunas optimizaciones para el calculo del aporte electroestatico pero no para el componente de L-J de manera que este genera un cuello de botella en las mejoras del tiempo de ejecucion.
+Como se mencionó previamente, el potencial de L-J genera una aproximacion relativamente buena de las interacciones de no union en modelos moleculares y, dada su simplicidad, es incluido en gran parte de los campos de fuerzas utilizados en dinámica molecular.
+Es por eso que la optimizacion del calculo asociado tendría un gran impacto en este métdodo de simulación. Ademas, la forma funcional implica que existe, al menos debilmente, entre todos los pares de particulas del sistema, lo que se traduce en una gran cantidad de calculos por paso. 
+El cálculo de este potencial representa así la mayor parte del costo computacional asociado a la simulacion. 
 
 
 \subsection{Condiciones de frontera}
@@ -287,7 +280,7 @@ La figura \ref{minimage} muestra una representación gráfica de este método.
 \begin{figure}[!ht]
 \centering
 \includegraphics[keepaspectratio, height=10cm ,width=0.5\textwidth]{img/minimage.png}
-\caption{Criterio de imagen minima para condiciones periodicas de frontera}
+\caption{Criterio de imagen minima para condiciones periodicas de frontera. Los circulos sin relleno representan todas las imagenes de la misma particula i}
 \label{minimage}
 \end{figure}
 
@@ -303,12 +296,17 @@ La figura \ref{minimage} muestra una representación gráfica de este método.
 
 
 
+
+
+
+
+\subsection{Estado del arte}
+
+
 % *-**********************************************
-%***   PODRIA AGREGAR UNA subsection DEDICADA AL ESTADO DEL ARTE( O  CON OTRO NOMBRE) , DONDE HABLE DE:
-%   -PODRIA ARRANCAR DICIENDO QUE EL METODO HA EVOLUCIONADO MUCHO, IMPUSADO POR LA GRAN UTILIDAD DE ESTE 
+%*  -PODRIA ARRANCAR DICIENDO QUE EL METODO HA EVOLUCIONADO MUCHO, IMPUSADO POR LA GRAN UTILIDAD DE ESTE 
 %   -DISTINTAS OPTIMIZACIONES EN EL METODO (VARIACIONES EN LA FORMA DE IMPLEMENTAR LA INTERACCION CON EL SOLVENTE ...PME, SOLVENTE IMPLICITO, ETC)
-%  
-%  -NO DEBERIA HABLAR DE IMPLEMENTACIONES EN SI (PARALELA, GPUS, ETC), SOLO DE CUESTIONES RELACIONADAS CON EL METODO EN SI MISMO. 
+%   -NO DEBERIA HABLAR DE IMPLEMENTACIONES EN SI (PARALELA, GPUS, ETC), SOLO DE CUESTIONES RELACIONADAS CON EL METODO EN SI MISMO. 
 %        ******PERO SI PODRIA HABLAR DE QUE EL METODO PERMITE DIFERENTES IMPLEMENTACIONES Y LOS AVANCES EN EL HARDWARE Y MODELOS DE COMPUTO HAN GENERADO UNA GRAN VARIEDAD DE IMPLEMENTACIONES
 %  -CUALES SON LOS ORDENES DE TIEMPO DE SIMULACION DE INTERES Y CUALES LOS QUE SON MANEJABLES CON EL EQUIPAMIENTO DE HOY EN DIA. 
 %  -LO MISMO CON RESPECTO A LOS TAMAÑOS DE LOS SISTEMAS DE PARTICULAS
@@ -316,16 +314,23 @@ La figura \ref{minimage} muestra una representación gráfica de este método.
 %************************************************
 
 
+% DEJAR EN CLARO QUE SE DEBE SEGUIR AVANZANDO PORQUE TIENE MAYORES POSIBLIDADADES DE APLICACION
 
-\subsection{Estado del arte}
+El metodo ha tenido una gran utilidad desde sus inicios y ha demostrado una posiblidad de aplicacion mucho mayor. Esta posiblidad de aplicarlo a sistemas cada vez mas grandes y procesos en escalas de tiempo mayores es lo que impulsa constantemente su optimizacion.
 
 
-Existen distintas aproximaciones para evaluar las interacciones que apuntan a optimizar el costo computacional asociado al calculo. Algunas implementaciones permiten definir un potencial de solvente implicito, ...... (referencia : Born solvation model [V. Tsui  D.A. Case, Biopolymers (Nucl. Acid. Sci.) 56, 275-291 (2001)].)
+% ACA DESCRIBO MUUY BREVEMENTE NOMBRAR ALGUNAS OPTIMIZACIONES IMPORTANTES
+
+Varias versiones del metodo implementan tecnicas para 
+
+Existen distintas aproximaciones para evaluar las interacciones que apuntan a optimizar el costo computacional asociado al calculo. 
+Algunas implementaciones permiten definir un potencial de solvente implicito, ...... (referencia : Born solvation model [V. Tsui  D.A. Case, Biopolymers (Nucl. Acid. Sci.) 56, 275-291 (2001)].)
 Otra optimizacion posible es para el calculo del potencial de interaccion electrostatico : PME. Este es importante ya que permite simplificar el calculo del aporte electroestatico el cual, al ser un potencial de no-union, implica una gran cantidad de calculos.
 
 
 
 
+% ACA DESCRIBO MUUUUY BREVEMENTE QUE IMPLEMENTACIONES SE HAN HECHO COMO PARA DEJAR PICANDO EL TEMA (O TENGO QUE DEJAR EN CLARO QUE GPU ES EL ESTANDAR DE HOY EN DIA??)
 
 
 En cuanto a las arquitecturas de cómputo, las implementaciones sobre GPU, que son el centro de este trabajo, se han establecido como estándares para las implementaciones del algoritmo. Esto se debe 
@@ -336,7 +341,8 @@ Con este contexto , las capacidades de cálculo actuales permiten realizar simul
 Si bien se ha avanzado mucho desde el desarrollo del método, existen multiples procesos de interes que podrían ser abordados mediante experimentos de simulacion computacional pero que el intervalo de tiempo en el cual ocurren no es posible de ser alcanzado con los recursos disponibles hoy en dia.
 Esta situación hace que se destine una gran cantidad de esfuerzo para continuar las mejoras en el metodo y mantener las implementaciones a la par de las arquitecturas disponibles.
 
-
+El presente trabajo intenta, entonces, adecuar las implementaciones mas actuales del metodo para explotar al maximo todas las caracteristicas que ofrece la arquitectura de GPU 
+para que las implementaciones desarrolladas en los ultimos años con el fin de aprovechar el paralelismo provisto por las   tengan la capacidad de explotar al maximon todas las caracteristicas que ofrece la arquitectura.
 
 
 
@@ -357,6 +363,10 @@ Esta situación hace que se destine una gran cantidad de esfuerzo para continuar
 
 % LO DEJO PARA ESCRIBIR MAS ADELANTE: ACÁ VA LA DESCRIPCION GENERAL DE LA ARQUITECTURA Y ALGUNOS DETALLES QUE USO EN LAS IMPLEMENTACIONES 
 \chapter{La arquitectura GPU}
+
+
+
+
 
 
 
@@ -386,9 +396,17 @@ Existen diversas implementaciones del algoritmo de dinamica molecular con difere
 \end{comment}
 
 
+% **********SUPUESTAMENTE EN LA INTRODUCCION YA HABLE DE LOS AVANCES QUE HUBO EN EL METODO EN SI, ES DECIR, TODAS LAS OPTIMIZACIONES QUE HAY BASADAS EN MODIFICAR EL ALGORITMO
+% ************  ADEMAS, INTRODUJE LA IDEA QUE LAS IMPLEMENTACIONES DEL ALGORITMO SE HAN MANTENIDO AL DIA CON LAS ARQUITECTURAS Y NUEVOS MODELOS DE COMPUTO EXISTENTES
+% ****		ACA TENDRIA QUE HABLAR DE LA EVOLUCION (ESTADO DEL ARTE?) DE LAS IMPLEMENTACIONES EN SI, TENIENDO EN CUENTA LA EVOLUCION DE LA ARQUITECTURA, HASTA DEJAR EN CLARO
+% 		QUE LA IMPLEMENTACION SOBRE GPU ES EL STANDAR HOY EN DIA*** 
+
+
 
 
 % ***ESTE PRIMER PARRAFO QUE DICE QUE LAS IMPLEMENTACIONES SOBRE GPU SON UN ESTANDAR ....*****LO SAQUE DE LA PARTE DE OBJETIVOS**
+.......en primer lugar se hace un algoritmo con caracteristicas similares al estandar del metodo de hoy en dia, pero en su lugar solo implementa un modelo de interaccion de L-J. 
+Esto se hace con el objetivo de aislarse de otras implementaciones, de tener una aplicacion general, etc,......
 
 
 A partir de la descripción del método presentada en el capitulo 1 se puede llegar a una implementacion secuencial en forma casi directa. Este tipo de versiones son las que se utilizaron inicialmente para realizar las simulaciones.
@@ -455,6 +473,9 @@ El algoritmo inicial sigue la especificacion que se detallo en el capitulo 1....
 Dado que el aporte al campo de fuerzas que nos interesa es el correspondiente al potencial de L-J (potencial de no union), este es el unico aporte que se va a considerar. De esta forma, el sistema evoluciona en el tiempo a partir de las velocidades iniciales de las particulas y las fuerzas que se derivan de este potencial, unicamente. Si bien este modelo (considerando solo la interaccion de L-J) no es de utilidad para simular sistemas biologicos de interes (donde existen diversos enlaces entre los elementos), en este caso 
 
 
+% Esta linea no se si va aca o la pongo directamente en la parte de implementacion
+El esquema general del algoritmo se mantiene en todas las variantes. Las modificaciones estan centradas en la etapa de calculo del potencial, el contexto de este se mantiene siempre igual.
+
 
 Si bien el codigo aqui implementado ya está implementado como parte de distintos paquetes de software de dinamica molecular, el objetivo de realizar un algoritmo independiente, donde la evolucion temporal ocurra unicamente en base al potencial de L-J 
 
@@ -493,7 +514,7 @@ Aca describo el kernel y aspectos relevantes de las versiones implementadas:
 -que variables tengo que tener en cuenta en las implementaciones(por ej. el tamaño de la tabla,el rango, etc)
 -que resultados espero!!!!
 -como afecta la periodicidad. la describo aca o en el capitulo anterior??
--la granularidad
+-como afecta el tamaño de los bloques
 \end{comment}
 
 \section{Esquema general de la implementación}

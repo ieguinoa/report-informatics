@@ -106,7 +106,10 @@ El esquema general del método es el siguiente:
 
 
 % \begin{figure}[!ht]
-\includegraphics[keepaspectratio, width=\textwidth]{img/mdalgorithm.png}
+\begin{center}
+\includegraphics[keepaspectratio, width=0.5\textwidth]{img/mdalgorithm.png}
+\end{center}
+
 % \caption{Esquema general del algoritmo de dinámica molecular}
 % \label{Fig:esquemaMD}
 % \end{figure}
@@ -125,7 +128,7 @@ El esquema general del método es el siguiente:
 
 
 
-El resultado de una simulación de dinámica molecular es principalmente una trayectoria, representada por las posiciónes de cada una de las particulas a lo largo de un cierto tiempo.
+El resultado de una simulación de dinámica molecular es, fundamentalmente, una trayectoria representada por las posiciónes de cada una de las particulas a lo largo de un cierto tiempo.
 No se va a detallar acerca de los metodos para el procesamiento de este resultado, pero es relevante decir que la longitud de trayectoria que podamos obtener en un tiempo de cómputo razonable es lo que limita el tipo de proceso químico que podremos estudiar.
 Para poder estudiar un cierto proceso de interés es necesario que la simulacion alcance la escala de tiempo en la cual este ocurre. Un mayor tiempo de simulación equivale a realizar mas pasos y por lo tanto mas calculos totales, aumentando asi el tiempo de computo requerido.
 
@@ -176,8 +179,8 @@ las constantes A y B correspondientes al potencial Lenard-Jones, y las cargas q)
 simulación. Estos parámetros se suelen obtener tanto de datos experimentales, como así también de rigurosos cálculos cuanticos, y en ocasiones emplean correcciones empíricas.
 Al conjunto o "set" de parámetros derivados para utilizarse de forma conjunta en una simulación se lo conoce como Campo de Fuerzas.
 
-Esta parametrización del modelo de interacciones es lo que diferencia los distintos paquetes de software para simulacion mediante dinamica molecular. 
-Las distintas versiones suelen tener uno o mas campos de fuerzas propios para realizar las simulaciones. 
+Esta parametrización del modelo de interacciones representa la principal diferencia entre los distintos paquetes de software para simulaciones de dinamica molecular. 
+Las distintas versiones suelen tener uno o mas campos de fuerzas propios para utilizar en las simulaciones. 
 Estos campos de fuerzas estan parametrizado especificamente para el tipo de sistema que se intenta simular, logarando que se ajuste lo mejor posible a la realidad. De esta forma, existen versiones especificas para simular distintos sistemas biologicos (proteinas, acidos nucleicos), otros que intentan abarcar a sistemas de quimica organica en general, etc.
 
 
@@ -241,23 +244,11 @@ En cada paso, si dos particulas esta separadas por una distancia mayor que el cu
 Depende del usuario definir un cutoff que sea coherente con el sistema y simulacion a realizar.
 
 
+Como se mencionó previamente, el potencial de L-J genera una aproximacion relativamente buena de las interacciones de no union en modelos moleculares y, dada su simplicidad, se incluye en gran parte de los campos de fuerzas utilizados en dinámica molecular.
+Es por eso que la optimizacion del calculo asociado tendría un gran impacto en el métdodo. Ademas, la forma funcional implica que existe, al menos debilmente, entre todos los pares de particulas del sistema, lo que se traduce en una gran cantidad de calculos por paso. 
+El calculo de este potencial representa, asi,  la mayor parte del costo computacional asociado a la simulacion, existen algunas optimizaciones para el calculo del aporte electroestatico pero no para el componente de L-J de manera que este genera un cuello de botella en las mejoras del tiempo de ejecucion.
 
 
-
-
-
-
-
-Como se mencionó previamente, el potencial de L-J es uno de los componentes que se encuentra en la mayoria los campos de fuerza existentes, por lo que optimizar el calculo de este tendria una gran ventaja. 
-Ademas, al ser una interaccion de no union, existe, al menos debilmente, entre todos los pares de particulas del sistema, lo que implica una gran cantidad de calculos por paso. El calculo de potenciales de no union representa asi la mayor parte del costo computacional asociado a la simulacion, existen algunas optimizaciones para el calculo del aporte electroestatico pero no para el componente de L-J de manera que este genera un cuello de botella en las mejoras del tiempo de ejecucion.
-
-
-
-
-
-% **********************************************************
-% ************** EXPLICAR CONDICIONES DE PERIODICIDAD
-% *************************************************************
 \subsection{Condiciones de frontera}
 
 Hasta aqui hemos definido al sistema como el conjunto de atomos sobre los cuales realizamos la simulacion. 
@@ -274,34 +265,35 @@ Existen distintas aproximaciones para implementar estas condiciones en los limit
 Utilizar condiciones periodicas de borde es la forma mas comun de simular un sistema infinito. Aplicando esta condicion, las particulas estan contenidas en una caja de simulacion con un tamaño definido. 
 Esta caja es replicada virtualmente al infinito en las tres direcciones del eje cartesiano, llenando completamente el espacio.
 Todas las imagenes de las particulas se mueven de forma identica a la particula original. De hecho, solo una de ellas(la que se encuentra en la caja central) es la que efectivamente se esta simulando.
-Cuando una particula entra o sale de la caja central, una imagen de ella entra o sale de esta region de manera tal que el numero de particulas en la region de simulacion siempre se conserva.
+Cuando una particula entra o sale de la caja central, una imagen de ella entra o sale por la cara opuesta de esta region, de manera tal que el numero de particulas en la region de simulacion siempre se conserva.
 Se puede ver que, de esta forma, los limites del sistema que se esta simulando(la caja central) son virtualmente eliminados y no tienen ningun efecto sobre la simulacion.
 Como resultado de esto, cada particula perteneciente al conjunto de simulacion interactua no solo con las demas particulas de este, sino tambien con las imagenes virtuales que estamos teniendo en cuenta.
 
 Al parecer, el numero de interacciones (y por lo tanto la cantidad de calculos a realizar) se incrementara enormemente con esta nueva condicion. 
 Sin embargo, esto puede evitarse si se utiliza un potencial con un rango finito, dado que en este caso se pueden ignorar las interacciones entre particulas separadas por una distancia mayor a cierto valor de cutoff.
-En este caso, teniendo un valor de cutoff $R_{cutoff}$ y definiendo una caja de simulacion cuyo lado menor tenga una longitud $L_m$: 
-Si hacemos cumplir que $L_m>2*R_{cutoff}$ entonces se vera que, como maximo una de las imagenes de cada particula quedara dentro del rango del cutoff y por lo tanto debera ser considerada.
-Este metodo, conocido como el criterio de imagen minima, permite limitar el numero de calculos necesarios considerando solo la imagen mas cercana e ignorando el resto. 
-De esta se forma se puede cumplir con las caracteristicas infinitas del sistema real y las propiedades impuestas por el potencial logrando una mejor aproximacion.
+En este caso, teniendo un valor de cutoff $R_{c}$ y definiendo una caja de simulacion cuyo lado menor tenga una longitud $L_m$: 
+Si hacemos cumplir que $L_m>2R_{c}$, entonces se vera que, como maximo, solo una de las imagenes de cada particula quedara dentro del rango del cutoff y por lo tanto debera ser considerada.
+Este método, conocido como el criterio de imagen mínima, que permite limitar el número de cálculos necesarios considerando solo la imagen mas cercana e ignorando el resto. 
+De esta se forma se puede cumplir con las características infinitas del sistema real y las propiedades impuestas por el potencial, logrando una mejor aproximación en la simulacion.
+La figura \ref{minimage} muestra una representación gráfica de este método. 
+
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[keepaspectratio, height=10cm ,width=0.5\textwidth]{img/minimage.png}
+\caption{Criterio de imagen minima para condiciones periodicas de frontera}
+\label{minimage}
+\end{figure}
+
+
+% propiedades fisicas van a depender del tamano de la caja
+% Agregar detalles de sumatoria de Ewald ?
 
 
 
 
 
 
-Real systems are almost infinite in size
-
-In vacuo simulation are rarely a good idea
-
-Periodic boundary conditions: 
--Simulation boxes and nearest image conventions
-
--Infinite electrostatics: Ewald summation
-
--Problem: physical properties depend on box size
-
--el tamano de la caja debe ser mayor que 2*cutoff
 
 
 
@@ -309,7 +301,7 @@ Periodic boundary conditions:
 
 
 % *-**********************************************
-%***   PODRIA AGREGAR UNA subsection DEDICADA AL ESTADO DEL ARTE( O  CON OTRO NOMBRE) , DONDE HABLE DE:
+%*
 %   -PODRIA ARRANCAR DICIENDO QUE EL METODO HA EVOLUCIONADO MUCHO, IMPUSADO POR LA GRAN UTILIDAD DE ESTE 
 %   -DISTINTAS OPTIMIZACIONES EN EL METODO (VARIACIONES EN LA FORMA DE IMPLEMENTAR LA INTERACCION CON EL SOLVENTE ...PME, SOLVENTE IMPLICITO, ETC)
 %  
@@ -345,7 +337,29 @@ Esta situación hace que se destine una gran cantidad de esfuerzo para continuar
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% LO DEJO PARA ESCRIBIR MAS ADELANTE: ACÁ VA LA DESCRIPCION GENERAL DE LA ARQUITECTURA Y ALGUNOS DETALLES QUE USO EN LAS IMPLEMENTACIONES 
 \chapter{La arquitectura GPU}
+
+
+
+
+
+
 
 
 
@@ -357,7 +371,6 @@ Esta situación hace que se destine una gran cantidad de esfuerzo para continuar
 PRIMERO HAY UNA PARTE GENERAL DE ´INTRODUCCION´:  EN ESTA PARTE TENGO QUE ACLARAR BIEN LOS FUNDAMENTOS DE LA MODIFICACION 
 -EN PRIMER LUGAR TENGO QUE EXPLICAR QUE ES LO QUE YA EXISTE EN CUANTO A IMPLEMENTACIONES DE DINAMICA MOLECULAR (AMBER GPU, ETC). P 
 PUEDO ARRANCAR ´ASUMIENDO´ QUE LA IMPLEMENTACION SECUENCIAL ES CASI OBVIA Y DIRECTA A PARTIR DE LA ESPECIFICACION QUE SE DIO EN LA INTRODUCCION.
-VOY PLANTEANDO TODAS LAS OPTIMIZACIONES QUE SE FUERON HICIENDO(APROVECHANDO AVANCES EN LAS ARQUITECTURAS/MODELOS DE COMPUTO). EN LA INTRODUCCION YA HABLE DE OPTIMIZACIONES REFERIDAS AL METODO EN SI MISMO Y TERMINE DICIENDO QUE LA PARTE DE L-J ES LA QUE MAS CUESTA Y LA QUE MENOS OPTIMIZACIONES TIENE.
 -DESPUES EXPLICO POR QUE SE PUEDE PENSAR QUE USANDO LA GPU (Y ASUMIENDO LA IMPLEMENTACION SOBRE GPU COMO BASE) PUEDO USAR UNA TABLA PARA BUSCAR LOS RESULTADOS DE LA FUNCION (POTENCIAL L-J). ACA PUEDO DECIR QUE LA TABLA PUEDE SER IMPLEMENTADA EN CUALQUIER SISTEMA DE MEMORIA. ES DEICR, SI BIEN SE PUEDE IMPLEMENTAR SOBRE CPU ESTA SOLUCION (Y DE HECHO LO HICE) USAMOS LA GPU POR LA MEMORIA DE TEXTURA Y POR SER HOY EN DIA UN ESTANDAR EN LO QUE RESPECTA A DINAMICA MOLECULAR
 
 DESPUES DE LA INTRODUCCION ARMO UNA SECCION (3.1, 3.2, etc) PARA CADA UNA DE LAS VARIANTES. AHI DETALLO CADA VARIANTE:

@@ -2,7 +2,7 @@
 \select@language {spanish}
 \contentsline {chapter}{\numberline {1}Introducci\IeC {\'o}n}{3}
 \contentsline {section}{\numberline {1.1}Objetivos}{3}
-\contentsline {section}{\numberline {1.2}El metodo de dinamica molecular}{3}
+\contentsline {section}{\numberline {1.2}El m\IeC {\'e}todo de din\IeC {\'a}mica molecular}{3}
 \contentsline {subsection}{\numberline {1.2.1}Fundamentos}{3}
 \contentsline {subsection}{\numberline {1.2.2}Esquema general del m\IeC {\'e}todo}{3}
 \contentsline {subsection}{\numberline {1.2.3}La funci\IeC {\'o}n potencial}{4}

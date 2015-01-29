@@ -14,7 +14,7 @@
 
 \title{Implementación en GPU de un algoritmo eficiente de dinámica molecular con potenciales numéricos}
 \author{Ignacio Eguinoa \\ 
-\small Facultad de Informatica, UNLP
+\small Facultad de Informática, UNLP
 \date{}
 }
 
@@ -35,17 +35,19 @@
 
 
 
-En este trabajo se presenta una optimizacion del algoritmo de dinamica molecular sobre GPU para simulacion de sistemas de particulas que interaccionan mediante un potencial de Lennard-Jones. 
 
-Siguiendo las especificaciones del método de dinámica molecular se desarrolla, en primer lugar, una implementacion propia de éste sobre GPU que evoluciona exlusivamente de acuerdo a un modelo de potencial de Lennard-Jones. Usando este desarrollo como referencia, se implementan adaptaciones para el calculo del potencial y las fuerzas derivadas de éste basadas en el uso de valores tabulados, teniendo en cuenta tanto las propiedades de la funcion potencial como las caracteristicas del hardware sobre el cual se trabaja.
+En este trabajo se presentan modificaciones al algoritmo de dinámica molecular sobre GPU, basadas en la optimización del cálculo del potencial de Lennard-Jones.
+Siguiendo las especificaciones del método encontradas en la literatura se implementa un algoritmo eficiente de dinámica molecular sobre GPU que evoluciona exlusivamente de acuerdo a un modelo de potencial de Lennard-Jones. 
+Usando este desarrollo como referencia, se introducen adaptaciones para el cálculo del potencial y las fuerzas derivadas de éste, haciendo uso de valores tabulados y teniendo en cuenta tanto las propiedades de la función potencial como las características del hardware sobre el cual se trabaja.
 
 Además de las mejoras en performance, se tiene en cuenta otro aspecto importante: la precisión numérica con la que se opera. Dado que la utilización de valores tabulados implica un error en el potencial y su fuerza resultante, es necesario evaluar la implicancia que tendrá esto sobre la correctitud de la simulación.
 
-Las implementaciones actuales del método sobre arquitecturas GPU proveen una gran mejora en la performance con respecto a las versiones iniciales implementadas sobre CPU, lo cual es producto de las propiedades intrínsecamente paralelas del algoritmo y la arquitectura altamente paralelizada del hardware. Por su parte, las adaptaciones realizadas en este trabajo presentan una optimizacion extra manteniendo la calidad númerica de los resultados. 
+Las implementaciones actuales del método sobre arquitecturas GPU proveen una gran mejora en la performance con respecto a las versiones iniciales implementadas sobre CPU, lo cual es producto de las propiedades intrínsecamente paralelas del algoritmo y el gran poder de computo que ofrece la arquitectura altamente paralelizada del hardware. 
+Por su parte, las adaptaciones realizadas en este trabajo presentan una optimización extra manteniendo la calidad númerica de los resultados. 
 
-Dado que el potencial de Lennard-Jones representa un aporte importante para modelar las interacciones en distintos campos de fuerzas, las mejoras obtenidas pueden ser incorporadas fácilmente a distintas versiones existentes del método de dinámica molecular. 
+Dado que el potencial de Lennard-Jones representa un aporte importante para modelar las interacciones en distintos campos de fuerzas, las mejoras obtenidas pueden ser incorporadas fácilmente a una gran cantidad de versiones existentes de este método de simulación. 
 
-Por último, los resultados obtenidos alientan a evaluar este tipo de aproximaciones para realizar cálculos con formas funcionales similares que hayan sido implementados sobre GPU. De esta forma, se intenta explotar todas las propiedades que ofrece la arquitectura.
+Por último, los resultados obtenidos alientan a evaluar este tipo de aproximaciones para optimizar cálculos con formas funcionales similares en algoritmos que hayan sido implementados sobre GPU. De esta forma, se intenta explotar todas las propiedades que ofrece la arquitectura.
 
 
 \pagebreak
@@ -74,66 +76,63 @@ De esta forma, se espera que la modificacion resulte en una mejora de la perform
 
 
 
-\section{El metodo de dinamica molecular}
+\section{El método de dinámica molecular}
 
 \subsection{Fundamentos}
 
 
 Los sistemas químicos de interés como las proteínas suelen ser complejos de estudiar debido a su gran tamaño. 
-La superficie de energia libre, funcion que describe la energia del sistema y a partir de la cual se podrian derivar todas las propiedades termodinamicas y cineticas de interes, es una funcion 3N dimensional (siendo N el numero de particulas del sistema), lo que hace imposible derivar analiticamente las propiedades debido al altisimo costo computacional asociado.
+La superficie de energía libre, que describe la energía del sistema y a partir de la cual se podrían derivar todas las propiedades termodinámicas y cinéticas de interés, es una función 3N dimensional (siendo N el número de partículas del sistema), lo que hace imposible derivar analíticamente las propiedades por el altísimo costo computacional asociado.
 
 Otra forma de analizar estos sistemas es mediante una aproximación numérica, a través de simulaciones computacionales.  	
 La simulación computacional de biomoléculas involucra la exploración de su superficie de energía libre, la cual, debido a la complejidad de estos sistemas, es altamente accidentada, contiene una gran cantidad de mínimos locales y de barreras de energéticas. 
-De esta forma, si los parametros de la simulacion estan correctamente definidos, el conjunto de conformaciones adoptadas durante la ejecucion sera representativo del ensamble real de conformaciones posibles del sistema, lo que nos permite estimar las propiedades de interes.
+De esta forma, si los parámetros de la simulación están correctamente definidos, el conjunto de conformaciones adoptadas durante la ejecución será representativo del ensamble real de conformaciones posibles del sistema, lo que nos permite estimar las propiedades de interés.
 
 Los métodos de simulación molecular nos permiten, entonces, obtener una serie de configuraciones representativas del sistema, de modo que las propiedades termodinámicas extraídas del mismo se correspondan de manera precisa con los valores reales.
-Una de las formas de obtener estas configuraciones es mediante el metodo de dinamica molecular. Este metodo implica simular la progresion temporal "real" del sistema, obteniendo distintas conformaciones a medida que avanza el tiempo de simulacion.
+Una de las formas de obtener estas configuraciones es mediante el método de dinámica molecular. Este método implica simular la progresion temporal "real" del sistema, obteniendo distintas conformaciones a medida que avanza el tiempo de simulación.
 
-La tecnica de simulacion de Dinamica Molecular se basa en resolver las ecuaciones de movimiento de Newton para cada átomo del sistema; así, en cada "paso" de la simulación se calcula la energia potencial entre las particulas y de esta se derivan las fuerzas que actúan sobre cada átomo. 
+La técnica de simulación de dinámica molecular se basa en resolver las ecuaciones de movimiento de Newton para cada átomo del sistema; así, en cada "paso" de la simulación se calcula la energia potencial entre las particulas y de ésta se derivan las fuerzas que actúan sobre cada átomo. 
 Las ecuaciones de Newton relacionan las fuerzas resultantes del potencial con la aceleracion que tendra cada particula y, por lo tanto, el cambio en la velocidad y en la posicion con el tiempo. 
-Dado que el potencial es una funcion continua dependiente de la posicion, los cambios en las velocidades y posiciones resultan de una integracion a lo largo de la trayectoria de la particula.
+Dado que el potencial es una función continua dependiente de la posición, los cambios en las velocidades y posiciones resultan de una integracion a lo largo de la trayectoria de la partícula.
 
 
 \subsection{Esquema general del método}
 
-En la practica, la integración de las Ecuaciones de Newton se calcula computacionalmente mediante el llamado Algoritmo de Verlet [14], el cual resuelve la integración en una ecuacion discreta donde las posiciones estan separadas por intervalos de tiempo ("dt") . 
-Usando las fuerzas resultantes, junto con las posiciones y velocidades de las particulas correspondientes a la iteracion, el algoritmo de Verlet calcula las nuevas posiciones y velocidades en un intervalo de tiempo posterior. De este modo se genera una trayectoria, determinada por las posiciones de las particulas en cada paso de la simulacion. Esta trayectoria describe como cambia la conformación espacial del sistema a lo largo del tiempo. 
-La elección del ''dt'' es una situación de compromiso, ya que un valor muy chico, si bien representa la propagación del movimiento de forma mas precisa(mas cercana al valor de la integracion), requiere una mayor cantidad de cálculos para un mismo tiempo total de simulación. 
+En la práctica, la integración de las ecuaciones de Newton se calcula computacionalmente mediante el llamado Algoritmo de Verlet, el cual resuelve la integración en una ecuación discreta donde las posiciones estan separadas por intervalos de tiempo ("dt") . 
+Usando las fuerzas resultantes, junto con las posiciones y velocidades de las partículas correspondientes a la iteración, el algoritmo de Verlet calcula las nuevas posiciones y velocidades en un intervalo de tiempo posterior. De este modo se genera una trayectoria, determinada por las posiciones de las particulas en cada paso de la simulación. 
+Esta trayectoria describe como cambia la conformación espacial del sistema a lo largo del tiempo. 
+La elección del "dt" es una situación de compromiso, ya que un valor muy chico, si bien representa la propagación del movimiento de forma mas precisa(mas cercana al valor real de la integración), requiere una mayor cantidad de cálculos para un mismo tiempo total de simulación. 
 
 
 
-El esquema general del método es el siguiente:
+El esquema general del método se puede ver en la figura \ref{esquemaMD}.
 
+% **********************************************************************
+% ***************CAMBIAR LA FIGURA POR UNA SIMILAR EN ESPAÑOL **********
+% **********************************************************************
 
-% \begin{figure}[!ht]
+\begin{figure}[!ht]
 \begin{center}
 \includegraphics[keepaspectratio, width=0.5\textwidth]{img/mdalgorithm.png}
 \end{center}
+\caption{Esquema general del algoritmo de dinámica molecular}
+\label{esquemaMD}
+\end{figure}
 
-% \caption{Esquema general del algoritmo de dinámica molecular}
-% \label{Fig:esquemaMD}
-% \end{figure}
 
-% ***************CAMBIAR LA FIGURA POR UNA SIMILAR EN ESPAÑOL **********
-% \linebreak
-
-\vspace{20pt}
 
 
 
 % *********************
 % ****QUE OTROS DATOS RELEVANTES OBTENGO DE LA SIMULACION??
 %********************** 
-  
 
 
+El resultado de la simulación es, fundamentalmente, una trayectoria representada por las posiciónes de cada una de las partículas a lo largo de un cierto tiempo.
+No se va a detallar acerca del procesamiento de este resultado pero es relevante decir que la longitud de trayectoria que podamos obtener en un tiempo de cómputo razonable es lo que limita el tipo de proceso químico que podremos estudiar.
+Para poder estudiar un proceso de interés es necesario que la simulación alcance la escala de tiempo en la cual éste ocurre. Un mayor tiempo de simulación equivale a realizar más pasos y por lo tanto más cálculos totales, aumentando así el tiempo de cómputo requerido.
 
-El resultado de una simulación de dinámica molecular es, fundamentalmente, una trayectoria representada por las posiciónes de cada una de las particulas a lo largo de un cierto tiempo.
-No se va a detallar acerca de los metodos para el procesamiento de este resultado, pero es relevante decir que la longitud de trayectoria que podamos obtener en un tiempo de cómputo razonable es lo que limita el tipo de proceso químico que podremos estudiar.
-Para poder estudiar un cierto proceso de interés es necesario que la simulacion alcance la escala de tiempo en la cual este ocurre. Un mayor tiempo de simulación equivale a realizar mas pasos y por lo tanto mas calculos totales, aumentando asi el tiempo de computo requerido.
-
-Por su parte, simular sistemas mas grandes (con mayor cantidad de particulas) implica una mayor cantidad de calculos en cada paso y por lo tanto un mayor costo computacional. Además, la funcion que describe las propiedades del sistema tiene por naturaleza una mayor cantidad de variables, debido a esto es necesario  correr la simulacion durante mas tiempo para poder llegar a un conjunto de conformaciones que sea representativo del ensamble real.
-
+Por su parte, simular sistemas más grandes (con mayor cantidad de partículas) implica un incremento en la cantidad de cálculos por cada paso y por lo tanto un mayor costo computacional. Además, la función que describe las propiedades del sistema tiene por naturaleza una mayor cantidad de variables, debido a esto es necesario correr la simulación durante más tiempo para poder llegar a un conjunto de conformaciones que sea representativo del ensamble real.
 
 
 
@@ -141,28 +140,26 @@ Por su parte, simular sistemas mas grandes (con mayor cantidad de particulas) im
 \subsection{La función potencial}
 
 
-En la utilización del método de dinámica molecular, el potencial(V) que permite derivar las fuerzas entre particulas se obtiene modelando al sistema molecular mediante la mecanica clasica (metodo de mecanica molecular, MM).
+En la utilización del método de dinámica molecular, el potencial(V) que permite derivar las fuerzas entre partículas se obtiene modelando al sistema molecular mediante la mecánica clásica (método conocido como mecánica molecular o MM).
 Usando un método de MM, se ignoran los electrones y la naturaleza cuántica de estos. La energía potencial del sistema, entonces, depende exclusivamente de las posiciones de los núcleos atómicos. Se modela cada molécula como un conjunto de sitios -que representan los átomos que la componen- y resortes -que representan los enlaces químicos entre estos- junto con un potencial parametrizado ad hoc.
-Este potencial es una función matemática que depende exclusivamente de las posiciones de los atomos, la cual se ajusta a las interacciones observadas experimentalmente entre los componentes del sistema. Este tipo de repesentacion simplificada del sistema permite reducir la complejidad de los calculos necesarios para la simulacion, y por lo tanto el costo computacional asociado, pero limita el tipo de procesos que se pueden estudiar. Por ej. no se pueden estudiar reacciones quimicas que impliquen ruptura o formación de enlaces ya que estos no son considerados con suficiente detalle.
+Este potencial es una función matemática que depende exclusivamente de las posiciones de los atomos, la cual se ajusta a las interacciones observadas experimentalmente entre los componentes del sistema. Este tipo de repesentacion simplificada del sistema permite reducir la complejidad de los cálculos necesarios para la simulación, y por lo tanto el costo computacional asociado, pero limita el tipo de procesos que se pueden estudiar. Por ej. no se pueden estudiar reacciones quimicas que impliquen ruptura o formación de enlaces ya que estos no son considerados con suficiente detalle.
 
-% The choice of the molecular mechanics force fields is an important aspect of the MD simulation . The forcefield governs how the parts of a molecule relate to each other, how each atom is affected by its atomic environment and how these forces can contribute to the structure of the molecule under a certain set of constraints
 Las interacciones representadas en el método de MM se pueden agrupar en dos tipos:
 
 \begin{description}
- \item [De unión:] Describen las interacciones entre dos átomos unidos entre si directamente o hasta 2 enlaces de distancia. 
- Consisten en aquellos términos del potencial cuya energía se ve afectada por los estiramientos de los enlaces, las flexiones de los ángulos entre 2 átomos, y la rotación de dos átomos adyacentes sobre un eje (ángulos dihedros). Los estiramientos y las flexiones angulares son modeladas
+ \item [De unión:] Describen las interacciones entre dos átomos unidos entre si directamente o hasta dos enlaces de distancia. 
+ Consisten en aquellos términos del potencial cuya energía se ve afectada por los estiramientos de los enlaces, las flexiones de los ángulos entre dos átomos, y la rotación de dos átomos adyacentes sobre un eje (ángulos dihedros). Los estiramientos y las flexiones angulares son modeladas
 mediante un oscilador armónico, mientras que las rotaciones de los enlaces en el plano son modeladas mediante una función trigonométrica.
 
 \item [De no unión:] describen la interacción entre átomos ubicados a más de 3 enlaces de distancia de la misma molécula, o bien entre átomos de moléculas distintas, y consisten en un término para la
-contribución electrostática computada con la Ley de Coulomb, y un término para la contribución de Vaan Der Waals modelada por un potencial de Leenard-Jones 12-6.
+contribución electrostática calculada mediante la Ley de Coulomb, y un término para la contribución de Van Der Waals modelada por un potencial de Lennard-Jones 12-6.
 
 
 \end{description}
 
 
 
-El esquema general de la función potencial suele tomar una forma similar a la que sigue: \\ \\ 
-% ***PONER la funcion que marca la diferencia entre los parametros de union y los de no union PAGINA 15 DE LA TESIS***
+El esquema general de la función potencial suele tomar una forma similar a la que sigue: \\
 % \includegraphics[]{img/ecPotencialAmber.png}
 % \begin{figure}[h]
 \includegraphics[keepaspectratio, width=1.0\textwidth]{img/ecPotencialAmber.png}
@@ -172,16 +169,19 @@ El esquema general de la función potencial suele tomar una forma similar a la q
 \vspace{2pt}
 
 En azul se representan los términos matemáticos que modelan las interacciones de unión (1. Término de estiramiento de enlaces; 2. Término de flexión angular; 3. Término de rotación de ángulos diedros), y en rojo
-las interacciones de no unión (Potencial de Leenard-Jones 12-6 e interacción Coulómbica).
+las interacciones de no unión (Potencial de Lennard-Jones 12-6 e interacción Coulómbica).
 
 Los parámetros que se observan en esta función potencial (las constantes $K_b, K_{\theta}$ y $V_n$ , los valores de equilibrio $b_0$, $\theta_0$ y $\delta$ , 
 las constantes A y B correspondientes al potencial Lenard-Jones, y las cargas q) deben ser ajustados especialmente para cada molécula individual que se desee incluir en la 
-simulación. Estos parámetros se suelen obtener tanto de datos experimentales, como así también de rigurosos cálculos cuanticos, y en ocasiones emplean correcciones empíricas.
-Al conjunto o "set" de parámetros derivados para utilizarse de forma conjunta en una simulación se lo conoce como Campo de Fuerzas.
+simulación. Estos parámetros se suelen obtener tanto de datos experimentales, como así también de rigurosos cálculos cuánticos, y en ocasiones emplean correcciones empíricas.
+Al conjunto o "set" de parámetros derivados para utilizarse de forma conjunta en una simulación se lo conoce como campo de fuerzas.
 
 Esta parametrización del modelo de interacciones representa la principal diferencia entre los distintos paquetes de software para simulaciones de dinamica molecular. 
 Las distintas versiones suelen tener uno o mas campos de fuerzas propios para utilizar en las simulaciones. 
-Estos campos de fuerzas estan parametrizado especificamente para el tipo de sistema que se intenta simular, logarando que se ajuste lo mejor posible a la realidad. De esta forma, existen versiones especificas para simular distintos sistemas biologicos (proteinas, acidos nucleicos), otros que intentan abarcar a sistemas de quimica organica en general, etc.
+Estos campos de fuerzas estan parametrizado específicamente para el tipo de sistema que se intenta simular, logrando que se ajuste lo mejor posible a la realidad.
+De esta forma, existen versiones específicas para simular distintos sistemas biologicos (proteínas, ácidos nucleicos), otros que intentan abarcar a sistemas de química orgánica en general, etc.
+La eleccion del campo de fuerzas es un aspecto importante de la simulacion de DM
+% The choice of the molecular mechanics force fields is an important aspect of the MD simulation . The forcefield governs how the parts of a molecule relate to each other, how each atom is affected by its atomic environment and how these forces can contribute to the structure of the molecule under a certain set of constraints
 
 
 
@@ -243,10 +243,9 @@ Esta es una aproximación que proveen varias de las versiones implementadas del 
 En cada paso, si dos particulas esta separadas por una distancia mayor que el cutoff se les asigna automaticamente un valor de potencial $V_{LJ}=0$ asumiendo que se está realizando una buena aproximación, lo que evita tener que calcular el valor real. 
 Depende del usuario definir un cutoff que sea coherente con el sistema y simulacion a realizar.
 
-
-Como se mencionó previamente, el potencial de L-J genera una aproximacion relativamente buena de las interacciones de no union en modelos moleculares y, dada su simplicidad, se incluye en gran parte de los campos de fuerzas utilizados en dinámica molecular.
-Es por eso que la optimizacion del calculo asociado tendría un gran impacto en el métdodo. Ademas, la forma funcional implica que existe, al menos debilmente, entre todos los pares de particulas del sistema, lo que se traduce en una gran cantidad de calculos por paso. 
-El calculo de este potencial representa, asi,  la mayor parte del costo computacional asociado a la simulacion, existen algunas optimizaciones para el calculo del aporte electroestatico pero no para el componente de L-J de manera que este genera un cuello de botella en las mejoras del tiempo de ejecucion.
+Como se mencionó previamente, el potencial de L-J genera una aproximacion relativamente buena de las interacciones de no union en modelos moleculares y, dada su simplicidad, es incluido en gran parte de los campos de fuerzas utilizados en dinámica molecular.
+Es por eso que la optimizacion del calculo asociado tendría un gran impacto en este métdodo de simulación. Ademas, la forma funcional implica que existe, al menos debilmente, entre todos los pares de particulas del sistema, lo que se traduce en una gran cantidad de calculos por paso. 
+El cálculo de este potencial representa así la mayor parte del costo computacional asociado a la simulacion. 
 
 
 \subsection{Condiciones de frontera}
@@ -281,7 +280,7 @@ La figura \ref{minimage} muestra una representación gráfica de este método.
 \begin{figure}[!ht]
 \centering
 \includegraphics[keepaspectratio, height=10cm ,width=0.5\textwidth]{img/minimage.png}
-\caption{Criterio de imagen minima para condiciones periodicas de frontera}
+\caption{Criterio de imagen minima para condiciones periodicas de frontera. Los circulos sin relleno representan todas las imagenes de la misma particula i}
 \label{minimage}
 \end{figure}
 
@@ -300,12 +299,14 @@ La figura \ref{minimage} muestra una representación gráfica de este método.
 
 
 
+
+\subsection{Estado del arte}
+
+
 % *-**********************************************
-%*
-%   -PODRIA ARRANCAR DICIENDO QUE EL METODO HA EVOLUCIONADO MUCHO, IMPUSADO POR LA GRAN UTILIDAD DE ESTE 
+%*  -PODRIA ARRANCAR DICIENDO QUE EL METODO HA EVOLUCIONADO MUCHO, IMPUSADO POR LA GRAN UTILIDAD DE ESTE 
 %   -DISTINTAS OPTIMIZACIONES EN EL METODO (VARIACIONES EN LA FORMA DE IMPLEMENTAR LA INTERACCION CON EL SOLVENTE ...PME, SOLVENTE IMPLICITO, ETC)
-%  
-%  -NO DEBERIA HABLAR DE IMPLEMENTACIONES EN SI (PARALELA, GPUS, ETC), SOLO DE CUESTIONES RELACIONADAS CON EL METODO EN SI MISMO. 
+%   -NO DEBERIA HABLAR DE IMPLEMENTACIONES EN SI (PARALELA, GPUS, ETC), SOLO DE CUESTIONES RELACIONADAS CON EL METODO EN SI MISMO. 
 %        ******PERO SI PODRIA HABLAR DE QUE EL METODO PERMITE DIFERENTES IMPLEMENTACIONES Y LOS AVANCES EN EL HARDWARE Y MODELOS DE COMPUTO HAN GENERADO UNA GRAN VARIEDAD DE IMPLEMENTACIONES
 %  -CUALES SON LOS ORDENES DE TIEMPO DE SIMULACION DE INTERES Y CUALES LOS QUE SON MANEJABLES CON EL EQUIPAMIENTO DE HOY EN DIA. 
 %  -LO MISMO CON RESPECTO A LOS TAMAÑOS DE LOS SISTEMAS DE PARTICULAS
@@ -313,16 +314,23 @@ La figura \ref{minimage} muestra una representación gráfica de este método.
 %************************************************
 
 
+% DEJAR EN CLARO QUE SE DEBE SEGUIR AVANZANDO PORQUE TIENE MAYORES POSIBLIDADADES DE APLICACION
 
-\subsection{Estado del arte}
+El metodo ha tenido una gran utilidad desde sus inicios y ha demostrado una posiblidad de aplicacion mucho mayor. Esta posiblidad de aplicarlo a sistemas cada vez mas grandes y procesos en escalas de tiempo mayores es lo que impulsa constantemente su optimizacion.
 
 
-Existen distintas aproximaciones para evaluar las interacciones que apuntan a optimizar el costo computacional asociado al calculo. Algunas implementaciones permiten definir un potencial de solvente implicito, ...... (referencia : Born solvation model [V. Tsui  D.A. Case, Biopolymers (Nucl. Acid. Sci.) 56, 275-291 (2001)].)
+% ACA DESCRIBO MUUY BREVEMENTE NOMBRAR ALGUNAS OPTIMIZACIONES IMPORTANTES
+
+Varias versiones del metodo implementan tecnicas para 
+
+Existen distintas aproximaciones para evaluar las interacciones que apuntan a optimizar el costo computacional asociado al calculo. 
+Algunas implementaciones permiten definir un potencial de solvente implicito, ...... (referencia : Born solvation model [V. Tsui  D.A. Case, Biopolymers (Nucl. Acid. Sci.) 56, 275-291 (2001)].)
 Otra optimizacion posible es para el calculo del potencial de interaccion electrostatico : PME. Este es importante ya que permite simplificar el calculo del aporte electroestatico el cual, al ser un potencial de no-union, implica una gran cantidad de calculos.
 
 
 
 
+% ACA DESCRIBO MUUUUY BREVEMENTE QUE IMPLEMENTACIONES SE HAN HECHO COMO PARA DEJAR PICANDO EL TEMA (O TENGO QUE DEJAR EN CLARO QUE GPU ES EL ESTANDAR DE HOY EN DIA??)
 
 
 En cuanto a las arquitecturas de cómputo, las implementaciones sobre GPU, que son el centro de este trabajo, se han establecido como estándares para las implementaciones del algoritmo. Esto se debe 
@@ -333,7 +341,8 @@ Con este contexto , las capacidades de cálculo actuales permiten realizar simul
 Si bien se ha avanzado mucho desde el desarrollo del método, existen multiples procesos de interes que podrían ser abordados mediante experimentos de simulacion computacional pero que el intervalo de tiempo en el cual ocurren no es posible de ser alcanzado con los recursos disponibles hoy en dia.
 Esta situación hace que se destine una gran cantidad de esfuerzo para continuar las mejoras en el metodo y mantener las implementaciones a la par de las arquitecturas disponibles.
 
-
+El presente trabajo intenta, entonces, adecuar las implementaciones mas actuales del metodo para explotar al maximo todas las caracteristicas que ofrece la arquitectura de GPU 
+para que las implementaciones desarrolladas en los ultimos años con el fin de aprovechar el paralelismo provisto por las   tengan la capacidad de explotar al maximon todas las caracteristicas que ofrece la arquitectura.
 
 
 
@@ -387,9 +396,17 @@ Existen diversas implementaciones del algoritmo de dinamica molecular con difere
 \end{comment}
 
 
+% **********SUPUESTAMENTE EN LA INTRODUCCION YA HABLE DE LOS AVANCES QUE HUBO EN EL METODO EN SI, ES DECIR, TODAS LAS OPTIMIZACIONES QUE HAY BASADAS EN MODIFICAR EL ALGORITMO
+% ************  ADEMAS, INTRODUJE LA IDEA QUE LAS IMPLEMENTACIONES DEL ALGORITMO SE HAN MANTENIDO AL DIA CON LAS ARQUITECTURAS Y NUEVOS MODELOS DE COMPUTO EXISTENTES
+% ****		ACA TENDRIA QUE HABLAR DE LA EVOLUCION (ESTADO DEL ARTE?) DE LAS IMPLEMENTACIONES EN SI, TENIENDO EN CUENTA LA EVOLUCION DE LA ARQUITECTURA, HASTA DEJAR EN CLARO
+% 		QUE LA IMPLEMENTACION SOBRE GPU ES EL STANDAR HOY EN DIA*** 
+
+
 
 
 % ***ESTE PRIMER PARRAFO QUE DICE QUE LAS IMPLEMENTACIONES SOBRE GPU SON UN ESTANDAR ....*****LO SAQUE DE LA PARTE DE OBJETIVOS**
+.......en primer lugar se hace un algoritmo con caracteristicas similares al estandar del metodo de hoy en dia, pero en su lugar solo implementa un modelo de interaccion de L-J. 
+Esto se hace con el objetivo de aislarse de otras implementaciones, de tener una aplicacion general, etc,......
 
 
 A partir de la descripción del método presentada en el capitulo 1 se puede llegar a una implementacion secuencial en forma casi directa. Este tipo de versiones son las que se utilizaron inicialmente para realizar las simulaciones.
@@ -456,6 +473,9 @@ El algoritmo inicial sigue la especificacion que se detallo en el capitulo 1....
 Dado que el aporte al campo de fuerzas que nos interesa es el correspondiente al potencial de L-J (potencial de no union), este es el unico aporte que se va a considerar. De esta forma, el sistema evoluciona en el tiempo a partir de las velocidades iniciales de las particulas y las fuerzas que se derivan de este potencial, unicamente. Si bien este modelo (considerando solo la interaccion de L-J) no es de utilidad para simular sistemas biologicos de interes (donde existen diversos enlaces entre los elementos), en este caso 
 
 
+% Esta linea no se si va aca o la pongo directamente en la parte de implementacion
+El esquema general del algoritmo se mantiene en todas las variantes. Las modificaciones estan centradas en la etapa de calculo del potencial, el contexto de este se mantiene siempre igual.
+
 
 Si bien el codigo aqui implementado ya está implementado como parte de distintos paquetes de software de dinamica molecular, el objetivo de realizar un algoritmo independiente, donde la evolucion temporal ocurra unicamente en base al potencial de L-J 
 
@@ -494,7 +514,7 @@ Aca describo el kernel y aspectos relevantes de las versiones implementadas:
 -que variables tengo que tener en cuenta en las implementaciones(por ej. el tamaño de la tabla,el rango, etc)
 -que resultados espero!!!!
 -como afecta la periodicidad. la describo aca o en el capitulo anterior??
--la granularidad
+-como afecta el tamaño de los bloques
 \end{comment}
 
 \section{Esquema general de la implementación}

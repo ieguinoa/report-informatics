@@ -89,7 +89,7 @@ La simulación computacional de biomoléculas involucra la exploración de su su
 De esta forma, si los parámetros de la simulación están correctamente definidos, el conjunto de conformaciones adoptadas durante la ejecución será representativo del ensamble real de conformaciones posibles del sistema, lo que nos permite estimar las propiedades de interés.
 
 Los métodos de simulación molecular nos permiten, entonces, obtener una serie de configuraciones representativas del sistema, de modo que las propiedades termodinámicas extraídas del mismo se correspondan de manera precisa con los valores reales.
-Una de las formas de obtener estas configuraciones es mediante el método de dinámica molecular. Este método implica simular la progresion temporal "real" del sistema, obteniendo distintas conformaciones a medida que avanza el tiempo de simulación.
+Una de las formas de obtener estas configuraciones es mediante el método de dinámica molecular(DM). Este método implica simular la progresion temporal "real" del sistema, obteniendo distintas conformaciones a medida que avanza el tiempo de simulación.
 
 La técnica de simulación de dinámica molecular se basa en resolver las ecuaciones de movimiento de Newton para cada átomo del sistema; así, en cada "paso" de la simulación se calcula la energia potencial entre las particulas y de ésta se derivan las fuerzas que actúan sobre cada átomo. 
 Las ecuaciones de Newton relacionan las fuerzas resultantes del potencial con la aceleracion que tendra cada particula y, por lo tanto, el cambio en la velocidad y en la posicion con el tiempo. 
@@ -176,22 +176,21 @@ las constantes A y B correspondientes al potencial Lenard-Jones, y las cargas q)
 simulación. Estos parámetros se suelen obtener tanto de datos experimentales, como así también de rigurosos cálculos cuánticos, y en ocasiones emplean correcciones empíricas.
 Al conjunto o "set" de parámetros derivados para utilizarse de forma conjunta en una simulación se lo conoce como campo de fuerzas.
 
-Esta parametrización del modelo de interacciones representa la principal diferencia entre los distintos paquetes de software para simulaciones de dinamica molecular. 
+Esta parametrización del modelo de interacciones representa la principal diferencia entre los distintos paquetes de software para simulaciones de dinámica molecular. 
 Las distintas versiones suelen tener uno o mas campos de fuerzas propios para utilizar en las simulaciones. 
 Estos campos de fuerzas estan parametrizado específicamente para el tipo de sistema que se intenta simular, logrando que se ajuste lo mejor posible a la realidad.
 De esta forma, existen versiones específicas para simular distintos sistemas biologicos (proteínas, ácidos nucleicos), otros que intentan abarcar a sistemas de química orgánica en general, etc.
-La eleccion del campo de fuerzas es un aspecto importante de la simulacion de DM
-% The choice of the molecular mechanics force fields is an important aspect of the MD simulation . The forcefield governs how the parts of a molecule relate to each other, how each atom is affected by its atomic environment and how these forces can contribute to the structure of the molecule under a certain set of constraints
+La eleccion del campo de fuerzas es un aspecto importante de la simulacion de DM ya que éste define como se relacionan distintas partes de una misma molécula, como cada átomo se ve afectado por el entorno y como las condiciones contribuyen a la estructura molecular. 
 
 
 
 
 \subsubsection{Potencial de Lennard-Jones}
 
-
-El calculo de las interacciones de no union es una parte importante en la implementacion del algoritmo ya que implica la mayor parte del costo computacional asociado a la simulacion. 
-Esto se debe a que se debe calcular entre todos los elementos del sistema. 
-En particular, es importante el termino correspondiente al potencial de Lennard-Jones porque este existe siempre, independientemente de la carga neta en las particulas que interaccionan.
+% *******REVISAR ESTE PRIMER PARRAFO
+El cálculo de las interacciones de no unión es una paso importante en el algoritmo ya que implica la mayor parte del costo computacional asociado a la simulación. 
+Esto se debe a que es necesario calcularlo entre todos los elementos del sistema. 
+En particular, es importante el término correspondiente al potencial de Lennard-Jones porque este existe siempre, independientemente de la carga neta en las partículas que interaccionan.
 
 La expresión mas común que representa este potencial es: 
 \begingroup
@@ -199,88 +198,82 @@ La expresión mas común que representa este potencial es:
 \begin{equation} V_{LJ}(r)= 4 \epsilon [ (\sigma/r)^{12} - (\sigma/r)^6] \end{equation}
 \endgroup
 
-Esta ecuacion esta compuesta por 2 terminos representando fuerzas opuestas:
-El primer termino ($(\sigma/r)^{12}$) representa fuerzas de repulsion que actuan a corta distancia.
-El segundo termino ($(\sigma/r)^{6}$) representa fuerzas de atraccion que actuan en un rango mayor de distancias.
+Esta ecuación está compuesta por dos términos representando fuerzas opuestas:
+El primer término ($(\sigma/r)^{12}$) representa fuerzas de repulsión que actúan a corta distancia.
+El segundo término ($(\sigma/r)^{6}$) representa fuerzas de atracción que actúan en un rango mayor de distancias.
 
 \vspace{10pt}
-Es usual reagrupar los terminos $\sigma$ y  $\epsilon$ usando  
+Es usual reagrupar los términos $\sigma$ y  $\epsilon$ usando  
 $A=4\epsilon\sigma^{12}  $  y  $B=4\epsilon\sigma^6$ para obtener una forma simplificada de la ecuación:   \begin{equation}  V_{LJ}(r)= [ (A/r^{12}) - (B/r^6)] \end{equation}
 
-
-% TENGO QUE EXPLICAR QUE LOS PARAMETROS SIGMA Y EPSILON DEPENDEN DE LOS TIPOS DE PARTICULAS QUE ESTAN INTERACTUANDO, ES IMPORTANTE DEJARLO CLARO PORQUE ES RELEVANTE PARA LA IMPLEMENTACION DEL ALGORITMO YA QUE VOY A NECESITAR MATRICES CON LOS VALORES PARA TODAS LAS COMBINACIONES DE TIPOS DE ELEMENTOS
 \vspace{20pt}
 
 
-En la siguiente figura se puede ver el comportamiento fisico que describe este modelo de interacción:
+En la siguiente figura se puede ver el comportamiento físico que describe este modelo de interacción:
 
+% ***BUSCAR UNO QUE ESTE ASI DETALLADO PERO EN CASTELLANO****
 
-% ****PONER GRAFICO DEL POTENCIAL vs DISTANCIA lo mas detallado posible  
-% ***ESTE ES EL PRIMERO QUE ENCONTRE, ESTA EN INGLES PERO TIENE CASI TODO DETALLADO
 \vspace{14pt}
 \begin{center}
 \includegraphics[height=8cm,keepaspectratio, width=\textwidth]{img/LennardJonesFull.png}
 \end{center}
 
 
-% *************DESCRIBIR UN POCO LO QUE MUESTRA EL GRAFICO***********
-
-
-En el grafico se pueden observar dos regiones separadas que representan las fuerzas opuestas de la ecuacion. 
-Estos segmentos estan separados por un valor mínimo que se corresponden con el equilibrio entre el componente repulsivo y el de atraccion. 
-La distancia de equilibrio (que toma un valor de $2^{1/6}\approx1.12$) se obtiene derivando el potencial e igualandolo a 0.
+En el gráfica se pueden observar dos regiones separadas que representan las fuerzas opuestas de la ecuación. 
+Estos segmentos están separados por un valor mínimo que se corresponde con el equilibrio entre el componente repulsivo y el de atracción. 
+La distancia de equilibrio (que toma un valor de $2^{1/6}\approx1.12$) se obtiene derivando el potencial e igualándolo a 0.
 
 En el primer segmento de la curva ($r<1.12\sigma$), el valor del potencial esta gobernado por el componente repulsivo. 
 Este valor aumenta exponencialmente al disminuir la distancia, toma un valor $V=0$ cuando $r=\sigma$, y se hace positivo para valores de $r<\sigma$ indicando una fuerza repulsiva entre los átomos.
 
-En el punto de equilibrio ($r=1.12\sigma$) el potencial toma un valor minimo $V=-\epsilon$.
+En el punto de equilibrio ($r=1.12\sigma$) el potencial toma el valor mínimo $V=-\epsilon$.
 
-En el segundo segmento de la curva ($r>1.12\sigma$), el valor del potencial esta gobernado por el componente atractivo. El valor del potencial (siempre negativo, indicando una fuerza de atraccion) se acerca a 0 a medida que la distancia se acerca a infinito. 
+En el segundo segmento de la curva ($r>1.12\sigma$), el valor del potencial esta gobernado por el componente atractivo. El valor del potencial (siempre negativo, indicando una fuerza de atracción) se acerca a 0 a medida que la distancia se acerca a infinito. 
 
 
-A partir de la forma que toma el potencial de L-J resulta razonable pensar que, si se desprecia el de este potencial para interacciones entre particulas a una distancia mayor que cierto valor de corte, se podra obtener una buena aproximacion del comportamiento a la vez que se reduce considerablemente la cantidad de calculos necesarios en cada paso de la simulacion.
+A partir de la forma que toma el potencial de L-J resulta razonable pensar que, si se desprecia el de este potencial para interacciones entre partículas a una distancia mayor que cierto valor de corte, se podrá obtener una buena aproximación del comportamiento a la vez que se reduce considerablemente la cantidad de cálculos necesarios en cada paso de la simulación.
 Esta es una aproximación que proveen varias de las versiones implementadas del método, permitiendo que el usuario defina un valor de cutoff. 
-En cada paso, si dos particulas esta separadas por una distancia mayor que el cutoff se les asigna automaticamente un valor de potencial $V_{LJ}=0$ asumiendo que se está realizando una buena aproximación, lo que evita tener que calcular el valor real. 
-Depende del usuario definir un cutoff que sea coherente con el sistema y simulacion a realizar.
+En cada paso, si dos partículas están separadas por una distancia mayor que el cutoff se les asigna automáticamente un valor de potencial $V_{LJ}=0$ asumiendo que se está realizando una buena aproximación, lo que elimina el costo de tener que calcular el valor real. 
+Depende del usuario definir un cutoff que sea coherente con el sistema y simulación a realizar.
 
 Como se mencionó previamente, el potencial de L-J genera una aproximacion relativamente buena de las interacciones de no union en modelos moleculares y, dada su simplicidad, es incluido en gran parte de los campos de fuerzas utilizados en dinámica molecular.
-Es por eso que la optimizacion del calculo asociado tendría un gran impacto en este métdodo de simulación. Ademas, la forma funcional implica que existe, al menos debilmente, entre todos los pares de particulas del sistema, lo que se traduce en una gran cantidad de calculos por paso. 
-El cálculo de este potencial representa así la mayor parte del costo computacional asociado a la simulacion. 
+Es por eso que la optimización del calculo asociado tendría un gran impacto en este métdodo de simulación. Además, la forma funcional implica que existe, al menos débilmente, entre todos los pares de particulas del sistema, lo que se traduce en una gran cantidad de cálculos por paso. 
+El cálculo de este potencial representa así la mayor parte del costo computacional asociado a la simulación. 
 
 
 \subsection{Condiciones de frontera}
 
-Hasta aqui hemos definido al sistema como el conjunto de atomos sobre los cuales realizamos la simulacion. 
-Sin embargo, los sistemas reales tienen, en terminos practicos, un tamano infinito. 
-Es decir, independientemente de cuantos elementos podamos incluir en nuestro conjunto de simulacion, el numero de particulas(N) sera siempre despreciable con respecto al numero de componentes del sistema macroscopico real.
+Hasta aquí hemos definido al sistema como el conjunto de átomos sobre los cuales realizamos la simulación. 
+Sin embargo, los sistemas reales tienen, en términos practicos, un tamaño infinito. 
+Es decir, independientemente de cuántos elementos podamos incluir en nuestro conjunto de simulación, el número de parículas(N) será siempre despreciable con respecto al nuúero de componentes del sistema macroscópico real.
 
-Si no se implementa ninguna condicion particular a los limites de nuestro sistema, se estaria simulando un conjunto de particulas que se encuentra en el vacio. 
-De esta forma, las interacciones solo ocurren entre las particulas del conjunto de simulacion que definimos, sin tener en cuenta ningun elemento en el contexto.
-Además, no hay limites definidos para las posibles posiciones de las particulas, las cuales pueden, por lo tanto, difundir libremente durante la ejecucion.
+Si no se implementa ninguna condición particular a los límites de nuestro sistema, se estaría simulando un conjunto de particulas que se encuentra en el vacío. 
+De esta forma, las interacciones ocurrirían solo entre las particulas del conjunto de simulación que definimos, sin tener en cuenta ningún elemento en el contexto.
+Además, no habría limites definidos para las posibles posiciones de las partículas, las cuales pueden, por lo tanto, difundir libremente durante la ejecución.
 
-Este tipo de simulaciones raramente es util ya que no representan sistemas realistas.Se debe tener en cuenta, entonces, condiciones especiales que tendran los limites en la simulacion para que estos representen de forma adecuada a los sistemas de interes.
-Existen distintas aproximaciones para implementar estas condiciones en los limites manteniendo un conjunto reducido de particulas. 
+Este tipo de simulaciones raramente es útil ya que no representan situaciones realistas. Se debe tener en cuenta, entonces, condiciones especiales que tendrán los limites en la simulación para que estos representen de forma adecuada a los sistemas de interés.
+Existen distintas aproximaciones para implementar estas condiciones en los límites manteniendo un conjunto reducido de particulas. 
 
-Utilizar condiciones periodicas de borde es la forma mas comun de simular un sistema infinito. Aplicando esta condicion, las particulas estan contenidas en una caja de simulacion con un tamaño definido. 
+Utilizar condiciones periódicas de borde es la forma mas común de simular un sistema infinito. Aplicando esta condición, las partículas están contenidas en una caja de simulación con un tamaño definido. 
 Esta caja es replicada virtualmente al infinito en las tres direcciones del eje cartesiano, llenando completamente el espacio.
-Todas las imagenes de las particulas se mueven de forma identica a la particula original. De hecho, solo una de ellas(la que se encuentra en la caja central) es la que efectivamente se esta simulando.
-Cuando una particula entra o sale de la caja central, una imagen de ella entra o sale por la cara opuesta de esta region, de manera tal que el numero de particulas en la region de simulacion siempre se conserva.
-Se puede ver que, de esta forma, los limites del sistema que se esta simulando(la caja central) son virtualmente eliminados y no tienen ningun efecto sobre la simulacion.
-Como resultado de esto, cada particula perteneciente al conjunto de simulacion interactua no solo con las demas particulas de este, sino tambien con las imagenes virtuales que estamos teniendo en cuenta.
+Todas las imágenes de las partículas se mueven de forma idéntica a la partícula central. De hecho, sólo una de ellas(la que se encuentra en la caja central) es la que efectivamente se está simulando.
+Cuando una partícula entra o sale de la caja central, una imagen de ella entra o sale por la cara opuesta de esta región, de manera tal que el número de partículas contenidas en la región de simulación siempre se conserva.
+Se puede ver que, de esta forma, los límites del sistema que se está simulando son virtualmente eliminados y no tienen ningún efecto sobre la simulación.
+Como resultado de esto, cada partícula perteneciente al conjunto de simulación interactúa no solo con las demás partículas de este, sino también con las imágenes virtuales que estamos teniendo en cuenta.
 
-Al parecer, el numero de interacciones (y por lo tanto la cantidad de calculos a realizar) se incrementara enormemente con esta nueva condicion. 
-Sin embargo, esto puede evitarse si se utiliza un potencial con un rango finito, dado que en este caso se pueden ignorar las interacciones entre particulas separadas por una distancia mayor a cierto valor de cutoff.
-En este caso, teniendo un valor de cutoff $R_{c}$ y definiendo una caja de simulacion cuyo lado menor tenga una longitud $L_m$: 
-Si hacemos cumplir que $L_m>2R_{c}$, entonces se vera que, como maximo, solo una de las imagenes de cada particula quedara dentro del rango del cutoff y por lo tanto debera ser considerada.
-Este método, conocido como el criterio de imagen mínima, que permite limitar el número de cálculos necesarios considerando solo la imagen mas cercana e ignorando el resto. 
-De esta se forma se puede cumplir con las características infinitas del sistema real y las propiedades impuestas por el potencial, logrando una mejor aproximación en la simulacion.
+Al parecer, el número de interacciones (y por lo tanto la cantidad de cálculos a realizar) se incrementará enormemente con esta nueva condición. 
+Sin embargo, esto puede evitarse si se utiliza un potencial con un rango finito, dado que en este caso se pueden ignorar las interacciones entre partículas separadas por una distancia mayor a cierto valor de cutoff.
+En este caso, teniendo un valor de cutoff $R_{c}$ y definiendo una caja de simulaciún cuyo lado menor tenga una longitud $L_m$: 
+Si hacemos cumplir que $L_m>2R_{c}$, entonces se verá que, como máximo, solo una de las imágenes de cada particula quedará dentro del rango del cutoff y por lo tanto debera ser considerada.
+Este método, conocido como el criterio de imagen mínima, permite limitar el número de cálculos necesarios considerando solo la imagen mas cercana e ignorando el resto. 
+De esta forma se puede cumplir con las características infinitas del sistema real y las propiedades impuestas por el potencial, logrando una mejor aproximación en la simulación.
 La figura \ref{minimage} muestra una representación gráfica de este método. 
 
 
 \begin{figure}[!ht]
 \centering
 \includegraphics[keepaspectratio, height=10cm ,width=0.5\textwidth]{img/minimage.png}
-\caption{Criterio de imagen minima para condiciones periodicas de frontera. Los circulos sin relleno representan todas las imagenes de la misma particula i}
+\caption{Criterio de imagen mínima para condiciones periódicas de frontera. Los círculos sin relleno representan todas las imágenes de la misma particula i}
 \label{minimage}
 \end{figure}
 
@@ -297,54 +290,33 @@ La figura \ref{minimage} muestra una representación gráfica de este método.
 
 
 
-
-
-
 \subsection{Estado del arte}
 
 
-% *-**********************************************
-%*  -PODRIA ARRANCAR DICIENDO QUE EL METODO HA EVOLUCIONADO MUCHO, IMPUSADO POR LA GRAN UTILIDAD DE ESTE 
-%   -DISTINTAS OPTIMIZACIONES EN EL METODO (VARIACIONES EN LA FORMA DE IMPLEMENTAR LA INTERACCION CON EL SOLVENTE ...PME, SOLVENTE IMPLICITO, ETC)
-%   -NO DEBERIA HABLAR DE IMPLEMENTACIONES EN SI (PARALELA, GPUS, ETC), SOLO DE CUESTIONES RELACIONADAS CON EL METODO EN SI MISMO. 
-%        ******PERO SI PODRIA HABLAR DE QUE EL METODO PERMITE DIFERENTES IMPLEMENTACIONES Y LOS AVANCES EN EL HARDWARE Y MODELOS DE COMPUTO HAN GENERADO UNA GRAN VARIEDAD DE IMPLEMENTACIONES
-%  -CUALES SON LOS ORDENES DE TIEMPO DE SIMULACION DE INTERES Y CUALES LOS QUE SON MANEJABLES CON EL EQUIPAMIENTO DE HOY EN DIA. 
-%  -LO MISMO CON RESPECTO A LOS TAMAÑOS DE LOS SISTEMAS DE PARTICULAS
-%  -DEBERIA DECIR QUE HAY MUCHOS PROCESOS QUE OCURREN EN ESCALAS DE TIEMPO QUE NO SE PUEDEN MANEJAR TODAVIA Y POR LO TANTO SE CONTINUA INTENTANDO MEJORAR LOS TIEMPOS DE SIMULACION
-%************************************************
 
+Desde que fue desarrollado, el método ha sido de una gran utilidad  y ha demostrado una posiblidad de aplicación a futuro mucho mayor. 
+Esta posiblidad de aplicarlo a sistemas cada vez mas grandes y procesos en escalas de tiempo mayores es lo que impulsó una constante búsqueda de mejoras sobre el algoritmo inicial.
+Se han desarrollado entonces una gran cantidad de estrategias que apuntan a optimizar el costo computacional asociado al método, sin sufrir una pérdida considerable en la precisión.
 
-% DEJAR EN CLARO QUE SE DEBE SEGUIR AVANZANDO PORQUE TIENE MAYORES POSIBLIDADADES DE APLICACION
+Para sistemas típicos de biomoleculas en donde el sistema está compuesto por una macromolécula(ej. proteínas) rodeada de un solvente líquido, es posible utilizar una aproximación conocida como solvente implicito.
+% referencia : Born solvation model [V. Tsui  D.A. Case, Biopolymers (Nucl. Acid. Sci.) 56, 275-291 (2001)].
+En este modelo, el solvente se representa como un medio continuo alrededor del sistema central en lugar de representar explícitamente todas las unidades que lo componen, reduciendo considerablemente el número de cálculos necesarios para evaluar la interacción con las moléculas de solvente. Al ser una aproximación, tiene ciertas limitaciones en cuanto a la precisión y al tipo de sistemas en los que puede ser aplicado.
 
-El metodo ha tenido una gran utilidad desde sus inicios y ha demostrado una posiblidad de aplicacion mucho mayor. Esta posiblidad de aplicarlo a sistemas cada vez mas grandes y procesos en escalas de tiempo mayores es lo que impulsa constantemente su optimizacion.
+El calculo asociado al componente electroestatico puede ser optimizado usando el método conocido como sumatoria Ewald. Este metodo permite aproximar el calculo de interacciones que actuan en un amplio rango de distancias sobre sistemas periódicos. 
 
+Otra adaptación muy utilizada es la implementación de una lista de vecinos para cada partícula. Esta lista mantiene las moleculas que estan dentro del rango de interaccion(distancia menor al cutoff) y son los unicos que se tendran en cuenta a la hora de hacer el calculo. La optimización se basa en que la lista solo se actualiza cada una cantidad de pasos definida como parámetro. 
+Este valor se deriva experimentalmente a partir de simulaciones de prueba y es el parámetro que balancea la optimización y la precisión: cuanto mas se demora la actualizacion mejor es el tiempo de ejecución pero menos representativa es la lista acerca de la realidad del entorno y, por lo tanto, menos preciso es el calculo.
 
-% ACA DESCRIBO MUUY BREVEMENTE NOMBRAR ALGUNAS OPTIMIZACIONES IMPORTANTES
+Existe una gran cantidad de variantes del algoritmo, solo se han mencionado algunos de los caminos en los que se ha avanzado realizando modificaciones con respecto a la descripcion inicial.
 
-Varias versiones del metodo implementan tecnicas para 
+En cuanto a las arquitecturas de cómputo, las implementaciones sobre GPU, que son el centro de este trabajo, se han establecido como estándares para las implementaciones del algorítmo. 
+Esto se debe al gran poder de cómputo que proveen en relación al costo económico, teniendo en cuenta que el algorítmo es altamente paralelizable y este tipo de hardware provee las condiciones necesarias para su implementación.
 
-Existen distintas aproximaciones para evaluar las interacciones que apuntan a optimizar el costo computacional asociado al calculo. 
-Algunas implementaciones permiten definir un potencial de solvente implicito, ...... (referencia : Born solvation model [V. Tsui  D.A. Case, Biopolymers (Nucl. Acid. Sci.) 56, 275-291 (2001)].)
-Otra optimizacion posible es para el calculo del potencial de interaccion electrostatico : PME. Este es importante ya que permite simplificar el calculo del aporte electroestatico el cual, al ser un potencial de no-union, implica una gran cantidad de calculos.
+Con este contexto , las capacidades de cálculo actuales permiten realizar simulaciones de dinámica molecular en sistemas de hasta XXXXXXX átomos aproximadamente, sobre un intervalo de tiempo del orden de YYYYYYY  micro/pico/******segundos).
 
-
-
-
-% ACA DESCRIBO MUUUUY BREVEMENTE QUE IMPLEMENTACIONES SE HAN HECHO COMO PARA DEJAR PICANDO EL TEMA (O TENGO QUE DEJAR EN CLARO QUE GPU ES EL ESTANDAR DE HOY EN DIA??)
-
-
-En cuanto a las arquitecturas de cómputo, las implementaciones sobre GPU, que son el centro de este trabajo, se han establecido como estándares para las implementaciones del algoritmo. Esto se debe 
-
-
-Con este contexto , las capacidades de cálculo actuales permiten realizar simulaciones de dinámica molecular en sistemas de hasta XXXXXXXXXX átomos aproximadamente sobre un intervalo de tiempo del orden de YYYYYYY  micro/pico/******segundos).
-
-Si bien se ha avanzado mucho desde el desarrollo del método, existen multiples procesos de interes que podrían ser abordados mediante experimentos de simulacion computacional pero que el intervalo de tiempo en el cual ocurren no es posible de ser alcanzado con los recursos disponibles hoy en dia.
-Esta situación hace que se destine una gran cantidad de esfuerzo para continuar las mejoras en el metodo y mantener las implementaciones a la par de las arquitecturas disponibles.
-
-El presente trabajo intenta, entonces, adecuar las implementaciones mas actuales del metodo para explotar al maximo todas las caracteristicas que ofrece la arquitectura de GPU 
-para que las implementaciones desarrolladas en los ultimos años con el fin de aprovechar el paralelismo provisto por las   tengan la capacidad de explotar al maximon todas las caracteristicas que ofrece la arquitectura.
-
-
+Si bien se ha avanzado mucho desde el desarrollo del método, existen múltiples procesos de interés que podrían ser abordados mediante experimentos de simulación computacional pero que el intervalo de tiempo en el cual ocurren no es posible de ser alcanzado con los recursos disponibles hoy en dia.
+Esta situación hace que se destine una gran cantidad de esfuerzo para continuar las mejoras en el método y mantener las implementaciones a la par de las arquitecturas disponibles, las cuales han avanzado considerablemente teniendo en cuenta que el método fue creado hace ya un largo tiempo.
+El presente trabajo intenta, entonces, adecuar las implementaciones más actuales del método para explotar al máximo todas las características que ofrece la arquitectura de GPU. 
 
 
 
@@ -374,77 +346,68 @@ para que las implementaciones desarrolladas en los ultimos años con el fin de a
 
 
 
+
+
 \chapter{Algoritmos}
-\begin{comment}
  
-PRIMERO HAY UNA PARTE GENERAL DE ´INTRODUCCION´:  EN ESTA PARTE TENGO QUE ACLARAR BIEN LOS FUNDAMENTOS DE LA MODIFICACION 
--EN PRIMER LUGAR TENGO QUE EXPLICAR QUE ES LO QUE YA EXISTE EN CUANTO A IMPLEMENTACIONES DE DINAMICA MOLECULAR (AMBER GPU, ETC). P 
-PUEDO ARRANCAR ´ASUMIENDO´ QUE LA IMPLEMENTACION SECUENCIAL ES CASI OBVIA Y DIRECTA A PARTIR DE LA ESPECIFICACION QUE SE DIO EN LA INTRODUCCION.
--DESPUES EXPLICO POR QUE SE PUEDE PENSAR QUE USANDO LA GPU (Y ASUMIENDO LA IMPLEMENTACION SOBRE GPU COMO BASE) PUEDO USAR UNA TABLA PARA BUSCAR LOS RESULTADOS DE LA FUNCION (POTENCIAL L-J). ACA PUEDO DECIR QUE LA TABLA PUEDE SER IMPLEMENTADA EN CUALQUIER SISTEMA DE MEMORIA. ES DEICR, SI BIEN SE PUEDE IMPLEMENTAR SOBRE CPU ESTA SOLUCION (Y DE HECHO LO HICE) USAMOS LA GPU POR LA MEMORIA DE TEXTURA Y POR SER HOY EN DIA UN ESTANDAR EN LO QUE RESPECTA A DINAMICA MOLECULAR
+ 
 
-DESPUES DE LA INTRODUCCION ARMO UNA SECCION (3.1, 3.2, etc) PARA CADA UNA DE LAS VARIANTES. AHI DETALLO CADA VARIANTE:
-SOLO ARMO 3 SECCIONES: EL ALGORITMO BASE DONDE EXPLICO TODO, EL ALGORITMO QUE USA UNA TABLA CON EL POTENCIAL, Y EL ALGORITMO QUE USA UNA TABLA CON EL VALOR DE LAS DERIVADAS.
-DESCRIBO LOS ALGORITMOS IMPLEMENTADOS, AGREGANDO CUALQUIER DETALLE QUE HAGA FALTA (QUE NO ESTE EN LA INTRODUCCION DE DINAMICA MOL.).
-LA PARTE DE PERIODICIDAD LA EXPLICO ACA???
-
-
-****
-TENGO UNA LINEA ACA QUE TRAJE DE OTRO LADO, NO SE DONDE METERLA:
-Existen diversas implementaciones del algoritmo de dinamica molecular con diferentes modelos de interaccion. Las distintas implementaciones existentes involucran al potencial de Lennard-Jones como aporte para evaluar las interacciones de no-union y, en todos los casos, el calculo de este tipo de interacciones representa la mayor parte del costo computacional asociado al método. Se espera entonces que las modificaciones estudiadas en este trabajo puedan ser integradas en diversas implementaciones existentes obteniendo una mejora considerable en la performance.
-*****
-
-\end{comment}
-
-
-% **********SUPUESTAMENTE EN LA INTRODUCCION YA HABLE DE LOS AVANCES QUE HUBO EN EL METODO EN SI, ES DECIR, TODAS LAS OPTIMIZACIONES QUE HAY BASADAS EN MODIFICAR EL ALGORITMO
+% **********EN EL CAP.1 YA HICE UN RESUMEN DE LOS AVANCES QUE HUBO EN EL METODO EN SI, ES DECIR, LAS OPTIMIZACIONES QUE HAY BASADAS EN MODIFICAR EL ALGORITMO
 % ************  ADEMAS, INTRODUJE LA IDEA QUE LAS IMPLEMENTACIONES DEL ALGORITMO SE HAN MANTENIDO AL DIA CON LAS ARQUITECTURAS Y NUEVOS MODELOS DE COMPUTO EXISTENTES
-% ****		ACA TENDRIA QUE HABLAR DE LA EVOLUCION (ESTADO DEL ARTE?) DE LAS IMPLEMENTACIONES EN SI, TENIENDO EN CUENTA LA EVOLUCION DE LA ARQUITECTURA, HASTA DEJAR EN CLARO
-% 		QUE LA IMPLEMENTACION SOBRE GPU ES EL STANDAR HOY EN DIA*** 
+%  **TAMBIEN DIJE QUE LO QUE VOY A HACER EN ESTE TRABAJO ES ADECUAR LAS IMPLEMENTACIONES ACTUALES PARA EXPLOTAR TODAS LAS CARACTERISTICAS DE LA GPU
+% ******NO DIJE NADA SOBRE LA POSIBILIDAD DE USAR UNA TABLA PARA CALCULAR EL POTENCIAL******************
 
 
 
 
-% ***ESTE PRIMER PARRAFO QUE DICE QUE LAS IMPLEMENTACIONES SOBRE GPU SON UN ESTANDAR ....*****LO SAQUE DE LA PARTE DE OBJETIVOS**
-.......en primer lugar se hace un algoritmo con caracteristicas similares al estandar del metodo de hoy en dia, pero en su lugar solo implementa un modelo de interaccion de L-J. 
-Esto se hace con el objetivo de aislarse de otras implementaciones, de tener una aplicacion general, etc,......
 
 
-A partir de la descripción del método presentada en el capitulo 1 se puede llegar a una implementacion secuencial en forma casi directa. Este tipo de versiones son las que se utilizaron inicialmente para realizar las simulaciones.
-La utilidad que ha mostrado esta técnica desde sus inicios y la posibilidad que ofrece para nuevas aplicaciones hizo que se desarrollen diversas implementaciones para aprovechar los nuevos modelos de computo disponibles, los cuales han avanzado considerablemente teniendo en cuenta que la tecnica fue creada hace ya un largo tiempo. 
-Entre los nuevos algoritmos, una gran cantidad se ha enfocado en explotar las caracteristicas intrinsecamente paralelas del metodo. En los ultimos años, con avance de las arquitecturas de GPU y su utilizacion para computo de proposito general, estos algoritmos han sido portados para adaptarse a las caracteristicas propias de GPGPU.
-De las versiones mencionadas en el capitulo 1, gran parte de ellas han sido portadas para poder ejecutarse sobre estas arquitecturas. (referencias amberGPU?? gromacs gpu??).
+% PUEDO ARRANCAR DICIENDO QUE LA IMPLEMENTACION BASE SOBRE GPU ES CASI DIRECTA A PARTIR DE LAS ESPECIFICACIONES YA QUE EL ALGORITMO ES NATURALMENTE MUY PARALELO
+%  ADEMAS, DE ESTA FORMA SE CONSIGUE UNA OPTIMIZACION MUY FACILMENTE
+% EN ESTA IMPLEMENTACION DIRECTA (COMO EN EL CASO DE TODOS LOS ) EL CALCULO DEL POTENCIAL DE L-J SE HACE MEDIANTE THREADS QUE RESUELVEN EN BASE A LA ECUACION MOSTRADA EN EL CAP. 1
+% ESTE PASO TIENE UN ORDEN DE N_2 Y POR LO TANTO SOBREPASA AMPLIAMENTE LAS CAPACIDADES DE COMPUTO DE CUALQUIER ARQUITECTURA GPU
 
-En el capitulo anterior se mostraron las ventajas que brinda el metodo de GPGPU para aplicaciones altamente paralelizables. De la misma forma,  la implementacion del metodo de dinamica molecular sobre esta arquitectura resulta en un aumento muy importante en la performance en forma casi directa. Además de las mejoras en la performance, el bajo costo del hardware en relacion a su poder de computo que provee la arquitectura hace que estas implementaciones sean un estandar de uso en el area.  
 
-De esta forma, hoy en dia se puede encontrar una gran variedad de software para simulaciones de dinamica molecular implementado sobre GPU. A pesar de la gran cantidad de modificaciones que se han agregado y la evolucion en el hardware existente, se sigue dedicando un gran esfuerzo para continuar optimizando el algoritmo con el fin de poder simular nuevos procesos y sistemas de interes que requieren una mayor cantidad de calculos. 
-Si se analizan las implementaciones que se utilizan actualmente, se puede ver que la mayor parte del costo computacional del metodo se mantiene asociado al calculo de las interacciones de no-union(entre particulas que no forman enlaces quimicos entre si), el cual esta representado principalmente por el potencial de L-J. Este calculo tiene una complejidad de orden N2 sobre el numero de particulas del sistema....
-En el capitulo 1 se describio una aproximacion muy utilizada para intentar reducir la cantidad de calculos necesarios, la cual consiste en despreciar las interacciones entre particulas que se encuentren a mayor distancia que cierto valor de cutoff. Esta aproximacion esta basada en las propiedades de la funcion que describe el potencial de L-J. Incluso ajustando el valor de cutoff a valores suficientemente chicos, el costo que implica este paso representa la mayor parte de los requerimiento......Por esta razon, una gran parte de los esfuerzos se centran en optimizar esta etapa.
+Las limitaciones en este paso se deben a que tiene un orden de ejecucion $N^2$. Aun en arquitecturas altamente paralelas como las GPUs, este calculo es extremadamente costoso. 
+Aun cuando el numero de procesadores en estas arquitecturas siga creciendo, es poco probable que se supere el numero de calculos que es necesario hacer para simular sistemas grandes.
+Es necesario, entonces, realizar aproximaciones extra para superar este limite.
+
+
+% 
+
+% LUEGO DECIR QUE DADAS LAS CARACTERISTICAS DE LA FUNCION DE L-J SERIA RAZONABLE PENSAR EN USAR UNA TABLA PARA CALCULAR EL POTENCIAL DE FORMA AISLADA(CALCULAR EL POTENCIAL UNA VEZ)
+% LA MEMORIA DE LA GPU TIENE VARIAS PROPIEDADES QUE PERMITEN IMPLEMENTAR ESTO DE FORMA MUY EFICIENTE Y CON GRAN PRECISION
+% QUE PASARIA SI APROVECHAMOS ENTONCES ESTO PARA IMPLEMENTAR UN SISTEMA DE POTENCIALES TABULADOS DENTRO DE AL ETAPA DE CALCULO EN EL ALGORITMO QUE SIGUE EL ESQUEMA GENERAL DE DM SOBRE GPU,
+% CON EL FIN DE REDUCIR EL COSTO DEL CALCULO y OPTIMIZAR LA SIMULACION
+
+Basandose en la forma funcional del potencial, es razonable pensar que, utilizando una tabla conteniendo los resultados para un rango de valores definido y, aun sin tener ésta un tamaño excesivo, se podria obtener una buena aproximacion del resultado para cualquier distancia. 
  
 
-% ****HASTA ACA YA DEFINI QUE LAS IMPLEMENTACIONES SOBRE GPU SON EL ESTANDAR HOY EN DIA, Y QUE SE HA OPTIMIZADO POCO DEL CALCULO DEL POTENCIAL DE LENNARD-JONES PERO SI DE OTROS ASPECTOS, INCLUSO SE HA OPTIMIZADO EL CALCULO DE LAS INTERACCIONES ELECTROSTATICAS***
-
-% ****AHORA EXPLICO CUALES SON LAS CARACTERISTICAS DE LA FUNCION DE L-J QUE HACEN QUE PUEDA SER TABULADO Y DAR UNA BUENA APROXIMACION 
-% DESPUES EXPLICO QUE LAS CARACTERISTICAS DE LA MEMORIA DE TEXTURA ENCAJAN JUSTO PARA IMPLEMENTAR LA TABLA Y LA BUSQUEDA EFICIENTE DEL RESULTADO ASOCIADO***
-
-
-Como se puede apreciar a partir de la descripcion de este potencial en el capitulo 1, la forma funcional que lo describe se caracteriza por tener un rango de distancias donde el resultado crece(o decrece) exponencialmente, y un punto a partir del cual converge y el valor asociado a la interaccion se hace despreciable.
-Basandose en estas caracteristicas es razonable pensar que, utilizando una tabla conteniendo los resultados para un rango de valores definido y, aun sin tener ésta un tamaño excesivo, se podria obtener una buena aproximacion del resultado para cualquier distancia. 
+ 
+%  ACA PUEDO DECIR QUE LA TABLA PUEDE SER IMPLEMENTADA EN CUALQUIER SISTEMA DE MEMORIA. ES DEICR, SI BIEN SE PUEDE IMPLEMENTAR SOBRE CPU ESTA SOLUCION (Y DE HECHO LO HICE) USAMOS LA GPU POR LA MEMORIA DE TEXTURA Y POR SER HOY EN DIA UN ESTANDAR EN LO QUE RESPECTA A DINAMICA MOLECULAR
+si bien el objetivo de este trabajo es optimizar la ejecucion de las implementaciones sobre GPU, el 
 
 
 % ****ACA PONGO LAS CARACTERISTICAS QUE OFRECE LA GPU Y QUE PUEDEN SER USADAS APROVECHANDO QUE HOY EN DIA LA MAYORIA DEL SOFT. ESTA IMPLEMENTADO SOBRE GPU*****
-
 Para implementar este mecanismo hay varias propiedades del sistema de memoria que se puede usar y que se deben analizar......................................................
 
 
 
-% ****ALGO MAS ANTES DE TERMINAR***
 
-Se debe tener en cuenta que, aún cuando sea posible realizar una buena aproximacion utilizando tablas, el algoritmo de dinamica molecular implica utilizar este valor para obtener las fuerzas y movimientos resultantes de la interaccion, lo cual afecta la posicion (y por lo tanto el valor del potencial asociado) en la proxima iteracion. De esta forma, los errores resultantes de la aproximacion por utilizar tablas de valores seran propagados a lo largo de una simulacion que involucra miles de pasos.....
+% CIERRE DE INTRODUCCION: (YA ESTA BASTANTE BIEN ESCRITO)
+% CIERRO DICIENDO QUE EN ESTE TRABAJO SE EVALUARAN DISTINTAS FORMAS DE IMPLEMENTAR ESTA MODIFICACION TENIENDO EN CUENTA LAS PROPIEDADES QUE OFRECE LA GPU ,
+% QUE HAY QUE TENER EN CUENTA LA PROPAGACION DE ERRORES POR LA FORMA DEL ALGORITMO, ETC
+% Y QUE LA MODIFICACION PUEDE SER APLICADA A CUALQUIER VERSION EXISTENTE Y DEBERIA AUMENTAR CONSIDERABLEMENTE LA PERFORMANCE
+
+Asi, en este trabajo se estudiarán distintas formas de utilizar el sistema de memoria de la GPU para realizar el calculo del potencial de Lennard Jones, analizando su utilizacion en el contexto del método de dinamica molecular.
+Dado que el calculo de este potencial representa la mayor parte del costo asociado a la simulacion, se espera obtener una mejora considerable en el tiempo de ejecución con respecto al algoritmo estandar sobre GPU, el cual resuelve la ecuacion de L-J para cada interaccion a evaluar.
+Se debe tener en cuenta que, aún cuando sea posible realizar una buena aproximacion utilizando tablas, el algoritmo de dinamica molecular implica utilizar este valor para obtener las fuerzas y movimientos resultantes de la interaccion, lo cual afecta la posicion (y por lo tanto el valor del potencial asociado) en la proxima iteracion. 
+De esta forma, los errores resultantes de la aproximacion por utilizar tablas de valores seran propagados a lo largo de una simulacion que involucra miles de pasos.....
+
+Es importante destacar que las adaptaciones que se plantean y analizan en este trabajo constituyen una modificación puntual para realizar el calculo del potencial de Lennard-Jones y, por lo tanto, tienen la capacidad de ser incluidas directamente en cualquier algoritmo existente y combinadas junto con cualquier otro método de optimización.
+Además, como se vio en el capitulo 1, existen pocas variantes para optimizar el calculo de este potencial de no-union.
 
 
-% ****TERMINO CON****
-
-Asi, en este trabajo se estudiarán distintas formas de utilizar el sistema de memoria de la gpu para realizar el calculo del potencial de Lennard Jones, analizando su utilizacion en el contexto del método de dinamica molecular. Dado que el calculo de este potencial representa la mayor parte del costo asociado a la simulacion, se espera obtener una mejora considerable en el tiempo de ejecución con respecto al algoritmo estandar sobre GPU, el cual resuelve la ecuacion de L-J para cada interaccion a evaluar.
 
 
 
@@ -470,30 +433,23 @@ EN ESTAS SECCIONES DEBERIA HACER UNA DESCRIPCION GENERAL DE LOS 3 ESQUEMAS QUE D
 
 
 El algoritmo inicial sigue la especificacion que se detallo en el capitulo 1....
-Dado que el aporte al campo de fuerzas que nos interesa es el correspondiente al potencial de L-J (potencial de no union), este es el unico aporte que se va a considerar. De esta forma, el sistema evoluciona en el tiempo a partir de las velocidades iniciales de las particulas y las fuerzas que se derivan de este potencial, unicamente. Si bien este modelo (considerando solo la interaccion de L-J) no es de utilidad para simular sistemas biologicos de interes (donde existen diversos enlaces entre los elementos), en este caso 
-
 
 % Esta linea no se si va aca o la pongo directamente en la parte de implementacion
 El esquema general del algoritmo se mantiene en todas las variantes. Las modificaciones estan centradas en la etapa de calculo del potencial, el contexto de este se mantiene siempre igual.
 
 
-Si bien el codigo aqui implementado ya está implementado como parte de distintos paquetes de software de dinamica molecular, el objetivo de realizar un algoritmo independiente, donde la evolucion temporal ocurra unicamente en base al potencial de L-J 
-
-Dado que el trabajo se centra puntualmente en modificar la forma en que se calcula el potencial de L-J, el primer paso consiste en implementar un algoritmo de dinamica molecular que utilice exclusivamente este modelo de interaccion. 
+Dado que el aporte a las interacciones que nos interesa es el correspondiente al potencial de L-J , este es el unico que se va a considerar. 
 Es decir, el campo de fuerzas estará definido exclusivamente por el potencial de Lennard-Jones que modela interacciones de no-unión. 
-De esta forma, no será posible simular (de forma correcta) sistemas moleculares que incluyan enlaces químicos, ya que estos no estarán correctamente modelados por el campo de fuerzas. 
-
+De esta forma, el sistema evoluciona en el tiempo a partir de las velocidades iniciales de las particulas y las fuerzas que se derivan de este potencial, unicamente. 
 El objetivo de esto es, en primer lugar, facilitar la implementacion de esta modificacion/optimizacion en el algoritmo, y en segundo lugar probar las propiedades de esta variante de forma independiente a cualquier otra implementacion existente sobre GPU. 
-Utilizando una implementacion propia se puede evaluar, de forma aislada, las ventajas y desventajas del uso de una tabla numerica. De esta forma se puede verificar facilmente que las variaciones en el tiempo y en la precision de los resultados son producto exclusivo de las modificaciones implementadas en cada paso.
+Utilizando una implementacion propia se puede evaluar, de forma aislada, las ventajas y desventajas del uso de una tabla numerica. 
+Se podrá verificar facilmente que las variaciones en el tiempo y en la precision de los resultados son producto exclusivo de las modificaciones implementadas en cada paso.
 
-Idealmente, las ventajas resultantes de este trabajo se sumaran a las caracteristicas de cualquier implementacion existente. 
 
+Usando el modelo de interaccion resultante no será posible simular (de forma correcta) sistemas moleculares que incluyan enlaces químicos, ya que estos no estarán correctamente modelados por el campo de fuerzas. 
+Si bien este modelo(considerando solo la interaccion de L-J) no es útil por si solo para simular sistemas biologicos de interes (donde existen diversos enlaces entre los elementos), en este caso 
 
 % ****describo brevemente el algoritmo*****
-
-
-% *****ACA METO LO DE PERIODICIDAD???***
-% **PUEDO EXPLICAR EN FORMA ABSTRACTA CUAL ES LA IDEA DE LA PERIODICIDAD, MASOMENOS QUE TENGO QUE TENER EN CUENTA A LA HORA DE IMPLEMENTARLO EN EL ALGORITMO, EL RESTO LO EXPLICO EN LA PARTE DE IMPLEMENTACION*** 
 
 
 
@@ -501,12 +457,45 @@ Idealmente, las ventajas resultantes de este trabajo se sumaran a las caracteris
 
 \section{Calculo usando tablas de valores del potencial }
 
+el algoritmo utiliza este potencial para obtener la interaccion entre cada par de particulas y derivar la fuerza resultante de esto. 
+Ademas, esta la funcion permite evaluar la energia potencial total asociada a la conformacion. Para esto se realiza la suma del valor de la funcion entre todos los pares de particulas.
 
-% Tengo que explicar que el potencial de Lennard Jones depende del par de elementos que interaccionan (y por lo tanto va a haber tablas de LxL )
+La primera aproximacion que involucra el uso de tablas de deduce de forma bastante directa a partir de la descripción general del algoritmo, se basa en utilizar una tabla que tenga almacenados valores del potencial para un rango definido de distancias.
+Teniendo este tipo de valores almacenados es posible utilizarlos para calcular tanto las fuerzas resultantes (necesarias para la evolucion de la simulacion) como el valor de la enegia potencial total, el cual puede ser requerido por el usuario como resultado de la simulacion.
+
+% Aca explico masomenos como seria la tabla: Tengo que explicar que el potencial de Lennard Jones depende del par de elementos que interaccionan (y por lo tanto va a haber tablas de LxL )
+% DECIR MASOMENOS CUANTOS TIPOS DE ELEMENTOS EXISTEN , ETC
+
+
+
+Utilizando esta tabla, para obtener el valor de la energia potencial de interaccion entre un par de particulas simplemente se recupera el valor asociado a la distancia(r) que existe entre las particulas(o el valor tabulado mas cercano).
+Para poder obtener la fuerza resultante de esta interaccion es necesario conocer el valor de la derivada de la funcion potencial para la distancia correspondiente.
+Utilizando la tabla descita previamente se puede obtener el valor de la derivada mediante la tecnica de derivacion numerica. 
+Para esto se obtienen primero dos valores de potencial a partir de la tabla, correspondientes a distancias de r+-x. Donde x es un valor discreto definido en base a.....
+Como se ve, esto implica una doble fuente de error, debido a una aproximacion tanto en la utilizacion de la derivada numerica como en la obtencion de los valores de potencial a partir de una tabla.
+
+
 
 
 
 \section{Calculo usando tablas de valores de la derivada  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \chapter{Implementaciones}
 \begin{comment}
@@ -527,12 +516,36 @@ Aca describo el kernel y aspectos relevantes de las versiones implementadas:
 % \subsubsection{Tabla sobre memoria de textura}
 
 
+
+
+
+
+
+
+
+
+
+
+
 \chapter{Resultados}
 \section{Sistemas de partículas utilizados}
 \section{Performance}
 \subsection{Evaluación de las implementaciones}
 \subsection{Efectos del tamaño de bloque}
 \section{Calidad numérica}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \chapter{Conclusiones}
 

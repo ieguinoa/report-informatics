@@ -1,0 +1,142 @@
+
+\chapter{Algoritmos}
+
+% % %    EN ESTE CAPITULO DEBERIA EXPLICAR LOS MISMOS CONCEPTOS QUE EXPLIQUE EN LA INTRODUCCION(TODOS LOS PASOS DEL ALGORITMO) PERO MAS DETALLADOS Y APLICADOS ESPECIFICAMENTE A GPU
+% %   	DETALLAR PARA CADA PASO CUALES SON LAS CARACTERISTICAS DE EFICIENCIA QUE HAY QUE TENER EN CUENTA(TODO CON RESPECTO A LA GPU)
+% % %     ACLARAR QUE TODO ESTO YA SE HA IMPLEMENTADO Y 
+% % %   EL CAPITULO EN GENERAL TIENE 3 PARTES:
+% %  		-INTRODUCCION:
+% %             -EL ALGORITMO/ESQUEMA GENERAL:  ACA APROVECHO PARA CENTRARME EN HABLAR DE TODAS LAS PARTES DEL ALGORITMO QUE DESPUES VOY A OBVIAR (TO)
+% % 		-UNA O MAS PARTES DONDE EXPLICO LAS VARIACIONES QUE HAGO EN EL ALGORITMO (ACA SI ME CENTRO EN )
+% % % 		  *****DEBERIAN SER 2 VARIANTES*****
+% % %   ACA PUEDO EXPLICAR ALGUNOS ASPECTOS GENERALES DEL ALGORITMO (TODO LO QUE SEA RELEVANTE Q)
+%  DE
+
+
+Este capítulo, los conceptos del m\'etodo de dinámica molecular presentados en la introducción son explicados en términos del algoritmo que los representa, haciendo énfasis en el paralelismo intrínseco que poseen, intentando abstraerse de cualquier implementación.
+
+En la primera sección se describen loa conceptos del algoritmo base, describiendo todos los pasos de este, en particular todas las ecuaciones q no fueron detalladas en la introducción. 
+
+En las siguientes secciones del capítulo se explican las modificaciones que este trabajo introduce y las propiedades que se deben tener en cuenta para implementarlas utilizando arquitecturas paralelas.
+
+Es importante destacar que las adaptaciones que se plantean y analizan en este trabajo constituyen una modificación puntual para realizar el calculo del potencial de Lennard-Jones y, por lo tanto, tienen la capacidad de ser incluidas directamente en cualquier algoritmo existente y combinadas junto con cualquier otro método de optimización.
+Por otro lado, como se vió en el capitulo 1, existen pocas variantes para optimizar el calculo de este potencial de no-unión y, dado que comprende el mayor aporte al costo computacional del método, esta implementación tendría un gran impacto en distintas implementaciones del método.
+
+
+
+
+
+
+
+
+
+
+\section{Esquema general del algoritmo}
+
+
+
+El algoritmo inicial sigue la especificacion que se detallo en el capitulo 1....
+
+El proceso de actualización de coordenadas deberá calcular para cada partícula la nueva posición, la cual estará dada en funcion de la posicion y velocidad previa. La ecuación que se debe calcular en este paso es:
+Claramente este cálculo es totalmente independiente entre las partículas y por lo tanto puede hacerse la actualización totalmente en paralelo.
+
+El proceso para actualizar la velocidad implica obtener un nuevo valor de velocidad en función del valor previo de esta y de la fuerza resultante calculada que actúa sobre la partícula acelerándola. La ecuación que se debe aplicar es:
+
+A partir de las distancias entre las partículas se puede obtener la fuerza total resultante que actúa sobre cada partícula.
+
+El cálculo de la fuerza entre un par de partículas responde a la siguiente ecuación: \[\vec{F}(r)=\dfrac{\partial U(r)}{ \partial(r)}=\]
+
+Este valor da la fuerza resultante en la dirección de $\vec{r}$ , es decir, en la dirección del vector distancia entre ambas partículas. 
+Para obtener la suma tota de las fuerzas que actúan sobre una partícula es necesario sumar el aporte de la interacción contra todas las demás partículas del sistema, esto implica sumar fuerzas con distintas direcciones, lo que implica sumar los componentes x,y,z de los distintos vectores. Por lo tanto, el cálculo de la fuerza resultante que actúa sobre una partícula suele dividirse en tres pasos:
+
+\begin{itemize}
+\item En un primer paso se calcula el valor de la fuerza entre cada par de partículas de acuerdo a la ecuación anterior.
+\item En un segundo paso se descompone esta fuerza en sus 3 componentes (x,y,z). Para esto se calcula: $F_i=\dfrac{\partial U(r)}{\partial r} \dfrac{\partial r}{\partial i}$  para i= x,y,z
+
+\item Por último se realiza la suma de los componentes para todas las fuerzas que actúan sobre una partícula. $F_i=\sum F_i$
+\end{itemize}
+
+
+El calculo del potencial de interacción tiene una particularidad y es que este valor(y por lo tanto su derivada) es simétrico??? Es decir, la interacción entre una partícula a y b tiene el mismo modulo pero signo opuesto q el valor entre b y a. Esto tiene una implicación relevante en el calculo q debe realizarse ya que solo deberán calcularse interacciones para la mitad de los pares de partículas...reduciendo así considerablemente el número de cálculos.
+
+
+%Esto pasarlo a la parte donde explico el paso de calculo de la derivada. También debería aclarar que el paso de cálculo de fuerzas y el del potencial (si es requerido) tienen una complejidad similar 
+
+Las limitaciones en este conjunto de pasos se deben a que tiene un orden de ejecucion $N^2$. Aun en arquitecturas altamente paralelas como las GPUs, este calculo es extremadamente costoso. 
+Aun cuando el numero de procesadores en estas arquitecturas siga creciendo, es poco probable que se supere el numero de calculos que es necesario hacer para simular sistemas grandes.
+Es necesario, entonces, realizar aproximaciones extra para superar este limite.
+
+
+
+
+%Dado que el aporte a las interacciones que nos interesa es el correspondiente al potencial de L-J , este es el unico que se va a considerar. 
+%Es decir, el campo de fuerzas estará definido exclusivamente por el potencial de Lennard-Jones que modela interacciones de no-unión. 
+%De esta forma, el sistema evoluciona en el tiempo a partir de las velocidades iniciales de las particulas y las fuerzas que se derivan de este potencial, unicamente. 
+% Sin embargo, usando el modelo de interacción resultante no será posible simular (de forma correcta) sistemas moleculares que incluyan enlaces químicos, ya que estos no estarán correctamente modelados por el campo de fuerzas. 
+El objetivo de esto es, en primer lugar, facilitar la implementacion de modificaciones/optimizaciones en el algoritmo relacionadas con el calculo del potencial de L-J.
+En segundo lugar, utilizando una implementacion propia se puede evaluar las ventajas y desventajas del uso de una tabla numerica de forma independiente a cualquier otra implementacion existente sobre GPU. 
+Se podrá verificar facilmente que las variaciones en el tiempo y en la precision de los resultados son producto exclusivo de las modificaciones implementadas en cada paso.
+
+
+
+
+
+
+
+\section{Calculo usando tablas de valores del potencial }
+
+El algoritmo utiliza este potencial para obtener la interaccion entre cada par de particulas y derivar la fuerza resultante de esto. 
+Ademas, esta la funcion permite evaluar la energia potencial total asociada a la conformacion. Para esto se realiza la suma del valor de la funcion entre todos los pares de particulas.
+
+
+% 
+
+% LUEGO DECIR QUE DADAS LAS CARACTERISTICAS DE LA FUNCION DE L-J SERIA RAZONABLE PENSAR EN USAR UNA TABLA PARA CALCULAR EL POTENCIAL DE FORMA AISLADA(CALCULAR EL POTENCIAL UNA VEZ)
+% LA MEMORIA DE LA GPU TIENE VARIAS PROPIEDADES QUE PERMITEN IMPLEMENTAR ESTO DE FORMA MUY EFICIENTE Y CON GRAN PRECISION
+% QUE PASARIA SI APROVECHAMOS ENTONCES ESTO PARA IMPLEMENTAR UN SISTEMA DE POTENCIALES TABULADOS DENTRO DE AL ETAPA DE CALCULO EN EL ALGORITMO QUE SIGUE EL ESQUEMA GENERAL DE DM SOBRE GPU,
+% CON EL FIN DE REDUCIR EL COSTO DEL CALCULO y OPTIMIZAR LA SIMULACION
+
+%esto pasarlo a la sección q habla de la tabla directamente
+Basandose en la forma funcional del potencial, es razonable pensar que, utilizando una tabla conteniendo los resultados para un rango de valores definido y, aun sin tener ésta un tamaño excesivo, se podria obtener una buena aproximacion del resultado para cualquier distancia. 
+ 
+
+La primera aproximacion que involucra el uso de tablas se deduce de forma bastante directa a partir de la descripción general del algoritmo, se basa en utilizar una tabla que tenga almacenados valores del potencial para un rango definido de distancias.
+Teniendo este tipo de valores almacenados es posible utilizarlos para calcular tanto las fuerzas resultantes (necesarias para la evolucion de la simulacion) como el valor de la enegia potencial total, el cual puede ser requerido por el usuario como resultado de la simulacion.
+
+
+ 
+%  ACA PUEDO DECIR QUE LA TABLA PUEDE SER IMPLEMENTADA EN CUALQUIER SISTEMA DE MEMORIA. ES DEICR, SI BIEN SE PUEDE IMPLEMENTAR SOBRE CPU ESTA SOLUCION (Y DE HECHO LO HICE) USAMOS LA GPU POR LA MEMORIA DE TEXTURA Y POR SER HOY EN DIA UN ESTANDAR EN LO QUE RESPECTA A DINAMICA MOLECULAR
+si bien el objetivo de este trabajo es optimizar la ejecucion de las implementaciones sobre GPU, el 
+
+
+
+% Aca explico masomenos como seria la tabla: Tengo que explicar que el potencial de Lennard Jones depende del par de elementos que interaccionan (y por lo tanto va a haber tablas de LxL )
+% DECIR MASOMENOS CUANTOS TIPOS DE ELEMENTOS EXISTEN , ETC
+
+
+
+Utilizando esta tabla, para obtener el valor de la energia potencial de interaccion entre un par de particulas simplemente se recupera el valor asociado a la distancia(r) que existe entre las particulas(o el valor tabulado mas cercano).
+Para poder obtener la fuerza resultante de esta interaccion es necesario conocer el valor de la derivada de la funcion potencial para la distancia correspondiente.
+Utilizando la tabla descita previamente se puede obtener el valor de la derivada mediante la tecnica de derivacion numerica. 
+Para esto se obtienen primero dos valores de potencial a partir de la tabla, correspondientes a distancias de r+-x. Donde x es un valor discreto definido en base a.....
+Como se ve, esto implica una doble fuente de error, debido a una aproximacion tanto en la utilizacion de la derivada numerica como en la obtencion de los valores de potencial a partir de una tabla.
+
+
+% Esta linea no se si va aca o la pongo directamente en la parte de implementacion
+El esquema general del algoritmo se mantiene en todas las variantes. Las modificaciones estan centradas en la etapa de calculo del potencial, el contexto de este se mantiene siempre igual.
+
+
+
+\section{Calculo usando tablas de valores de la derivada  }
+
+Como se mencionó en el capitulo 1, el resultado mas importante de la simulación es la trayectoria. Además, es la base de la simulacion y se debe calcular siempre.
+Dado que el valor mas importante que se obtiene a partir del potencial de L-J es la fuerza resultante de la interacción, se podría pensar que sería mas conveniente mantener en una tabla directamente los valores de la derivada. 
+De esta forma, para obtener la fuerza correspondiente se busca el valor en la tabla que se encuentre mas cercano a la distancia de interacción. 
+
+
+
+%ESTO NO SE SI PONERLO ACA O DIRECTAMENTE CUANDO ESTOY INTRODUCIENDO LA PARTE DE RESULTADOS
+Se debe tener en cuenta que, aún cuando sea posible realizar una buena aproximacion utilizando tablas, el algoritmo de dinamica molecular implica utilizar este valor para obtener las fuerzas y movimientos resultantes de la interaccion, lo cual afecta la posicion (y por lo tanto el valor del potencial asociado) en la proxima iteracion. 
+De esta forma, los errores resultantes de la aproximacion por utilizar tablas de valores seran propagados a lo largo de una simulacion que involucra miles de pasos.....
+
+

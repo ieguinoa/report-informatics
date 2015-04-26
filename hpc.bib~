@@ -1,5 +1,16 @@
 @comment{x-kbibtex-personnameformatting=<%l><, %f>}
 
+@article{friedrichs2009accelerating,
+  title={Accelerating molecular dynamic simulation on graphics processing units},
+  author={Friedrichs, Mark S and Eastman, Peter and Vaidyanathan, Vishal and Houston, Mike and Legrand, Scott and Beberg, Adam L and Ensign, Daniel L and Bruns, Christopher M and Pande, Vijay S},
+  journal={Journal of computational chemistry},
+  volume={30},
+  number={6},
+  pages={864--872},
+  year={2009},
+  publisher={Wiley Online Library}
+}
+
 @book{Abbas2003,
 	address = "Hingham, MA",
 	author = "Abbas, A.",

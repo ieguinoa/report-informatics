@@ -1,0 +1,46 @@
+@article{friedrichs2009accelerating,
+  title={Accelerating molecular dynamic simulation on graphics processing units},
+  author={Friedrichs, Mark S and Eastman, Peter and Vaidyanathan, Vishal and Houston, Mike and Legrand, Scott and Beberg, Adam L and Ensign, Daniel L and Bruns, Christopher M and Pande, Vijay S},
+  journal={Journal of computational chemistry},
+  volume={30},
+  number={6},
+  pages={864--872},
+  year={2009},
+  publisher={Wiley Online Library}
+}
+
+@article{gotz2012routine,
+  title={Routine microsecond molecular dynamics simulations with AMBER on GPUs. 1. Generalized born},
+  author={Gotz, Andreas W and Williamson, Mark J and Xu, Dong and Poole, Duncan and Le Grand, Scott and Walker, Ross C},
+  journal={Journal of chemical theory and computation},
+  volume={8},
+  number={5},
+  pages={1542--1555},
+  year={2012},
+  publisher={ACS Publications}
+}
+
+
+@article{salomon2013routine,
+  title={Routine microsecond molecular dynamics simulations with AMBER on GPUs. 2. Explicit solvent particle mesh Ewald},
+  author={Salomon-Ferrer, Romelia and Gotz, Andreas W and Poole, Duncan and Le Grand, Scott and Walker, Ross C},
+  journal={Journal of Chemical Theory and Computation},
+  volume={9},
+  number={9},
+  pages={3878--3888},
+  year={2013},
+  publisher={ACS Publications}
+}
+
+
+@article{le2013spfp,
+  title={SPFP: Speed without compromise—A mixed precision model for GPU accelerated molecular dynamics simulations},
+  author={Le Grand, Scott and G{\"o}tz, Andreas W and Walker, Ross C},
+  journal={Computer Physics Communications},
+  volume={184},
+  number={2},
+  pages={374--380},
+  year={2013},
+  publisher={Elsevier}
+}
+

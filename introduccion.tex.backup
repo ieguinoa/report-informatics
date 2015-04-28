@@ -78,7 +78,7 @@ El esquema general del método se puede ver en la figura \ref{esquemaMD}.
 % ****QUE OTROS DATOS RELEVANTES OBTENGO DE LA SIMULACION??
 %********************** 
 
-  
+
 El resultado de la simulación es, fundamentalmente, una trayectoria representada por las posiciones de cada una de las partículas a lo largo de un cierto tiempo.
 No se va a detallar acerca del análisis posterior de este resultado pero es relevante decir que la longitud de trayectoria que podamos obtener en un tiempo de cómputo razonable es lo que limita el tipo de proceso químico que podremos estudiar.
 Para poder estudiar un proceso de interés, entonces, es necesario que la simulación alcance la escala de tiempo en la cual éste ocurre. Un mayor tiempo de simulación equivale a realizar más pasos y por lo tanto más cálculos totales, aumentando así el tiempo de cómputo requerido.

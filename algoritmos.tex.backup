@@ -23,13 +23,10 @@ Es importante destacar que las adaptaciones que se plantean y analizan en este t
 Por otro lado, como se vió en el capitulo 1, existen pocas variantes para optimizar el calculo de este potencial de no-unión y, dado que comprende el mayor aporte al costo computacional del método, esta implementación tendría un gran impacto en distintas implementaciones del método.
 
 
-%Dado que el aporte a las interacciones que nos interesa es el correspondiente al potencial de L-J , este es el unico que se va a considerar. 
-%Es decir, el campo de fuerzas estará definido exclusivamente por el potencial de Lennard-Jones que modela interacciones de no-unión. 
-%De esta forma, el sistema evoluciona en el tiempo a partir de las velocidades iniciales de las particulas y las fuerzas que se derivan de este potencial, unicamente. 
-% Sin embargo, usando el modelo de interacción resultante no será posible simular (de forma correcta) sistemas moleculares que incluyan enlaces químicos, ya que estos no estarán correctamente modelados por el campo de fuerzas. 
-El objetivo de esto es, en primer lugar, facilitar la implementacion de modificaciones/optimizaciones en el algoritmo relacionadas con el calculo del potencial de L-J.
-En segundo lugar, utilizando una implementacion propia se puede evaluar las ventajas y desventajas del uso de una tabla numerica de forma independiente a cualquier otra implementacion existente. 
-Se podrá verificar facilmente que las variaciones en el tiempo y en la precision de los resultados son producto exclusivo de las modificaciones implementadas en cada paso.
+
+
+
+
 
 
 
@@ -44,8 +41,8 @@ El primer paso implica calcular la fuerza que actúa sobre cada partícula y
 El cálculo de la fuerza entre un par de partículas responde a la siguiente ecuación: \begin{equation} \label{fuerza}\vec{F}(r)=\dfrac{\partial U(r)}{ \partial(r)}\end{equation}
                                                                                                                                                    
 Por lo tanto, para calcular esto de forma discreta, primero debemos conocer el valor de r, es decir, la distancia entre cada par de partículas.
-Este paso es claramente paralelizable ya que las posiciones son totalmente independientes entre si.
-A partir de las distancias entre las partículas, la ecuación \ref{fuerza} permite obtener la fuerza resultante de la interacción entre un par de partículas, conociendo la función potencial.
+
+A partir de las distancias entre las partículas, la ecuacion \ref{fuerza} permite obtener la fuerza resultante de la interacción entre un par de partículas, conociendo la función potencial.
 Este valor da la fuerza resultante en la dirección de $\vec{r}$ , es decir, en la dirección del vector distancia entre ambas partículas. 
 Para poder obtener la suma total de las fuerzas que actúan sobre una partícula, es decir, como resultado de interacciones con todas las partículas del sistema,
 es necesario sumar el aporte de la interacción contra todas las demás partículas del sistema. 
@@ -71,12 +68,22 @@ F_i=\sum F_i
 
 
 
-% CALCULO DE LA ACELERACION
-Una vez obtenida la fuerza que actúa sobre cada partícula, se puede calcular la aceleración resultante de ésta.
+%Esto pasarlo a la parte donde explico el paso de calculo de la derivada. También debería aclarar que el paso de cálculo de fuerzas y el del potencial (si es requerido) tienen una complejidad similar 
 
-.........................
+Las limitaciones en este conjunto de pasos se deben a que tiene un orden de ejecucion $N^2$. Aun en arquitecturas altamente paralelas como las GPUs, este calculo es extremadamente costoso. 
+Aun cuando el numero de procesadores en estas arquitecturas siga creciendo, es poco probable que se supere el numero de calculos que es necesario hacer para simular sistemas grandes.
+Es necesario, entonces, realizar aproximaciones extra para superar este limite.
 
 
+
+
+%Dado que el aporte a las interacciones que nos interesa es el correspondiente al potencial de L-J , este es el unico que se va a considerar. 
+%Es decir, el campo de fuerzas estará definido exclusivamente por el potencial de Lennard-Jones que modela interacciones de no-unión. 
+%De esta forma, el sistema evoluciona en el tiempo a partir de las velocidades iniciales de las particulas y las fuerzas que se derivan de este potencial, unicamente. 
+% Sin embargo, usando el modelo de interacción resultante no será posible simular (de forma correcta) sistemas moleculares que incluyan enlaces químicos, ya que estos no estarán correctamente modelados por el campo de fuerzas. 
+El objetivo de esto es, en primer lugar, facilitar la implementacion de modificaciones/optimizaciones en el algoritmo relacionadas con el calculo del potencial de L-J.
+En segundo lugar, utilizando una implementacion propia se puede evaluar las ventajas y desventajas del uso de una tabla numerica de forma independiente a cualquier otra implementacion existente sobre GPU. 
+Se podrá verificar facilmente que las variaciones en el tiempo y en la precision de los resultados son producto exclusivo de las modificaciones implementadas en cada paso.
 
 
 
@@ -89,22 +96,12 @@ El proceso para actualizar la velocidad implica obtener un nuevo valor de veloci
 
 
 
-% ACA DEBERIA HACER UN BALANCE GLOBAL DE LOS PUNTOS CRITICOS DEL ALGORITMO, O ALGO COMO PARA INTRODUCIR LAS MODIFICACIONES PLANTEADASme
-%Esto pasarlo a la parte donde explico el paso de calculo de la derivada. También debería aclarar que el paso de cálculo de fuerzas y el del potencial (si es requerido) tienen una complejidad similar 
-Las limitaciones en este conjunto de pasos se deben a que tiene un orden de ejecucion $N^2$. Aun en arquitecturas altamente paralelas como las GPUs, este calculo es extremadamente costoso. 
-Aun cuando el numero de procesadores en estas arquitecturas siga creciendo, es poco probable que se supere el numero de calculos que es necesario hacer para simular sistemas grandes.
-Es necesario, entonces, realizar aproximaciones extra para superar este limite.
-En las siguientes secciones se presentan modificaciones al algoritmo centradas en este paso. 
-En el próximo capitulo se analizará la forma de implementarlas y las propiedades de la arquitectura GPU que ...
-
-
 
 
 \section{Calculo usando tablas de valores del potencial }
 
 El algoritmo utiliza este potencial para obtener la interaccion entre cada par de particulas y derivar la fuerza resultante de esto. 
 Ademas, esta la funcion permite evaluar la energia potencial total asociada a la conformacion. Para esto se realiza la suma del valor de la funcion entre todos los pares de particulas.
-
 
 
 % 

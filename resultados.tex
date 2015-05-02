@@ -35,12 +35,56 @@ Los sistemas detallados en la sección anterior se utilizaron para evaluar las d
 % GRAFICO DE BARRA CON LAS 3 IMPLEMENTACIONES AGRUPADAS EN 3(O 2) SISTEMAS DE PRUEBAS **PERIODICO -  CANTIDAD FIJA DE PASOS*
 % *****PUEDO METER LO DE CPU TAMBIEN ACA  ****
 
+En la figura \ref{time-compare} se puede ver los resultados en tiempo evaluados para todas las implementaciones detalladas en el capítulo previo.
+Las evaluaciones miden el tiempo de ejecución del paso correspondiente al cálculo de fuerzas.
+
+
+
+\begin{figure}[htbp]
+\centering
+   \includegraphics[width=\plotwidth]{plots/performance/comparacion-tiempos-sistemas.png}
+ \caption{Comparaci\'on para los tres casos de prueba estudiados para las distintas implementaciones evaluadas}
+ \label{time-compare}
+\end{figure}
+
+
 \subsubsection{Efectos de la periodicidad}
+
+
 % DESPUES EXPLICAR COMO AFECTA LA (NO)PERIODICIAD A LA EJECUCION Y MOSTRA EL GRAFICO DE TIEMPO DE EJECUCION DE LAS 3 IMPLEMENTACIONES PARA LOS DISTINTOS SISTEMAS (***NO** PERIODICO)
+% DEBERIA MOSTRAR UN GRAFICO QUE DE ALGUNA FORMA COMPARE LAS IMPLEMENTACIONES PARA 1 SOLA ITERACION Y PARA UN NUMERO X DE ITERACIONES (PERIODICO con max. cutoff Y NO PERIODICO) 
+% Y DECIR QUE A MEDIDA QUE SE EJECUTA, LOS ATOMOS SE 'ESCAPAN' DE LA CAJA NO PERIODICA PERO LA EJECUCION PERIODICA SIEMPRE MANTIENE EL NUMERO DE ATOMOS SOBRE LOS CUALES CALCULAR LA FUERZA
+En la figura \ref{periodic-effects} se ven los efectos mencionados. Se muestra la ejecución de las diferentes implementaciones para un mismo sistema(X átomos) 
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}[b]{\plotwidthtres}
+   \includegraphics[width=\textwidth]{plots/NOperiodic/comparacion-1iter.png}
+   \caption{1 iteración}
+   \label{compar-1iter}
+ \end{subfigure}
+\begin{subfigure}[b]{\plotwidthtres}
+   \includegraphics[width=\textwidth]{plots/NOperiodic/comparacion-Niter.png}
+   \caption{N iteraciones}
+   \label{compar-niter}
+ \end{subfigure}
+ \caption{Comparaci\'on de tiempos de ejecuci\'on bajo condiciones de periodicidad y NO-periódicas}
+ \label{periodic-effects}
+\end{figure}
+
 
 \subsubsection{Efectos del cutoff}
 Se realiza una evaluación del efecto del cutoff en el tiempo de ejecución
-% GRAFICO SCATTER DE LAS 3 IMPLEMENTACIONES vs AUMENTO EN EL CUTOFF
+% GRAFICO SCATTER DE LAS 3 IMPLEMENTACIONES vs AUMENTO EN EL CUTOFF 
+% MOSTRAR LO MISMO PARA LOS 3 SISTEMAS  **** TANTO PARA PERIODIC COMO NO PERIODIC****, ASI TAMBIEN SE VE EL EFECTO DEL CUTOFF EN EL TIEMPO PARA LOS CASOS PERIOD Y NO
+En la figura \ref{time-vs-cut} se ve el efecto del cutoff sobre el tiempo de ejecución del cálculo de fuerzas de interacción.
+
+\begin{figure}[htbp]
+\centering
+   \includegraphics[width=\plotwidth]{plots/timeVsCut/timeComparison.png}
+ \caption{Comparaci\'on de las distintas implementaciones sobre un sistema de 8000 átomos}
+ \label{time-vs-cut}
+\end{figure}
 
 
 \subsection{Efectos del tamaño de bloque}
@@ -50,9 +94,25 @@ Se realiza una evaluación del efecto del cutoff en el tiempo de ejecución
 
 \subsection{Tamaños y límites de las tablas}
 % GRAFICO DE ERROR ABSOLUTO vs NUMERO TOTAL DE ELEMENTOS DE LA TABLA
+En la figura \ref{errorAbsElemTabla} se ven los errores asociados a un número muy chico de elementos en la tabla. 
+Se ve como, para el caso de una tabla de potenciales, el error es mayor que la implementacion con tabla de derivadas
+para un mismo numero de elementos.
 
-% GRAFICO
+\begin{figure}[htbp]
+\centering
+   \includegraphics[width=\plotwidth]{plots/erroresTabla/errorAbsolutoElemTabla.png}
+ \caption{Comparaci\'on de las distintas implementaciones que utilizan tablas sobre un sistema de 8000 átomos }
+ \label{errorAbsElemTabla}
+\end{figure}
+
+% **************************************************
+% ACA DEBERIA PONER LA TABLA CON ERRORES RELATIVOS
+% *************************************************
+
+
+
 \subsection{Estabilidad de la simulación}
+% GRAFICO
 % Acá debería mostrar como la energia se mantiene constante cuando hago una simulacion larga (distintos valores de tamano de tabla	)
 
 

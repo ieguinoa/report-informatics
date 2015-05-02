@@ -1,6 +1,10 @@
 \chapter{Resultados}
 \section{Propiedades de los sistemas de evaluación}
 % ACA DEBERIA DECIR LAS CARACTERISTICAS DE LOS SISTEMAS Y CUALQUIER COSA DE LA EJECUCION QUE TENGA ALGO QUE VER CON EL SISTEMA QUE SE ESTÁ UTILIZANDO
+
+Los tiempos de ejecuci\'on se midieron utilizando el reloj est\'andar de alta precisi\'on para Linux (\texttt{clock\_gettime}~\cite{LinuxDocumentation}), 
+
+
 Claramente, el factor mas importante del sistema que afectará a la ejecución es el número total de partículas de éste. Los tamaños de sistemas utilizados fueron tres, y para 
 
 Además del tamaño, hay otros factores del sistema que se tuvieron en cuenta para realizar una correcta evaluación y que deben ser 
@@ -26,6 +30,29 @@ En las próximas secciones, cuando sea relevante, se especificarán las propieda
 Los sistemas detallados en la sección anterior se utilizaron para evaluar las distintas implementaciones en cuanto a performance..
 
 \subsection{Evaluación de las implementaciones}
+
+% PRIMER GRAFICO DEBERÍA IR EL TIEMPO DE EJECUCION DE LAS 3 IMPLEMENTACIONES PARA LOS DISTINTOS SISTEMAS (PERIODICO)
+% GRAFICO DE BARRA CON LAS 3 IMPLEMENTACIONES AGRUPADAS EN 3(O 2) SISTEMAS DE PRUEBAS **PERIODICO -  CANTIDAD FIJA DE PASOS*
+% *****PUEDO METER LO DE CPU TAMBIEN ACA  ****
+
+\subsubsection{Efectos de la periodicidad}
+% DESPUES EXPLICAR COMO AFECTA LA (NO)PERIODICIAD A LA EJECUCION Y MOSTRA EL GRAFICO DE TIEMPO DE EJECUCION DE LAS 3 IMPLEMENTACIONES PARA LOS DISTINTOS SISTEMAS (***NO** PERIODICO)
+
+\subsubsection{Efectos del cutoff}
+Se realiza una evaluación del efecto del cutoff en el tiempo de ejecución
+% GRAFICO SCATTER DE LAS 3 IMPLEMENTACIONES vs AUMENTO EN EL CUTOFF
+
+
 \subsection{Efectos del tamaño de bloque}
+
+
 \section{Calidad numérica}
+
+\subsection{Tamaños y límites de las tablas}
+% GRAFICO DE ERROR ABSOLUTO vs NUMERO TOTAL DE ELEMENTOS DE LA TABLA
+
+% GRAFICO
+\subsection{Estabilidad de la simulación}
+% Acá debería mostrar como la energia se mantiene constante cuando hago una simulacion larga (distintos valores de tamano de tabla	)
+
 

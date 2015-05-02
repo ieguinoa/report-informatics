@@ -23,3 +23,7 @@
 *.out
 *.synctex.gz
 plots/*.png
+plots/*/*.png
+plots/*/*/*.png
+plots/*/*/*/*.png
+plots/*/*/*/*/*.png

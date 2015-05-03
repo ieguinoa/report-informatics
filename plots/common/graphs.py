@@ -261,7 +261,7 @@ def scatter(xlabel, ylabel, filename, xdata, ydata):
   pylab.savefig(filename, bbox_inches='tight')
   pylab.close()
 
-def comparativeScatter(xlabel, ylabel, filename, xdata, ydata, label, ymax=None):
+def comparativeScatter(xlabel, ylabel, filename, xdata, ydata, label, ymax=None,xmin=None):
   pylab.xlabel(xlabel)
   pylab.ylabel(ylabel)
   #frmt = ['-s','-^','-s']
@@ -274,6 +274,8 @@ def comparativeScatter(xlabel, ylabel, filename, xdata, ydata, label, ymax=None)
   x1,x2,y1,y2 = pylab.axis()
   if ymax:
 	pylab.axis((x1,x2,0,ymax))
+  if xmin:
+	pylab.axis((xmin,x2,0,ymax))
   pylab.savefig(filename, bbox_inches="tight")
   pylab.close()
 

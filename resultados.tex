@@ -76,13 +76,30 @@ En la figura \ref{periodic-effects} se ven los efectos mencionados. Se muestra l
 \subsubsection{Efectos del cutoff}
 Se realiza una evaluación del efecto del cutoff en el tiempo de ejecución
 % GRAFICO SCATTER DE LAS 3 IMPLEMENTACIONES vs AUMENTO EN EL CUTOFF 
-% MOSTRAR LO MISMO PARA LOS 3 SISTEMAS  **** TANTO PARA PERIODIC COMO NO PERIODIC****, ASI TAMBIEN SE VE EL EFECTO DEL CUTOFF EN EL TIEMPO PARA LOS CASOS PERIOD Y NO
 En la figura \ref{time-vs-cut} se ve el efecto del cutoff sobre el tiempo de ejecución del cálculo de fuerzas de interacción.
 
+% \begin{figure}[htbp]
+% \centering
+%    \includegraphics[width=\plotwidth]{plots/timeVsCut/timeComparison.png}
+%  \caption{Comparaci\'on de las distintas implementaciones sobre un sistema de 8000 átomos}
+%  \label{time-vs-cut}
+% \end{figure}
+
+
+% MOSTRAR LO MISMO PARA LOS 3 SISTEMAS  **** TANTO PARA PERIODIC COMO NO PERIODIC****, ASI TAMBIEN SE VE EL EFECTO DEL CUTOFF EN EL TIEMPO PARA LOS CASOS PERIOD Y NO
 \begin{figure}[htbp]
 \centering
-   \includegraphics[width=\plotwidth]{plots/timeVsCut/timeComparison.png}
- \caption{Comparaci\'on de las distintas implementaciones sobre un sistema de 8000 átomos}
+\begin{subfigure}[b]{\plotwidthtres}
+   \includegraphics[width=\textwidth]{plots/timeVsCut/timeComparison-periodic.png}
+   \caption{Condiciones de periodicidad}
+   \label{compar-1iter}
+ \end{subfigure}
+\begin{subfigure}[b]{\plotwidthtres}
+   \includegraphics[width=\textwidth]{plots/timeVsCut/timeComparison-NOperiodic.png}
+   \caption{Condiciones NO periódicas}
+   \label{compar-niter}
+ \end{subfigure}
+ \caption{Comparaci\'on de tiempos de ejecuci\'on bajo condiciones de periodicidad y NO-periódicas}
  \label{time-vs-cut}
 \end{figure}
 
@@ -105,9 +122,112 @@ para un mismo numero de elementos.
  \label{errorAbsElemTabla}
 \end{figure}
 
+
+
+
+
+En la tabla \ref{tabla-errorRelativo-fuerzas} se muestran los errores relativos en el cálculo de fuerzas de las distintas implementaciones.
+% EL ERROR ES EL PROMEDIO?? EL MAXIMO???
+% QUE TAMAÑO DE TABLA SE USÓ??? 
+
+
+
+En la tabla \ref{tabla-errorRelativo-potencial} se muestran los errores relativos en el cálculo de fuerzas de las distintas implementaciones.
+% EL ERROR ES EL PROMEDIO?? EL MAXIMO???
+% QUE TAMAÑO DE TABLA SE USÓ???  
+
+
 % **************************************************
-% ACA DEBERIA PONER LA TABLA CON ERRORES RELATIVOS
+% ACA DEBERIA PONER LAS TABLAS CON ERRORES RELATIVOS
 % *************************************************
+
+
+
+\begin{table}[h]
+
+\begin{minipage}{\linewidth}
+\centering
+\begin{tabular}{@{}llll@{}}
+
+Error relativo(Fuerza)	 & 200 átomos            	& 8000 átomos        		& 20000 átomos \\ \bottomrule 
+% Error relativo(Fuerza)	 &            			&      				& 		 \\ \hline
+Implementación 1	 & 1.00E-09 			& 1.00E-09 			& 	-----	 \\ \hline
+Implementación 2	 & 0.0003			& 0.0003			& 	-----	\\ \hline
+Implementación 3	 & 8.00E-06 			& 8.00E-06			& 		 
+
+\end{tabular}
+\caption{Errores relativos en el cálculo de fuerzas para las distintas implementaciones y distintos tamaños de sistemas}
+\label{tabla-errorRelativo-fuerzas}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+\centering
+\begin{tabular}{@{}llll@{}}
+\\
+\\
+% Error relativo(E. Potencial)	 &		           	& 		       		& 		 \\ \bottomrule 
+Error relativo(E. Potencial)	 & 200 átomos            	& 8000 átomos        		& 20000 átomos \\ \bottomrule 
+Implementación 1	 & 1.00E-09 			& 1.00E-09 			& 		 \\ \hline
+Implementación 2	 & 3.00E-05 			& 3.00E-04			&  		\\ \hline
+Implementación 3	 & 3.00E-05	 		& 3.00E-04 			& 		 \\ \bottomrule
+
+\end{tabular}
+\end{minipage}
+\caption{Errores relativos en el cálculo de fuerzas para las distintas implementaciones y distintos tamaños de sistemas}
+\label{tabla-errorRelativo-potencial}
+\end{table}
+
+
+% 
+% \begin{minipage}{\linewidth}
+% \centering
+% \begin{tabular}{@{}llll@{}}
+% \toprule
+% % Error relativo		 & 200 átomos            	& 8000 átomos        		& 20000 átomos \\ \midrule
+% Implementación 1	 & 1.00E-09 			& 1.00E-09 			& 		 \\ \hline
+% Implementación 2	 & 3.00E-05 			& 3.00E-04			&  		\\ \hline
+% Implementación 3	 & 3.00E-05	 		& 3.00E-04 			& 		 \\ \bottomrule
+% \end{tabular}
+% \end{minipage}
+
+
+% 
+% 
+% 
+% \begin{table}[h]
+% \centering
+% \begin{tabular}{@{}llll@{}}
+% \toprule
+% Error relativo		 & 200 átomos            	& 8000 átomos        		& 20000 átomos \\ \midrule
+% Implementación 1	 & 1.00E-09 			& 1.00E-09 			& 		 \\ \hline
+% Implementación 2	 & 3.00E-05 			& 3.00E-04			&  		\\ \hline
+% Implementación 3	 & 3.00E-05	 		& 3.00E-04 			& 		 \\ \bottomrule
+% \end{tabular}
+% \caption{Errores relativos en el cálculo de la energía potencial total para las distintas implementaciones y distintos tamaños de sistemas}
+% \label{tabla-errorRelativo-energia}
+% \end{table}
+% 
+
+
+\subsubsection{Efectos del limite superior de la tabla}
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}[b]{\plotwidthtres}
+   \includegraphics[width=\textwidth]{plots/erroresTabla/errorAbsolutoLimite200.png}
+   \caption{Condiciones de periodicidad}
+   \label{compar-1iter}
+ \end{subfigure}
+\begin{subfigure}[b]{\plotwidthtres}
+   \includegraphics[width=\textwidth]{plots/erroresTabla/errorAbsolutoLimite8k.png}
+   \caption{Condiciones NO periódicas}
+   \label{compar-niter}
+ \end{subfigure}
+ \caption{Comparacion de efectos en el error del calculo de fuerzas para sistemas de distinto tamaño}
+ \label{time-vs-cut}
+\end{figure}
+
+
 
 
 

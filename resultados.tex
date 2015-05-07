@@ -48,27 +48,43 @@ Las evaluaciones miden el tiempo de ejecución del paso correspondiente al cálc
 \end{figure}
 
 
+En la figura \ref{time-compare-cpu}
+
+
+\begin{figure}[htbp]
+\centering
+   \includegraphics[width=\plotwidth]{plots/performance/comparacion-tiempos-TODOScpu.png}
+ \caption{Comparaci\'on para los tres casos de prueba estudiados y la versión implementada sobre CPU para las distintas implementaciones evaluadas}
+ \label{time-compare-cpu}
+\end{figure}
+
 \subsubsection{Efectos de la periodicidad}
 
 
 % DESPUES EXPLICAR COMO AFECTA LA (NO)PERIODICIAD A LA EJECUCION Y MOSTRA EL GRAFICO DE TIEMPO DE EJECUCION DE LAS 3 IMPLEMENTACIONES PARA LOS DISTINTOS SISTEMAS (***NO** PERIODICO)
 % DEBERIA MOSTRAR UN GRAFICO QUE DE ALGUNA FORMA COMPARE LAS IMPLEMENTACIONES PARA 1 SOLA ITERACION Y PARA UN NUMERO X DE ITERACIONES (PERIODICO con max. cutoff Y NO PERIODICO) 
 % Y DECIR QUE A MEDIDA QUE SE EJECUTA, LOS ATOMOS SE 'ESCAPAN' DE LA CAJA NO PERIODICA PERO LA EJECUCION PERIODICA SIEMPRE MANTIENE EL NUMERO DE ATOMOS SOBRE LOS CUALES CALCULAR LA FUERZA
-En la figura \ref{periodic-effects} se ven los efectos mencionados. Se muestra la ejecución de las diferentes implementaciones para un mismo sistema(X átomos) 
+En la figura \ref{periodic-effects} se ven los efectos mencionados. Se muestra la ejecución de las diferentes implementaciones para un mismo sistema(X átomos). 
+A partir de las distintas ejecuciones se calcularon los tiempos promedios por iteración. 
+Se ve que en el caso de tener condiciones no periódicas, al evolucionar la ejecución la expansión del sistema disminuye el número de particulas que se encuentran dentro del radio definido por el cutoff.
+Esto genera una disminución en el numero de interacciones que se deben calcular y por lo tanto se reduce el tiempo promedio por iteración. 
+En otras condiciones iniciales, o para diferrentes sistemas de interacción, el tiempo promedio podría aumentar.
+
+En el caso de condiciones periódicas(usando el cutoff máximo), todas las partículas del sistema se mantienen dentro del radio de iteracción y por lo tanto el número de 
 
 \begin{figure}[htbp]
 \centering
 \begin{subfigure}[b]{\plotwidthtres}
-   \includegraphics[width=\textwidth]{plots/NOperiodic/comparacion-1iter.png}
-   \caption{1 iteración}
+   \includegraphics[width=\textwidth]{plots/NOperiodic/comparacion-NOperiodico.png}
+   \caption{Condiciones no periódicas}
    \label{compar-1iter}
  \end{subfigure}
 \begin{subfigure}[b]{\plotwidthtres}
-   \includegraphics[width=\textwidth]{plots/NOperiodic/comparacion-Niter.png}
-   \caption{N iteraciones}
+   \includegraphics[width=\textwidth]{plots/NOperiodic/comparacion-periodico.png}
+   \caption{Condiciones periódicas}
    \label{compar-niter}
  \end{subfigure}
- \caption{Comparaci\'on de tiempos de ejecuci\'on bajo condiciones de periodicidad y NO-periódicas}
+ \caption{Comparaci\'on de tiempos de ejecuci\'on promedio por iteración para condiciones periódicas y no periódicas}
  \label{periodic-effects}
 \end{figure}
 
@@ -105,6 +121,31 @@ En la figura \ref{time-vs-cut} se ve el efecto del cutoff sobre el tiempo de eje
 
 
 \subsection{Efectos del tamaño de bloque}
+
+En la figura \ref{blockSize} se ve el efecto de la variación en el tamaño de los bloques para las distintas implementaciones.
+
+En la implementación
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}[b]{\plotwidthtres}
+   \includegraphics[width=\textwidth]{plots/blockSize/timeComparison-Analitic.png}
+   \caption{Implementación base}
+   \label{fig:cpu-scalability-caroteno}
+ \end{subfigure}
+\begin{subfigure}[b]{\plotwidthtres}
+   \includegraphics[width=\textwidth]{plots/blockSize/timeComparison-Potential.png}
+   \caption{implementación Tabla de potencial}
+   \label{fig:cpu-scalability-fullereno}
+ \end{subfigure}
+\begin{subfigure}[b]{\plotwidthtres}
+   \includegraphics[width=\textwidth]{plots/blockSize/timeComparison-Derivative.png}
+   \caption{Implementación Tabla de derivadas}
+   \label{fig:cpu-scalability-hemo}
+ \end{subfigure}
+ \caption{Efectos de la variación en los tamaños de bloque para las distintas implementaciones.}
+ \label{blockSize}
+\end{figure}
 
 
 \section{Calidad numérica}

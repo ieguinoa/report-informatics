@@ -238,7 +238,7 @@ def multiComparativeBarChart(ticks, values, filename, ylabel, width=0.1, rotatio
   ax.set_ylabel(ylabel)
   ax.set_xticks(indexes)
   ax.set_xticklabels(ticks, rotation=rotation)
-  ax.legend(rects, values.keys(), loc="best")
+  ax.legend(rects, values.keys(), loc="upper center", fontsize=10)
 
   plt.savefig(filename, bbox_inches="tight")
   plt.close()
@@ -261,7 +261,7 @@ def scatter(xlabel, ylabel, filename, xdata, ydata):
   pylab.savefig(filename, bbox_inches='tight')
   pylab.close()
 
-def comparativeScatter(xlabel, ylabel, filename, xdata, ydata, label, ymax=None,xmin=None):
+def comparativeScatter(xlabel, ylabel, filename, xdata, ydata, label, ymax=None,xmin=None, notation=None):
   pylab.xlabel(xlabel)
   pylab.ylabel(ylabel)
   #frmt = ['-s','-^','-s']
@@ -270,12 +270,16 @@ def comparativeScatter(xlabel, ylabel, filename, xdata, ydata, label, ymax=None,
   for yd, l in zip(ydata, label):
       pylab.plot(xdata, yd, frmt[c],  label=l)
       c+=1
-  pylab.legend(loc="best")
+  pylab.legend(loc="best", fontsize=12)
   x1,x2,y1,y2 = pylab.axis()
+  #pylab.axis((x1,x2,0,1e-2))
   if ymax:
 	pylab.axis((x1,x2,0,ymax))
   if xmin:
 	pylab.axis((xmin,x2,0,ymax))
+  if notation=='sci':
+    pylab.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+  #pylab.axis.set_major_formatter(mtick.FormatStrFormatter('%.2e'))
   pylab.savefig(filename, bbox_inches="tight")
   pylab.close()
 

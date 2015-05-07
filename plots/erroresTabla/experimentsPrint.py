@@ -39,12 +39,13 @@ def errorLimiteSuperior():
              errTablaPot.append(float(p))
 	     errTablaDer.append(float(d))
         params = {
-            'xlabel': u"Limite superior de la tabla (Angstroms)",
+            'xlabel': r"Limite superior de la tabla [$\AA$]",
             'ylabel': u"Error absoluto",
             'xdata': elementos,
             'ydata': [errTablaPot,errTablaDer],
             'label': [u'Tabla Potenciales',u'Tabla Derivadas'],
             'filename': u'errorAbsolutoLimite200.png' ,
+            'notation': 'sci'
         }
         comparativeScatter(**params)
 
@@ -57,39 +58,20 @@ def errorLimiteSuperior():
              errTablaPot.append(float(p))
 	     errTablaDer.append(float(d))
         params = {
-            'xlabel': u"Limite superior de la tabla (Angstroms)",
+            'xlabel': r'Limite superior de la tabla [$\AA$]',
             'ylabel': u"Error absoluto",
             'xdata': elementos,
             'ydata': [errTablaPot,errTablaDer],
             'label': [u'Tabla Potenciales',u'Tabla Derivadas'],
             'filename': u'errorAbsolutoLimite8k.png' ,
-	    'ymax' : 0.0002,
-	    'xmin' : 15,	
+	    'ymax' : 0.0001,
+	    #'ymax' : 2, 
+	    'xmin' : 15,
+	    'notation': 'sci', 
         }
         comparativeScatter(**params)
 
 
-
-
-
-def escalabilidad_final():
-    cutoffs , times = [],[]
-    with open("results/tablaPot-4000it-200p.txt") as f:
-           for line in f.readlines():
-             t, m = line.strip().split("\t")
-             cutoffs.append(int(t))
-             times.append(float(m))
-
-    params = {
-                'xlabel': u"Cutoff",
-                'ylabel': u"Tiempo de ejecución (seg.)",
-		'xdata': cutoffs,
-	        'ydata': times,
-		'label': ['Experimental'],
-		'filename': u'scalability-matrix-sums.png',
-       		#'ylim': (3.2,3.6),
-    }
-    comparativeScatter(**params)
 
 
 

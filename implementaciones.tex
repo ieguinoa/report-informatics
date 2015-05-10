@@ -10,6 +10,9 @@ Aca describo el kernel y aspectos relevantes de las versiones implementadas:
 
 En este capítulo se describen los kernels implementados, incluyendo las variantes evaluadas. Además, se detalla cómo se tuvieron en cuenta los aspectos de performance expuestos en el capítulo 2.
 
+Si bien las modificaciones están centradas puntualmente en la etapa de cálculo de las fuerzas individuales, y la evaluación sobre la performance se realizará teniendo en cuenta este paso, 
+se describen aspectos de implementación de todo el método ya que son relevantes para evaluar luego la correctitud numérica de las variables químicas, la cual depdende de la iteración global del método.
+Se describen, entonces, algunas optimizaciones que , si bien no son , formaron parte de la investigación realizada para este trabajo.
 
 
 \section{Consideraciones previas}
@@ -19,6 +22,19 @@ Una de las primeras decisiones que se deben considerar es la precisión que se u
 Si bien es un factor importante, este ya ha sido estudiado usando otras implementaciones del método.  En particular, se ha estudiado usando Amber\cite{le2013spfp}. El trabajo mencionado analiza un esquema mixto que implica almacenar los calculos de fuerzas entre particulas utilizando precisión simple y acumular en variables de precisión doble la suma de todos los aportes que componen la fuerza sobre una partícula. Asumiendo los resultados en performance y correctitud encontrados en Amber y,
 dado que es el software con el cual evaluaremos luego la calidad numérica lograda, utilizaremos, entonces, un esquema similar de precisión para nuestra implementación.
 
+
+Las arquitecturas de placas de v\'ideo est\'an dise\~nadas en torno al poder de c\'omputo.
+Las decisiones tomadas por los dise\~nadores de las GPUs se concentran alrededor de paralelismo a lo ancho, poniendo un gran \'enfasis en la cantidad de n\'ucleos.
+En consecuencia, se dispone de menor cantidad de espacio f\'isico para m\'as memoria.
+
+Esta decisi\'on implica que la amplia mayor\'ia de la memoria de la GPU se encuentra localizada afuera del chip.
+Por lo tanto, esconder la gran latencia que tiene al acceder a la misma es parte importante del paradigma de programaci\'on para GPGPUs.
+
+Es cr\'itico, adem\'as, que los accesos a memoria sean a direcciones m\'ultiplos de $16$, esto se conoce como \textit{accesos alineados}.
+El t\'ermino \emph{coalescencia de memoria} se define en GPU como la organizaci\'on de los accesos a memoria de manera secuencial, ordenada y predecible.
+Cuando la GPU accede a memoria de manera alineada, puede traer $16$, $32$ o $64$ elementos de 32 bits en una sola lectura~\cite{cudaProgrammingGuide}, suficiente para cada uno de los \threads{} del warp.
+Si, en cambio, no se respeta la alineaci\'on de la memoria o los \threads{} tienen un patr\'on de pedidos impredecible, entonces se deber\'an serializar los accesos y separar en m\'ultiples transacciones a memoria global para satisfacerlos.
+Este problema se agrava si se deben hacer accesos frecuentes por cientos de \threads{}, como es el caso de los bloques con gran nivel de paralelismo expl\'icito.
 
 
 \section{Esquema general de la implementación sobre GPU}
@@ -32,18 +48,36 @@ El paso correspondiente al calculo de las fuerzas entre particulas es quizas el 
 \cite{friedrichs2009accelerating}\cite{gotz2012routine}\cite{salomon2013routine}
 (citar los papers de amber y el de Accelerating Molecular Dynamic Simulation on Graphics Processing Units)
 
+
+% El calculo del potencial de interacción tiene una particularidad y es que este valor(y por lo tanto su derivada) es simétrico??? Es decir, la interacción entre una partícula a y b tiene el mismo modulo pero signo opuesto q el valor entre b y a. Esto tiene una implicación relevante en el calculo q debe realizarse ya que solo deberán calcularse interacciones para la mitad de los pares de partículas...reduciendo así considerablemente el número de cálculos.
 En el caso de interacciones non-bond, como las que se analizan en nuestro trabajo, la principal optimizacion deriva de la propiedad simetrica que presenta el potencial de interaccion, y por lo tanto la fuerza resultante, son simetricas
 
 En nuestra implementación, esta parte es central ya que da lugar luego a diversas modificaciones. El presente trabajo, entonces, intenta seguir una implementacion estandar de forma tal que las modificaciones evaluadas tengan un carácter mas general y no dependan de ninguna
 
 Para hacer uso de la propiedad de simetria, entonces, el calculo de la fuerza resultante de la interaccion solo se realiza sobre N2/2 pares, y el resto se deriva negando este valor.
 
+
 Para descomponer las componentes el cálculo se realiza usando un thread por cada par de partículas.
-Y para hacer la suma de la fuerza resultante, este se hace directamente sumando todos los valores de una fila. El acceso en este caso es coalescente ????? Y si hago una reducción ???
+
+Para hacer la suma de la fuerza resultante, se utiliza un esquema de reduccion \cite{cudaReductions}:
+Los threads ponen su contribucion al computo realizado en su posicion correspondiente de la memoria compartida, evitando tener que realizar operaciones de sincronización entre ellos. Los valores parciales se reducen,
+luego, con un algoritmo paralelo en arbol: cada thread suma el valor de la posición x con el valor en 2x si este existiera. Esto se repite por la mitad de los threads, hasta que todos los valores hayan sido sumados 
+y el thread 0 del bloque escribe el resultado a la memoria global.
+Un esquema simplificado de esto puede verse en la figura \ref{reduction}
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=\plotwidth]{img/md/reductions.png}
+   \caption{}
+   \label{reduction}
+\end{figure}
+
+Esta tecnica de reduccion es sumamente conocida para arquitecturas distribuidas, generando la respuesta en O(log 2 n) pasos. La literatura de CUDA sugiere tecnicas adicionales para minimizar aun mas el tiempo empleado en esta reducción. 
+Sin embargo, al realizarse a lo sumo seis operaciones, no es necesario aplicarlas en nuestro caso particular.
+
 
 Los pasos siguientes son, bastante directos.
 La aceleración se calcula en base a la fuerza resultante usando un thread por cada partícula.
-La actualización de coordenadas también se realiza usando un thread para cada partícula. En este caso el único valor q se lee es el de
+La actualización de coordenadas también se realiza usando un thread para cada partícula. El esquema de threads utilizado asegura acceso coalescente a 
 
 
 

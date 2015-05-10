@@ -59,9 +59,9 @@ Las instrucciones se encadenan para aprovechar el paralelismo a nivel instrucci\
 a nivel de \thread{}, usado de manera extensa a trav\'es del hardware.
 Todas las instrucciones son ejecutadas en orden y no hay predicci\'on de saltos ni ejecuci\'on especulativa, todo se ejecuta solamente cuando se lo necesita~\cite{CudaOverview}.
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
     \centering
-    \includegraphics[width=\plotwidthverysmall]{img/arq/fermi-sm.pdf}
+    \includegraphics[width=0.5\textwidth]{img/arq/fermi-sm.pdf}
     \caption{Diagrama de bloques del SM de GF100 Fermi. Basado en~\cite{NvidiaFermi}.}
     \label{fermi_sm}
 \end{figure}
@@ -78,9 +78,9 @@ En precisi\'on doble, esto no es posible, as\'i que hay solamente un warp corrie
 
 Un SM cuenta con una memoria com\'un de $64$ KB que se puede usar de forma autom\'atica tanto como memoria compartida com\'un a todos los \threads{} como cache L1 para todos los accesos a memoria.
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
     \centering
-    \includegraphics[width=\plotwidth]{img/arq/fermi-gpu-block.pdf}
+    \includegraphics[width=\textwidth]{img/arq/fermi-gpu-block.pdf}
     \caption{Diagrama de bloques de GF100 Fermi. Tomado de~\cite{NvidiaFermi}.}
     \label{fermi_gpu_block}
 \end{figure}
@@ -179,7 +179,7 @@ La latencia de acceso a la memoria global es de cientos de ciclos~\cite{Demystif
 La memoria global tambi\'en puede ser mapeada, o \textit{pinneada}, para que exista una copia de esa reserva tanto en la memoria en la placa como en la memoria principal del procesador. El driver de CUDA va a mantener la consistencia entre ambas de manera as\'incrona, evitando la necesidad de hacer copias de memoria expl\'icitas.
 No es ilimitada la cantidad de memoria mapeada posible, por lo que es importante saber elegir qu\'e elementos se van a almacenar de esta manera.
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
     \centering
     \includegraphics[width=250px]{img/arq/cuda-memories_ES.pdf}
     \caption{Esquema de la jerarqu\'ia de memorias en GPU, detallando de las disponibles en cada SM, la memoria compartida (SMEN), la L2 global, la
@@ -327,18 +327,17 @@ resultados entre s\'i.
 Si el problema requiere partes seriales, lo ideal es que se las pueda dividir en partes independientes que sean etapas de una cadena de procesos, donde cada una de \'estas exhiban caracter\'isticas fuertemente paralelas.
 Como las arquitecturas masivamente paralelas tienen como desventaja una menor eficiencia por n\'ucleo, si el problema no se puede dividir para maximizar la ocupaci\'on de todos los procesadores disponibles, va a resultar muy dif\'icil superar en eficiencia a los procesadores seriales.
 
-El \'item~\ref{req:float} habla acerca de que el m\'etodo de resoluci\'on de los problemas debe provenir de una aplicaci\'on num\'erica o de gran carga aritm\'etica.
+El ítem~\ref{req:float} habla acerca de que el m\'etodo de resoluci\'on de los problemas debe provenir de una aplicaci\'on num\'erica o de gran carga aritm\'etica.
 El set de instrucciones de las arquitecturas GPGPU est\'an fuertemente influenciados por las aplicaciones 3D que las impulsaron en un principio.
 \'Estas consisten mayormente de transformaciones de \'algebra lineal para modelar iluminaci\'on, hacer renders o mover puntos de vistas.
 Todos estos problemas son inherentemente de punto flotante, por lo cual el set de instrucciones, las ALUs internas y los registros est\'an optimizados para este caso de uso.
 
-El \'item \ref{req:matrix} menciona que los problemas que mejor se pueden tratar en esta arquitectura se pueden representar como operaciones entre arreglos o matrices de
-dos, tres o cuatro dimensiones.
+El ítem \ref{req:matrix} menciona que los problemas que mejor se pueden tratar en esta arquitectura se pueden representar como operaciones entre arreglos o matrices de dos, tres o cuatro dimensiones.
 Las estructuras de datos no secuenciales en memoria incurren en m\'ultiples accesos a memoria para recorrerlas y, en las arquitecturas GPGPU, generan un gran cuello de botella.
 Adem\'as, suelen ser dif\'iciles de paralelizar en m\'ultiples subproblemas.
 Tener como par\'ametros de entrada matrices o arreglos que se puedan partir f\'acilmente producen en overheads m\'inimos de c\'omputo y permiten aprovechar mejor las memorias caches y las herramientas de prefetching que brinda el hardware.
 
-Item \ref{req:transf} ataca uno de los puntos cr\'iticos de esta arquitectura.
+El \'item \ref{req:transf} ataca uno de los puntos cr\'iticos de esta arquitectura.
 Para poder operar con datos, se requiere que est\'en en la memoria de la placa, no en la memoria de prop\'osito general de la computadora.
 Se debe, entonces, hacer copias expl\'icitas entre las dos memorias, ya que ambas tienen espacios de direcciones independientes.
 Esta copia se realiza a trav\'es de buses que, a pesar de tener un gran \emph{throughput}, tambi\'en tienen una gran latencia (del orden de milisegundos).
@@ -352,8 +351,8 @@ invertir el tiempo necesario para la implementaci\'on y ajuste fino.
 
 Hasta ahora, solo se consideraron a los GPUs de forma aislada, observando las prestaciones del hardware y una aproximaci\'on a la manera en que se escriben los programas para esta arquitectura.
 La esencia de GPGPU se puede apreciar mejor compar\'andola contra los motivos de la evoluci\'on de CPU, y los problemas que se fueron enfrentando los dise\~nos siguiendo la historia de los componentes que fueron apareciendo en estos.
-Esto se mostr\'o en la tabla \ref{tbl:historia-cpu} (p\'agina~\pageref{tbl:historia-cpu}), que detalla algunos de los eventos m\'as importantes que aceleraron
-la \performance{} de los CPU.
+% Esto se mostr\'o en la tabla \ref{tbl:historia-cpu} (p\'agina~\pageref{tbl:historia-cpu}), que detalla algunos de los eventos m\'as importantes que aceleraron
+% la \performance{} de los CPU.
 
 Lo clave es observar el siguiente patr\'on: \emph{``no desechar algo que pudi\'eramos necesitar pronto''}, \emph{``intentar predecir el futuro de los condicionales''}, \emph{``intentar correr m\'ultiples instrucciones a la vez porque puede llegar a bloquear en alguna de ellas''}.
 
@@ -388,13 +387,30 @@ Relajar esta restricci\'on permite romper con el modelo de c\'omputo de CPU y de
 
 \section{Idoneidad para la tarea}
 
-El problema de QM/MM enfrentado en este trabajo cuenta con m\'ultiples operaciones matem\'aticas de gran volumen de c\'alculos.
-En particular, las operaciones matriciales constituyen los principales cuellos de botella en esta aplicaci\'on.
-Estas operaciones se realizan para varios grupos dentro de una grilla de integraci\'on (ecuaci\'on~\ref{eq:xc}), los cuales se pueden realizar de manera independiente (y por lo tanto en paralelo).
+El método de dinámica molecular tratado en este trabajo es un problema que implica una gran cantidad de operaciones matemáticas de gran volumen de cálculos e independientes entre si.
+El cálculo de fuerzas, la suma de todas las fuerzas parciales y la actualización de coordenadas son todos cálculos que se deben resolver para todas las partículas de forma individual. 
+Esto implica una gran cantidad de cálculos pero además una gran cantidad de datos que deben ser actualizados en cada paso de la simulación.
+En particular, la gran cantidad de accesos necesarios para actualizar constantemente los datos asociados a cada partícula constituye un cuello de botella en este tipo de aplicaciones.
 
-Para obtener los valores num\'ericos de densidad buscados en los puntos, se deben obtener las derivadas primeras y segundas, lo cual implica hacer m\'ultiples operaciones de multiplicaci\'on matricial.
-Este tipo de problemas est\'a estudiado fuertemente en la literatura debido a la multiplicidad de aplicaciones de diferentes campos que requieren de operaciones de \'algebra lineal.
+Dadas las caracter\'isticas de contar con un fuerte nivel de paralelismo y de ser operaciones mayormente de punto flotante, hace ya algún tiempo 
+las arquitecturas GPU se convirtieron en estándar para la aplicación de métodos de DM, tal como se vió en el capítulo 1.
 
-En nuestro caso, para un sistema se requieren miles de estas multiplicaciones entre matrices, algunas con matrices de m\'as de $500^2$ elementos.
-Como LIO es un proyecto de resoluci\'on num\'erica de QM/MM, los problemas enfrentados son casi, en su totalidad, operaciones de punto flotante.
-Luego, dadas las caracter\'isticas de contar con un fuerte nivel de paralelismo en los cuellos de botella y de ser operaciones mayormente de punto flotante, se determin\'o que el uso de GPGPU para este problema era promisorio, en comparaci\'on con arquitecturas de prop\'osito general con menos poder de c\'omputo. La exploraci\'on original de esta arquitectura trajo buenos resultados, por lo que se prosigui\'o su an\'alisis como un camino prometedor~\cite{TesisNitsche}.
+% De todas formas, aún queda mucho por avanzar. 
+
+
+% se determin\'o que el uso de GPGPU para este problema era promisorio, en comparaci\'on con arquitecturas de prop\'osito general con menos poder de c\'omputo. 
+
+
+% 
+% El problema de QM/MM enfrentado en este trabajo cuenta con m\'ultiples operaciones matem\'aticas de gran volumen de c\'alculos.
+% En particular, las operaciones matriciales constituyen los principales cuellos de botella en esta aplicaci\'on.
+% Estas operaciones se realizan para varios grupos dentro de una grilla de integraci\'on (ecuaci\'on~\ref{eq:xc}), los cuales se pueden realizar de manera independiente (y por lo tanto en paralelo).
+% 
+% Para obtener los valores num\'ericos de densidad buscados en los puntos, se deben obtener las derivadas primeras y segundas, lo cual implica hacer m\'ultiples operaciones de multiplicaci\'on matricial.
+% Este tipo de problemas est\'a estudiado fuertemente en la literatura debido a la multiplicidad de aplicaciones de diferentes campos que requieren de operaciones de \'algebra lineal.
+% 
+% En nuestro caso, para un sistema se requieren miles de estas multiplicaciones entre matrices, algunas con matrices de m\'as de $500^2$ elementos.
+% Como LIO es un proyecto de resoluci\'on num\'erica de QM/MM, los problemas enfrentados son casi, en su totalidad, operaciones de punto flotante.
+% Luego, dadas las caracter\'isticas de contar con un fuerte nivel de paralelismo en los cuellos de botella y de ser operaciones mayormente de punto flotante, 
+% se determin\'o que el uso de GPGPU para este problema era promisorio, en comparaci\'on con arquitecturas de prop\'osito general con menos poder de c\'omputo. 
+% La exploraci\'on original de esta arquitectura trajo buenos resultados, por lo que se prosigui\'o su an\'alisis como un camino prometedor~\cite{TesisNitsche}.

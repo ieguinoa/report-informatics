@@ -1,19 +1,18 @@
 \documentclass[oneside,numbers,spanish]{ezthesis}
 
 \usepackage[utf8]{inputenc}
-\usepackage{pdfpages}
 \usepackage{mathtools}
 \usepackage{amsmath}
 \usepackage{booktabs}
 \usepackage{amssymb}
 \usepackage{comment}
 \usepackage{amstext}
-% \usepackage{sub figure}
+% \usepackage{subfigure}
 % \usepackage{amsthm}
 % \usepackage{booktabs}
 % \usepackage{color}
 \usepackage{hyperref}
-\usepackage{float}
+% \usepackage{float}
 % \usepackage{pdfpages}
 % \usepackage{todonotes}
 \usepackage{caption}
@@ -107,6 +106,8 @@
 % \faculty{Escuela de Ingenier\'ia y Ciencias}
 % \department{Departamento de Sistemas Computacionales}
 
+\input{caratula.pdf}
+\newpage
 %% # M'argenes del documento #
 %% 
 %% Quitar el comentario en la siguiente linea para austar los m'argenes del
@@ -119,10 +120,7 @@
 %% instrucci'on antes de \begin{document}.
 % \hyperlinking
 \begin{document}
-% \includepdf{portada.pdf}
-% \newpage
-% \newpage
-\cleardoublepage  
+  
 %% En esta secci'on se describe la estructura del documento de la tesis.
 %% Consulta los reglamentos de tu universidad para determinar el orden
 %% y la cantidad de secciones que debes de incluir.
@@ -138,42 +136,69 @@
 \def\tituloTesis{}
 \def\director{Dr. Fernando Tinetti}
 \def\lugar{La Plata, 2015}
-
-
 % \input{caratula}
+  
+%% # Prefacios #
+%% Por cada prefacio (p.e. agradecimientos, resumen, etc.) crear
+%% un nuevo archivo e incluirlo aqu'i.
+%% Para m'as detalles y un ejemplo mirar el archivo "gracias.tex".
+\include{gracias}
 
-
-% \include{gracias}
-
-
+%% # 'Indices y listas de contenido #
+%% Quitar los comentarios en las lineas siguientes para obtener listas de
+%% figuras y cuadros/tablas.
 \tableofcontents
+%\listoffigures
+%\listoftables
+
+%% # Cap'itulos #
+%% Por cada cap'itulo hay que crear un nuevo archivo e incluirlo aqu'i.
+%% Mirar el archivo "intro.tex" para un ejemplo y recomendaciones para
+%% escribir.
+% \include{intro}
+%\include{capitulo1}
+%\include{capitulo2}
+%\include{capitulo3}
+%\include{conclu}
 
 
-
+% \input{introduccion.tex}
 \include{introduccion}
+
+
+
+
+
 
 \include{defs}
 
-
 % ESTE CAPITULO LO COPIO ENTERO DE OTRAS TESIS  ( SOLO AGREGO ALGUNOS DETALLES QUE USO EN LAS IMPLEMENTACIONES )
-\include{arquitecturas}
 
+\include{arquitecturas}
+% \input{arquitecturas.tex}
 
 
 \include{algoritmos}
+
+
+
 \include{implementaciones}
+
+
 \include{resultados}
+
 \include{conclusiones}
 
-\bibliography{hpc,bibliografia,md}
 
 \appendix
 %% Cap'itulos incluidos despues del comando \appendix aparecen como ap'endices
 %% de la tesis.
-\include{equipamiento}
+%\include{apendiceA}
 %\include{apendiceB}
 %\include{apendiceC}
 
-
+%% Incluir la bibliograf'ia. Mirar el archivo "biblio.bib" para m'as detales
+%% y un ejemplo.
+\bibliography{hpc,bibliografia,md}
 
 \end{document}

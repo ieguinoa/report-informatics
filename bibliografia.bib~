@@ -1,3 +1,62 @@
+***********  PAPER VIEJOS DE DINAMICA MOLECULAR *********8
+@article{mccamm0n1977dynamics,
+  title={Dynamics of folded proteins},
+  author={McCamm0n, J Andrew},
+  journal={Nature},
+  volume={267},
+  pages={16},
+  year={1977}
+}
+
+
+@article{piana2014assessing,
+  title={Assessing the accuracy of physical models used in protein-folding simulations: quantitative evidence from long molecular dynamics simulations},
+  author={Piana, Stefano and Klepeis, John L and Shaw, David E},
+  journal={Current opinion in structural biology},
+  volume={24},
+  pages={98--105},
+  year={2014},
+  publisher={Elsevier}
+}
+
+
+
+@article{stone2010gpu,
+  title={GPU-accelerated molecular modeling coming of age},
+  author={Stone, John E and Hardy, David J and Ufimtsev, Ivan S and Schulten, Klaus},
+  journal={Journal of Molecular Graphics and Modelling},
+  volume={29},
+  number={2},
+  pages={116--125},
+  year={2010},
+  publisher={Elsevier}
+}
+
+@article{senn2009qm,
+  title={QM/MM methods for biomolecular systems},
+  author={Senn, Hans Martin and Thiel, Walter},
+  journal={Angewandte Chemie International Edition},
+  volume={48},
+  number={7},
+  pages={1198--1229},
+  year={2009},
+  publisher={Wiley Online Library}
+}
+
+@article{noid2013perspective,
+  title={Perspective: coarse-grained models for biomolecular systems},
+  author={Noid, WG},
+  journal={The Journal of chemical physics},
+  volume={139},
+  number={9},
+  pages={090901},
+  year={2013},
+  publisher={AIP Publishing}
+}
+
+
+
+
 @inproceedings{Fang,
     author = {Fang, Jianbin and Sips, Henk and Zhang, LiLun and Xu, Chuanfu and Che, Yonggang and Varbanescu, Ana Lucia},
     title = {Test-driving Intel Xeon Phi},

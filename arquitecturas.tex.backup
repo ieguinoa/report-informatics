@@ -1,180 +1,8 @@
-\section{CPU}
+\chapter{La arquitectura GPU}
 
-Los microprocesadores ganan en prevalencia desde principios de los a\~nos 70, cuando Intel introduce los modelos \texttt{4004} y \texttt{8008}.
-Actualmente, las arquitecturas de procesadores de 64 bits basadas en la l\'inea \texttt{x86-64} de Intel dominan no solo el mercado de computadoras personales sino que tambi\'en el de servidores y \textit{clusters} de c\'omputo.
-Dado que utilizaremos el CPU est\'andar como punto de comparaci\'on para las dem\'as arquitecturas, y que \'estas est\'an basadas en parte en su dise\~no, daremos una breve rese\~na de los aspectos m\'as importantes y desarrollos modernos con respecto a la \performance{} dentro de los procesadores actuales.
-Haremos foco en el concepto de \textit{paralelismo} en las arquitecturas: la posiblidad de ejecutar simultaneamente flujos de instrucciones independientes entre s\'i.
+\section{Introducci\'on}
 
-\subsection{Tipos de paralelismo}
-
-Existen tres categor\'ias de paralelismo que, hoy en d\'ia, una arquitectura puede aprovechar para mejorar la \performance{} de una aplicaci\'on:
-\begin{itemize}
-    \item \textit{Instruction Level Parallelism}: Este tipo de optimizaciones buscan
-    ejecutar la mayor cantidad de instrucciones en un mismo hilo de ejecuci\'on simult\'aneamente.
-    Optimizaciones de este estilo incluyen:
-    \begin{itemize}
-      \item \textit{pipelines} de procesador: se separan las instrucciones en distintas etapas para ejecutar m\'ultiples instrucciones de manera solapada. Cada etapa es un estad\'io dentro de una cadena de montaje que empieza decodificando una instrucci\'on y
-      la ejecuta de a partes.
-
-      \item ejecuci\'on superescalar fuera de orden: ejecutar al mismo tiempo
-      instrucciones que no usan recursos comunes y son independientes entre s\'i.
-
-      \item ejecuci\'on especulativa: se basa en la predicci\'on de resultados todav\'ia no finalizados de procesar.
-    \end{itemize}
-
-    \item \textit{Data Level Parallelism}: Consideran las optimizaciones cuyo prop\'osito es lograr aplicar una misma operaci\'on a cada elemento de un conjunto datos simult\'aneamente
-    en un mismo hilo de ejecuci\'on. Esta t\'ecnica se denomina SIMD (\textit{Single Instruction, Multiple Data}).
-
-    \item \textit{Thread Level Parallelism}: Concierne al uso de m\'ultiples hilos de ejecuci\'on simult\'aneos, lo cual requiere el uso de procesadores que usualmente
-    comparten la memoria principal (arquitectura SMP, \textit{Symmetric Multiprocessing}).
-    Esto normalmente requiere esfuerzo adicional por parte del programador para mantener consistencia y coherencia.
-\end{itemize}
-
-En base a estos tipos de paralelismo surgieron grandes avances en la arquitectura de procesadores desde 1950 en adelante.
-Estos se detallan cronol\'ogicamente en la tabla \ref{tbl:historia-cpu}, como tambi\'en la motivaci\'on de su existencia.
-
-\newcommand{\blap}[1]{\begin{minipage}[t]{3in}#1\end{minipage}}
-
-
-\begin{table}[h]
-\renewcommand{\arraystretch}{2.0}
-\centering
-\begin{tabular}{lll}
-\hline
-A\~no & Tecnolog\'ia & Motivo \\ \hline
-1950s & Pipelines &  \blap{Usar independientemente las distintas unidades del procesador para disminuir los ciclos por instrucci\'on.} \\
-
-1970s & Vectorizaci\'on & \blap{Poder realizar las mismas operaciones sobre muchos datos simult\'aneamente.} \\
-
-1980s & Cache & \blap{Disminuir la latencia de muchos accesos a la memoria aprovechando la localidad de los mismos.} \\
-
-1987 & M\'ultiples ALUs & \blap{Poder compensar las ALU que m\'as latencia tienen, se multiplican las unidades para procesar m\'as instrucciones en paralelo.} \\
-
-1988 & Predicci\'on de Saltos & \blap{Disminuir y hasta evitar los costos de tener que recalcular el pipeline cuando hay saltos.} \\
-
-1995 & Fuera de Orden & \blap{Solapar la ejecuci\'on de instrucciones para compensar por instrucciones lentas y accesos a memoria.} \\
-
-2002 & SMT & \blap{Poder procesar de a m\'as de un \thread{} de OS en un solo core.} \\
-
-2005 & Multi-core & \blap{Aumentar el poder de c\'omputo sin aumentar la velocidad de clock.} \\
-\end{tabular}
-  \caption{Cronolog\'ia de los avances de arquitectura de procesadores, tomado de~\cite{HennessyPatterson}}
-  \label{tbl:historia-cpu}
-\end{table}
-
-A continuaci\'on detallamos algunos aspectos de cada una de estas t\'ecnicas.
-
-\subsection{Pipeline y Ejecuci\'on fuera de orden}
-
-Los primeras implementaciones de paralelismo a nivel de un solo procesador fueron a nivel de instrucciones mediante el uso de \textit{pipelines} de m\'ultiples etapas.
-Por ejemplo, en la arquitectura del Intel Pentium 4 se llegaron a utilizar $20$ etapas distintas de pipeline.
-Cada etapa corresponde a una actividad distinta en el proceso de ejecutar una instrucci\'on.
-Al tiempo que una instrucci\'on es decodificada, por ejemplo, otra instrucci\'on puede estar siendo le\'ida de memoria ya que, idealmente, las etapas previas no dependen de las posteriores.
-Este mecanismo funciona bien siempre y cuando una instrucci\'on no dependa de los resultados de otra anterior.
-Sin embargo, ocurre habitualmente que existe una dependencia entre instrucciones, produci\'endose entonces una demora (o \textit{pipe stall}) que requiera ejecutar las instrucciones de manera no solapada (con el costo de \textit{throughput} de instrucciones que ello implica).
-
-Esta t\'ecnica llevada a su conclusi\'on l\'ogica se conoce como ejecuci\'on fuera de orden (\textit{Out of Order Execution}).
-Mediante el uso de algoritmos y circuitos dedicados, un procesador puede detectar las dependencias entre las instrucciones y cambiar el orden de ejecuci\'on para minimizar la aparici\'on de pipe stalls, manteniendo los mismos resultados. De esta manera, se logra que la mayor parte de las unidades del procesador permanezcan ocupadas el mayor tiempo posible.
-
-Mejoras en este nivel eran usualmente invisibles al programador de un lenguaje de alto nivel como C++, dejando la tarea de aprovechar estas propiedades de la arquitectura a los compiladores optimizantes.
-Sin embargo, las ventajas de estas t\'ecnicas fueron disminuyendo a partir del a\~no 2000~\cite{HennessyPatterson}.
-
-\subsection{Extensiones vectoriales}
-
-Si bien las t\'ecnicas SIMD fueron desarrolladas para las supercomputadoras de los a\~nos 70 y 80, su aparici\'on en los microprocesadores x86 modernos ocurre en 1996 con el nombre MMX (\textit{MultiMedia eXtensions}), con mejoras luego en las extensiones SSE y AVX.
-AVX y AVX2 representan la \'ultima versi\'on disponible de las instrucciones de vectorizaci\'on y est\'an presentes en la l\'inea Intel Xeon de procesadores de alta gama y en las m\'as recientes generaciones de procesadores para consumidores.
-
-El paralelismo de datos puede ser explotado por el compilador, que analiza los ciclos de programa y detecta cuando hay operaciones independientes que pueden ser realizadas en simult\'aneo, dividiendo la cantidad de instrucciones totales que tiene que realizar un procesador. Un ejemplo de operaci\'on de suma vectorial puede verse en la figura~\ref{fig:simd-example}.
-
-\begin{figure}[htbp]
-    \centering
-%     \includegraphics[width=\plotwidthbigger]{images/simd_ES.pdf}
-    \caption{Ejemplo de operaci\'on de suma simult\'anea de ocho elementos. En SSE 4, usando la instrucci\'on \texttt{ADDPS}, el procesador puede hacer estas $16$ sumas en simult\'aneo usando un registro de 128 bits. En cambio, un procesador escalar solo podr\'ia hacerlas de a una por vez.}
-    \label{fig:simd-example}
-\end{figure}
-
-El uso de operaciones sobre m\'ultiples valores ha cobrado importancia como uno de los m\'etodos de incrementar la \performance{} de ejecuci\'on.
-La longitud de registros SIMD de las extensiones ($64$ bits para MMX, $128$ para SSE, $256$ para AVX) se ha duplicado cada seis a\~nos, con lo cual es importante para una aplicaci\'on que sus operaciones sean lo m\'as vectorizables posible~\cite{HennessyPatterson}.
-Para esto, es ideal que las operaciones sean regulares y los ciclos sean claros y con m\'inimas dependencias, de modo de hacer mejor uso de estas facilidades.
-
-\subsection{Caches}
-
-A diferencia de los procesadores, la velocidad de acceso de las memorias principales no aument\'o de una manera tan significativa, como se puede ver en la figura~\ref{fig:cpu_vs_mem}. Como consecuencia, la memoria empez\'o a convertirse en un serio cuello de botella a la velocidad de ejecuci\'on de los programas.
-
-\begin{figure}[htbp]
-    \centering
-%     \includegraphics[width=\plotwidth]{images/cpu_vs_memory_ES.pdf}
-    \caption{Comparaci\'on entre la \textit{performance} de CPU y memoria seg\'un el a\~no, la diferencia de entre ellos se denomina \textit{memory gap}. Tomado de~\cite{HennessyPatterson}.}
-    \label{fig:cpu_vs_mem}
-\end{figure}
-
-El concepto de \textit{localidad espacial} corresponde con la observaci\'on de que los datos con los que opera una secci\'on de un programa suelen estar \emph{cerca} en memoria.
-Los dise\~nos de procesadores empezaron a incluir distintos tipos de caches para sacar provecho de esta situaci\'on: memorias r\'apidas, pr\'oximas al CPU y de menor tama\~no para contener el subconjunto de los datos \emph{cercano} al recientemente usado.
-Su eficacia impuls\'o el establecimiento de una jerarqu\'ia en orden creciente de tama\~no y decreciente en velocidad, empezando por las caches L1 y siguiendo por las L2 y L3.
-
-El tama\~no de una cache L1 de CPU moderno est\'a en el orden de los $64$ KB, una cache L2 en el orden de los $2$ MB y una L3 en el orden de $6$ MB en adelante.
-
-Si bien la aparici\'on y utilizaci\'on de caches es transparente al programador en los procesadores de la l\'inea \texttt{x86-64}, los accesos irregulares a la memoria pueden producir que la cache se cargue con datos que no volver\'an a ser utilizados, causando que datos que s\'i se vayan a reutilizar sean desalojados.
-El evento en que datos no se encuentren en memoria cache y deban ser buscados en la memoria principal se denomina \textit{cache miss} y tiene un fuerte impacto en el rendimiento del programa.
-Por esto es que la regularidad de los accesos a memoria para hacer buen uso de caches resulta fundamental para obtener una buena \performance{}.
-
-\subsection{Multiprocesadores}
-
-Dentro del \'area de c\'omputo de escritorio, servidores y estaciones de trabajo basadas en la l\'inea \texttt{x86}, los procesadores MIMD (\textit{Multiple Instruction Multiple Data}) implicaron una revoluci\'on en el abordaje de los problema de alta \performance{}, pero cada procesador individual contin\'ua las l\'ineas anteriores.
-Los dise\~nos m\'as utilizados se basan en un arquitectura tipo SMP (\textit{Symmetric Multiprocessing}), en la cual todos los procesadores son iguales y comparten una misma memoria principal.
-Cada procesador tiene sus propios registros y se comunica con los dem\'as mediante memoria compartida o interrupciones.
-
-Por ejemplo, el procesador Intel Xeon \texttt{E7-8800} posee $12$ procesadores (n\'ucleos o \textit{cores}) que pueden ejecutar dos hilos simult\'aneamente cada uno, mediante el uso de la tecnolog\'ia denominada \hyperthreading{}.
-
-A diferencia de los otros m\'etodos, las mejoras posibles mediante el procesamiento paralelo en tareas son sustanciales, pero dependen del programador en gran medida.
-Un programa serial no se beneficiar\'a de m\'ultiples \textit{cores}, incluso siendo recompilado, a menos que este paralelismo se aproveche expl\'icitamente.
-Otro aspecto importante es la \textit{escalabilidad}, que consiste en que la divisi\'on de tareas mantenga a todos los procesadores disponibles ocupados, aunque crezca la cantidad de cores que intervengan.
-
-Un resultado importante a tener en cuenta es la denominada \textit{Ley de Amdahl}~\cite{Amdahl1967}, que establece una relaci\'on entre la aceleraci\'on (\speedup{}) m\'aximo alcanzable mediante un incremento en la cantidad de procesadores disponibles, el porcentaje de la aplicaci\'on que es paralelizable y el porcentaje que no lo es:
-\begin{equation}
-    \label{eq:amdahl}
-    S(n) = \frac{1}{(1 - B) + \frac{B}{n}}
-\end{equation}
-donde $S$ es el \speedup{} m\'aximo de mejora alcanzable, $B$ es la fracci\'on del algoritmo a ejecutar que se encuentra paralelizada, y $n$ la cantidad de hilos de ejecuci\'on paralelos con los que se dispone.
-
-\begin{figure}[htbp]
-    \centering
-%     \includegraphics[width=\plotwidth]{plots/cpu/amdahl.png}
-    \caption{Aceleraci\'on te\'orica m\'axima (en veces) dada por la ley de Amdahl, seg\'un la cantidad de n\'ucleos de procesamiento.}
-    \label{fig:amdahl_plot}
-\end{figure}
-
-Un ejemplo de esta ley en acci\'on es que si $95\%$ del problema fuera paralelizable entonces el l\'imite te\'orico de mejora es de $20$ veces (el programa corriendo sobre infinitos cores se ejecutar\'ia en un veinteavo del tiempo que originalmente requer\'ia).
-La figura~\ref{fig:amdahl_plot} muestra el comportamiento de la ecuaci\'on \ref{eq:amdahl}, que define la ley de Amdahl, con distintas fracciones de c\'odigo paralelo.
-
-La ley de Amdahl describe el pico te\'orico de mejora posible.
-Esta ley es una simplificaci\'on, ya que supone que todos los cores tienen trabajo perfectamente distribuido, que no deben comunicarse entre ellos por motivos de sincronizaci\'on y que no existen otras cargas adicionales introducidas por paralelizaci\'on misma.
-
-Por otro lado, la presencia de un componente com\'un (la memoria) puede representar cuellos de botella en el acceso a los datos, ya que si el \textit{bus} de memoria es saturado con pedidos, los procesadores deben detener forzosamente su ejecuci\'on hasta que los datos est\'en disponibles, elimin\'andose entonces el procesamiento paralelo.
-
-Otro punto de conflicto son las caches.
-Como los procesadores deben tener una visi\'on unificada y consistente de la memoria, a veces es necesario que estos sincronicen los valores de sus caches, especialmente ante una escritura de memoria.
-Esto se conoce como \textit{coherencia de caches} e involucra una sincronizaci\'on de alto \textit{overhead}, ya que implica coordinaci\'on entre dos o m\'as procesadores a trav\'es de un bus de memoria.
-
-Es, en este punto, que el impacto del paralelismo en el comportamiento del programa puede ser tan fuerte como sutil.
-Un fen\'omeno que ilustra esto es el de \textit{false sharing} (figura~\ref{fig:false_sharing}), que sucede cuando una variable no compartida entre \threads{} reside en la misma l\'inea de cache con una que s\'i. En ese caso, la variable es pasada de lado a lado entre cores aunque nunca fuese necesario, decrementando la escalabilidad del algoritmo y siendo dif\'icil de detectar al depender intr\'insecamente del sistema en el que se ejecuta.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\plotwidthverysmall]{images/false-sharing_ES.pdf}
-    \caption{Esquema para ilustrar el problema de \textit{false-sharing} entre caches en un esquema multicore. El \thread{} 1
-    escribe un valor en su cache y el \thread{} 2 lee un valor en su cache. Como ambos valores pertenecen a la misma l\'inea de
-    cache la escritura de 1 invalida la l\'inea de donde lee 2, haciendo que tenga que releer toda la l\'inea.}
-    \label{fig:false_sharing}
-\end{figure}
-
-Los desaf\'ios generados por la adici\'on de cores influencian fuertemente los dise\~nos de una arquitectura, no solo en procesadores est\'andar sino tambi\'en en aceleradores como las GPUs.
-
-\section{CUDA}
-
-\subsection{Introducci\'on}
-
-Una de las arquitecturas analizadas en este trabajo es la arquitectura GPU desarrollada por \nvidia{}, conocida como CUDA por las siglas en ingles de \textit{Compute Unified Device Architecture}.
+Este trabajo se centra en la arquitectura GPU desarrollada por \nvidia{}, conocida como CUDA por las siglas en ingles de \textit{Compute Unified Device Architecture}.
 CUDA surge naturalmente de la aplicaci\'on del hardware desarrollado para problemas gr\'aficos, pero aplicados al c\'omputo cient\'ifico.
 
 Las placas de v\'ideo aparecen en 1978 con la introducci\'on de Intel del chip \texttt{iSBX 275}.
@@ -201,7 +29,7 @@ Una comparativa del poder de c\'omputo te\'orico entre GPUs y CPUs puede ver en 
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\plotwidthsmaller]{images/cuda-gflops_ES.pdf}
+    \includegraphics[width=\plotwidthsmaller]{img/arq/cuda-gflops_ES.pdf}
     \caption{Picos te\'oricos de \performance{} en GFLOPS/s. Tomado de~\cite{cudaProgrammingGuide}.}
     \label{fig:cuda-gflops}
 \end{figure}
@@ -220,7 +48,7 @@ Nuevas soluciones para la portabilidad se siguen desarrollando: las bibliotecas 
 Estas herramientas permiten definir las operaciones de manera gen\'erica y dejan el trabajo pesado al compilador para que subdivida el problema de manera que el acelerador (CPU, GPU, MIC) necesite.
 Obviamente, los ajustes finos siempre quedan pendiente para el programador especializado, pero estas herramientas representan un avance fundamental al uso masivo de t\'ecnicas de paralelizaci\'on autom\'aticas, necesarias hoy d\'ia y potencialmente imprescindibles en el futuro.
 
-\subsection{Organizaci\'on de procesadores}
+\section{Organizaci\'on de procesadores}
 
 Los procesadores GPGPU dise\~nados por \nvidia{} han sido reorganizados a lo largo de su existencia m\'ultiples veces pero conservan algunas l\'ineas de dise\~no a trav\'es de su evoluci\'on.
 A continuaci\'on se describe la organizaci\'on definida en la arquitectura \texttt{Fermi} y luego analizaremos las diferencias con \texttt{Kepler}.
@@ -231,9 +59,9 @@ Las instrucciones se encadenan para aprovechar el paralelismo a nivel instrucci\
 a nivel de \thread{}, usado de manera extensa a trav\'es del hardware.
 Todas las instrucciones son ejecutadas en orden y no hay predicci\'on de saltos ni ejecuci\'on especulativa, todo se ejecuta solamente cuando se lo necesita~\cite{CudaOverview}.
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
     \centering
-    \includegraphics[width=\plotwidthverysmall]{images/fermi-sm.pdf}
+    \includegraphics[width=0.5\textwidth]{img/arq/fermi-sm.pdf}
     \caption{Diagrama de bloques del SM de GF100 Fermi. Basado en~\cite{NvidiaFermi}.}
     \label{fermi_sm}
 \end{figure}
@@ -250,9 +78,9 @@ En precisi\'on doble, esto no es posible, as\'i que hay solamente un warp corrie
 
 Un SM cuenta con una memoria com\'un de $64$ KB que se puede usar de forma autom\'atica tanto como memoria compartida com\'un a todos los \threads{} como cache L1 para todos los accesos a memoria.
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
     \centering
-    \includegraphics[width=\plotwidth]{images/fermi-gpu-block.pdf}
+    \includegraphics[width=\textwidth]{img/arq/fermi-gpu-block.pdf}
     \caption{Diagrama de bloques de GF100 Fermi. Tomado de~\cite{NvidiaFermi}.}
     \label{fermi_gpu_block}
 \end{figure}
@@ -302,7 +130,7 @@ mismo, por lo cual los c\'alculos intermedios en operaciones como FMA (\textit{F
 %que se ejecutan, e cuenta con ~\cite{NvidiaFermi} predicaci\'on en todas las instrucciones de la ISA.
 
 
-\subsection{Organizaci\'on de la memoria}
+\section{Organizaci\'on de la memoria}
 
 %La arquitectura CUDA esta enfocada a procesamiento de grandes cantidades de datos
 %de puntos flotante. El procesador GPGPU cuenta con cientos de ALU sincronizadas
@@ -351,9 +179,9 @@ La latencia de acceso a la memoria global es de cientos de ciclos~\cite{Demystif
 La memoria global tambi\'en puede ser mapeada, o \textit{pinneada}, para que exista una copia de esa reserva tanto en la memoria en la placa como en la memoria principal del procesador. El driver de CUDA va a mantener la consistencia entre ambas de manera as\'incrona, evitando la necesidad de hacer copias de memoria expl\'icitas.
 No es ilimitada la cantidad de memoria mapeada posible, por lo que es importante saber elegir qu\'e elementos se van a almacenar de esta manera.
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
     \centering
-    \includegraphics[width=250px]{images/cuda-memories_ES.pdf}
+    \includegraphics[width=250px]{img/arq/cuda-memories_ES.pdf}
     \caption{Esquema de la jerarqu\'ia de memorias en GPU, detallando de las disponibles en cada SM, la memoria compartida (SMEN), la L2 global, la
     memoria de la placa (global) y la mapeada entre el \textit{host} y la placa de video. Tomado de~\cite{farberCuda}.}
     \label{fig:cuda-memories}
@@ -386,7 +214,7 @@ Esta cache se debe definir en momento de compilaci\'on en el c\'odigo, ya que ti
 Una caracter\'istica adicional de esta cache es que como necesita resolver estos accesos no convencionales a la memoria, cuenta con una unidad propia de resoluci\'on de direcciones. Esta unidad tiene limitantes en cuanto a sus posibilidades, ya que no posee un ancho de banda suficiente como para resolver todos los accesos a memoria globales que podr\'ian surgir, por lo cual su uso debe ser criterioso.
 
 
-\subsection{Esquema de paralelismo}
+\section{Esquema de paralelismo}
 
 Al ser una arquitectura masivamente paralela desde su concepci\'on, CUDA presenta varios niveles de paralelismo, para agrupar l\'ogicamente el c\'omputo y poder dividir f\'isicamente su distribuci\'on.
 Los principales son:
@@ -416,7 +244,7 @@ CUDA no cuenta con un modelo impl\'icito de paralelismo entre distintas placas, 
 Las placas se pueden comunicar as\'incronamente entre s\'i, tanto accediendo a las memorias globales de cada una como ejecutando c\'odigo remotamente.
 En las versiones modernas del driver de CUDA, tambi\'en pueden comunicarse directamente las placas entre s\'i a trav\'es de la red, permitiendo escalar multinodo f\'acilmente en un cluster de c\'omputo~\cite{farberCuda}.
 
-\subsection{Diferencias entre Tesla, Fermi, Kepler}
+\section{Diferencias entre Tesla, Fermi, Kepler}
 
 Hasta ahora se describi\'o la arquitectura vista desde el punto de vista Fermi, que es la segunda arquitectura GPGPU dise\~nada por \nvidia{}.
 Fermi es la evoluci\'on de Tesla, construida para desacoplar a\'un m\'as los conceptos de procesamiento gr\'afico de modo de lograr un procesador m\'as escalable y de prop\'osito general.
@@ -461,7 +289,7 @@ Esto tambi\'en se ve en que Kepler tiene menos SM que Fermi o Tesla, pero son mu
 La tecnolog\'ia de fabricaci\'on ha ayudado a la disminuci\'on del consumo, un problema que acechaba a los dise\~nos Fermi, ya que sus consumos superiores a 200W por dispositivo los hac\'ian muy dif\'iciles de refrigerar incluso en clusters de HPC.
 Se puede apreciar entonces la estrategia de mercado de \nvidia{} de introducirse en las supercomputadoras de todo el mundo, donde el consumo y la refrigeraci\'on son factores limitantes (mucho m\'as a\'un que, por ejemplo, en computadoras de escritorio)~\cite{HennessyPatterson}.
 
-\subsection{CUDA, Herramientas de desarrollo, profiling, exploraci\'on}
+\section{CUDA, Herramientas de desarrollo, profiling, exploraci\'on}
 
 Para soportar una arquitectura masivamente paralela, se debe usar una ISA (\textit{Instruction Set Architecture}) dise\~nada especialmente para el problema.
 En el caso de CUDA, esta ISA se denominada PTX y debe poder soportar conceptos fundamentales del c\'omputo GPGPU: grandes cantidades de registros, operaciones en punto flotante de precisi\'on simple y doble, y FMA~(fused multiply-add).
@@ -483,7 +311,7 @@ Las herramientas de profiling no solo muestran \emph{runtime}, sino que sirven p
 
 El uso de todas estas herramientas fue vital en este trabajo para poder entender c\'omo funciona la arquitectura en detalle, c\'omo medir \performance{} y utilizaci\'on, y c\'omo los cambios realizados impactaron en las distintas generaciones de dispositivos.
 
-\subsection{Requerimientos de un problema para GPGPU}
+\section{Requerimientos de un problema para GPGPU}
 
 Dada la organizaci\'on de un procesador GPU, un problema debe exhibir al menos las siguientes caracter\'isticas para que tenga potencialidad para poder aprovechar las caracter\'isticas y recursos disponibles en esta arquitectura:
 
@@ -499,18 +327,17 @@ resultados entre s\'i.
 Si el problema requiere partes seriales, lo ideal es que se las pueda dividir en partes independientes que sean etapas de una cadena de procesos, donde cada una de \'estas exhiban caracter\'isticas fuertemente paralelas.
 Como las arquitecturas masivamente paralelas tienen como desventaja una menor eficiencia por n\'ucleo, si el problema no se puede dividir para maximizar la ocupaci\'on de todos los procesadores disponibles, va a resultar muy dif\'icil superar en eficiencia a los procesadores seriales.
 
-El \'item~\ref{req:float} habla acerca de que el m\'etodo de resoluci\'on de los problemas debe provenir de una aplicaci\'on num\'erica o de gran carga aritm\'etica.
+El ítem~\ref{req:float} habla acerca de que el m\'etodo de resoluci\'on de los problemas debe provenir de una aplicaci\'on num\'erica o de gran carga aritm\'etica.
 El set de instrucciones de las arquitecturas GPGPU est\'an fuertemente influenciados por las aplicaciones 3D que las impulsaron en un principio.
 \'Estas consisten mayormente de transformaciones de \'algebra lineal para modelar iluminaci\'on, hacer renders o mover puntos de vistas.
 Todos estos problemas son inherentemente de punto flotante, por lo cual el set de instrucciones, las ALUs internas y los registros est\'an optimizados para este caso de uso.
 
-El \'item \ref{req:matrix} menciona que los problemas que mejor se pueden tratar en esta arquitectura se pueden representar como operaciones entre arreglos o matrices de
-dos, tres o cuatro dimensiones.
+El ítem \ref{req:matrix} menciona que los problemas que mejor se pueden tratar en esta arquitectura se pueden representar como operaciones entre arreglos o matrices de dos, tres o cuatro dimensiones.
 Las estructuras de datos no secuenciales en memoria incurren en m\'ultiples accesos a memoria para recorrerlas y, en las arquitecturas GPGPU, generan un gran cuello de botella.
 Adem\'as, suelen ser dif\'iciles de paralelizar en m\'ultiples subproblemas.
 Tener como par\'ametros de entrada matrices o arreglos que se puedan partir f\'acilmente producen en overheads m\'inimos de c\'omputo y permiten aprovechar mejor las memorias caches y las herramientas de prefetching que brinda el hardware.
 
-Item \ref{req:transf} ataca uno de los puntos cr\'iticos de esta arquitectura.
+El \'item \ref{req:transf} ataca uno de los puntos cr\'iticos de esta arquitectura.
 Para poder operar con datos, se requiere que est\'en en la memoria de la placa, no en la memoria de prop\'osito general de la computadora.
 Se debe, entonces, hacer copias expl\'icitas entre las dos memorias, ya que ambas tienen espacios de direcciones independientes.
 Esta copia se realiza a trav\'es de buses que, a pesar de tener un gran \emph{throughput}, tambi\'en tienen una gran latencia (del orden de milisegundos).
@@ -520,12 +347,12 @@ Las nuevas versiones de CUDA buscan brindar nuevas herramientas para simplificar
 Estas caracter\'isticas limitan enormemente la clase de problemas que una GPGPU puede afrontar, y suelen ser una buena heur\'istica para determinar de antemano si vale la pena
 invertir el tiempo necesario para la implementaci\'on y ajuste fino.
 
-\subsection{Diferencia entre CPU y GPU - Procesadores especulativos}
+\section{Diferencia entre CPU y GPU - Procesadores especulativos}
 
 Hasta ahora, solo se consideraron a los GPUs de forma aislada, observando las prestaciones del hardware y una aproximaci\'on a la manera en que se escriben los programas para esta arquitectura.
 La esencia de GPGPU se puede apreciar mejor compar\'andola contra los motivos de la evoluci\'on de CPU, y los problemas que se fueron enfrentando los dise\~nos siguiendo la historia de los componentes que fueron apareciendo en estos.
-Esto se mostr\'o en la tabla \ref{tbl:historia-cpu} (p\'agina~\pageref{tbl:historia-cpu}), que detalla algunos de los eventos m\'as importantes que aceleraron
-la \performance{} de los CPU.
+% Esto se mostr\'o en la tabla \ref{tbl:historia-cpu} (p\'agina~\pageref{tbl:historia-cpu}), que detalla algunos de los eventos m\'as importantes que aceleraron
+% la \performance{} de los CPU.
 
 Lo clave es observar el siguiente patr\'on: \emph{``no desechar algo que pudi\'eramos necesitar pronto''}, \emph{``intentar predecir el futuro de los condicionales''}, \emph{``intentar correr m\'ultiples instrucciones a la vez porque puede llegar a bloquear en alguna de ellas''}.
 
@@ -558,210 +385,28 @@ Su meta principal es poder soportar grandes cantidades de paralelismo, mediante 
 Es decir, los dise\~nadores suponen que el c\'odigo que van a ejecutar esta bien adaptado a la arquitectura y no disponen casi de mecanismos en el procesador para dar optimizaciones post-compilaci\'on.
 Relajar esta restricci\'on permite romper con el modelo de c\'omputo de CPU y definir nuevas estrategias de paralelismo, que no siempre se adaptan bien a todos los problemas, pero para el subconjunto de los desaf\'ios que se presentan en el \'area de HPC y de v\'ideo juegos han probado ser un cambio paradigm\'atico.
 
-\subsection{Idoneidad para la tarea}
+\section{Idoneidad para la tarea}
 
-El problema de QM/MM enfrentado en este trabajo cuenta con m\'ultiples operaciones matem\'aticas de gran volumen de c\'alculos.
-En particular, las operaciones matriciales constituyen los principales cuellos de botella en esta aplicaci\'on.
-Estas operaciones se realizan para varios grupos dentro de una grilla de integraci\'on (ecuaci\'on~\ref{eq:xc}), los cuales se pueden realizar de manera independiente (y por lo tanto en paralelo).
+El método de dinámica molecular tratado en este trabajo es un problema que implica una gran cantidad de operaciones matemáticas de gran volumen de cálculos e independientes entre si.
+El cálculo de fuerzas, la suma de todas las fuerzas parciales y la actualización de coordenadas son todos cálculos que se deben resolver para todas las partículas de forma individual. 
+Esto implica una gran cantidad de cálculos pero además una gran cantidad de datos que deben ser actualizados en cada paso de la simulación.
 
-Para obtener los valores num\'ericos de densidad buscados en los puntos, se deben obtener las derivadas primeras y segundas, lo cual implica hacer m\'ultiples operaciones de multiplicaci\'on matricial.
-Este tipo de problemas est\'a estudiado fuertemente en la literatura debido a la multiplicidad de aplicaciones de diferentes campos que requieren de operaciones de \'algebra lineal.
+Dadas las caracter\'isticas de contar con un fuerte nivel de paralelismo y de ser operaciones mayormente de punto flotante, desde hace algún tiempo se 
 
-En nuestro caso, para un sistema se requieren miles de estas multiplicaciones entre matrices, algunas con matrices de m\'as de $500^2$ elementos.
-Como LIO es un proyecto de resoluci\'on num\'erica de QM/MM, los problemas enfrentados son casi, en su totalidad, operaciones de punto flotante.
-Luego, dadas las caracter\'isticas de contar con un fuerte nivel de paralelismo en los cuellos de botella y de ser operaciones mayormente de punto flotante, se determin\'o que el uso de GPGPU para este problema era promisorio, en comparaci\'on con arquitecturas de prop\'osito general con menos poder de c\'omputo. La exploraci\'on original de esta arquitectura trajo buenos resultados, por lo que se prosigui\'o su an\'alisis como un camino prometedor~\cite{TesisNitsche}.
+% se determin\'o que el uso de GPGPU para este problema era promisorio, en comparaci\'on con arquitecturas de prop\'osito general con menos poder de c\'omputo. 
+En particular, la gran cantidad de accesos necesarios para actualizar constantemente los datos asociados a cada partícula constituye un cuello de botella en este tipo de aplicaciones.
 
-\section{Xeon Phi}\label{sec:xeon-phi}
 
-\subsection{Introducci\'on}
-
-La arquitectura Xeon Phi es la culminaci\'on de un trabajo iniciado por Intel en 2004, previendo la necesidad de paralelismo masivo para aplicaciones futuras.
-Saliendo al mercado al final de 2012 y con el prop\'osito de competir en c\'omputo intensivo con \nvidia{} CUDA, ha ganado gran tracci\'on dentro
-de HPC a pesar de ser muy reciente.
-Por ejemplo, Xeon Phi ha sido implementado en la supercomputadora Tianhe-2 de la Universidad de Sun Yat-Sen en China, listada en Top 500 como la supercomputadora m\'as r\'apida del
-mundo en Junio 2013, Noviembre 2013, Junio 2014 y Noviembre 2014~\cite{Top500XeonPhiJune2013,Top500XeonPhiNov2013,Top500XeonPhiJune2014}.
-Los $16000$ nodos de esta supercomputadora contienen dos Ivy Bridge Xeon y tres coprocesadores Xeon Phi cada uno, dando un poder total de c\'omputo te\'orico de $54.9$ PetaFLOPS.
-
-\subsection{Microarquitectura general}
-
-En la concepci\'on del Xeon Phi se tuvieron en cuenta diversos factores, entre los cuales se incluye el consumo energ\'etico.
-Uno de los objetivos fue aumentar la relaci\'on de poder de c\'omputo por Watt de los procesadores Xeon de la \'epoca, manteniendo un entorno de desarrollo de prop\'osito general como el de \texttt{x86}.
-
-Si bien el consumo no se ve\'ia impactado por el set de instrucciones, s\'i se busc\'o eliminar diversos componentes del procesador, manteniendo las caracter\'isticas
-que sirvieran al tipo de aplicaci\'on a la que se estaba apuntando (programas altamente paralelos a nivel de datos y tareas)~\cite{BookXeonPhi}.
-
-La microarquitectura de este coprocesador se basa en muchos (m\'as de $50$) procesadores sim\'etricos que comparten la memoria, lo cual justifica su nombre \texttt{MIC}~(\textit{Many Integrated Core}).
-Cada procesador esta basado en el dise\~no del Intel Pentium, con una ISA~(\textit{Instruction Set Architecture}) similar a \texttt{IA-32} con soporte para direccionamiento a $64$ bits y nuevas instrucciones de vectorizaci\'on.
-
-Los procesadores tienen un \textit{clock rate} de $1.0$ GHz aproximadamente, comparativamente lentos frente a otros procesadores de Intel.
-Por ejemplo, los cores de un Intel Xeon CPU E5-2620 tienen un \textit{clock rate} de $2.10$ GHz, m\'as del doble.
-
-Cada uno de los cores permite hasta cuatro \textit{threads} simult\'aneos, con el prop\'osito de esconder la latencia de memoria y del tiempo de ejecuci\'on de las instrucciones vectoriales.
-Adicionalmente, el uso de dos \textit{pipelines} (denominados $U$ y $V$) permite que se ejecuten hasta dos instrucciones por ciclo de clock.
-Algunas de \'estas, sin embargo, solo pueden ser ejecutadas en uno de los dos: por ejemplo las instrucciones de vectorizaci\'on solo pueden correr en el pipeline $U$.
-Para realizar operaciones vectoriales se cuenta con una unidad de vectorizaci\'on (VPU, \textit{Vector Processing Unit}) con $32$ registros SIMD~(\textit{Single Instruction Multiple Data}) de $512$ bits por \thread{}, con lo cual cada una puede, te\'oricamente, realizar $16$ operaciones de punto flotante de 32 bits al mismo tiempo.
-La latencia de estas instrucciones es de cuatro ciclos de clock.
-Sin embargo, gracias a su micro arquitectura de \textit{pipeline} se puede lograr que la cantidad de instrucciones efectivamente retiradas (\textit{throughput}) te\'oricamente llegue a una instrucci\'on vectorial por ciclo, una vez cargado todo el pipeline.
-Un esquema de la arquitectura puede verse en la figura~\ref{fig:xeon_phi_core}.
-
-\begin{figure}[tb]
-   \centering
-   \includegraphics[width=\plotwidth]{images/xeon-phi-core_ES.pdf}
-   \caption{Esquema de un procesador del Xeon Phi, tomado de ~\cite{BookXeonPhi} }
-   \label{fig:xeon_phi_core}
-\end{figure}
-
-\subsection{Pipeline}
-
-\begin{figure}[tb]
-   \centering
-   \includegraphics[width=\plotwidth]{images/xeon-phi-pipeline.pdf}
-   \caption{Pipeline del procesador Xeon Phi.}
-   \label{fig:xeon_phi_pipeline}
-\end{figure}
-
-El \textit{pipeline} de instrucciones cuenta con siete etapas para las instrucciones escalares, y seis m\'as para las instrucciones vectoriales.
-
-La figura~\ref{fig:xeon_phi_pipeline} introduce las diferentes etapas de cada uno de los pipelines.
-Cada pipeline tiene las fases usuales del ciclo \textit{fetch-decode-execute}: Una instrucci\'on es le\'ida de memoria, luego decodificada en microoperaciones, y luego estas microoperaciones se realizan y se guardan los resultados.
-Cada etapa del pipeline realiza una fracci\'on de este ciclo.
-
-El \textit{instruction fetch} est\'a dividido en dos fases para elegir el \textit{thread} por hardware a ejecutar:
-\textit{Prethread picker function} (PPF) y \textit{Thread picker function} (TPF).
-En la fase PPF se mueve la instrucci\'on a uno de los cuatro buffers de \textit{prefetch} que tiene cada procesador.
-
-La etapa TPF selecciona el \thread{} a ejecutar, usando el buffer de prefetch.
-Cada buffer tiene espacio para dos instrucciones (porque puede ejecutarse una instrucci\'on por el pipeline $U$ y otra por el $V$).
-TPF funciona de manera \textit{round robin} entre los buffers de prefetch.
-Recargar este buffer con instrucciones (por ejemplo cuando hay un \textit{miss} de cache de instrucciones) toma entre cuatro y cinco ciclos.
-
-Los cuatro \threads{} de un n\'ucleo son usados secuencialmente por el pipeline, de manera de que si uno de los \threads{} esta bloqueado se elija a otro que tenga trabajo para hacer.
-Intel sugiere el uso de al menos dos \textit{\threads{}} por n\'ucleo para esconder latencias de memoria y de instrucciones vectoriales, y as\'i aumentar la \performance{}.
-
-Una vez que una instrucci\'on ha sido elegida para decodificarse, esta pasa a las etapas D0 y D1, con una velocidad de decodificaci\'on de dos instrucciones por ciclo de \textit{clock}.
-De ah\'i son enviadas a cada pipeline para ejecutarse.
-Por \'ultimo, se pasa a la etapa de \textit{writeback}~(WB), en la cual los resultados se combinan en sus respectivos registros o posiciones de memoria.
-No necesariamente cuando una instrucci\'on llega a esta fase ha terminado de ejecutarse, puesto que si la operaci\'on es vectorial reci\'en finaliza en la unidad
-vectorial cinco ciclos despu\'es.
-
-Este pipeline corto ($7$ etapas frente a las $20$ de la arquitectura Pentium 5 en la que se basa Xeon Phi) contribuye a que los fallos de predicci\'on de saltos tengan menor latencia y a que las instrucciones no vectoriales tengan poca latencia~\cite{IntelXeonPhiWhitePaper}.
-
-\subsection{Estructura de cache}
-
-Adem\'as de la unidad de vectorizaci\'on y la unidad escalar, cada procesador cuenta con $32$ KB de cache L1 y $512$ KB de cache L2 unificada para datos y c\'odigo.
-Estas caches son \textit{set associative} \textit{8-way} con una l\'inea de cache de $64$ bytes.
-La cache de datos es no bloqueante, de manera que un \textit{miss} de cache de un \thread{} en un core no produce un \textit{flush} del pipeline en los dem\'as \threads{}.
-
-\begin{figure}[tb]
-   \centering
-   \includegraphics[width=\plotwidth]{images/xeon-phi-ring.pdf}
-   \caption{Detalle de la estructura de anillo del Xeon Phi, tomado de~\cite{XeonPhiArchArticle}.}
-   \label{fig::xeon_phi_arch_ring}
-\end{figure}
-
-La cache L2 mantiene su coherencia mediante el uso de un directorio distribuido de \textit{tags}.
-Un esquema del mismo puede verse en la figura~\ref{fig::xeon_phi_arch_ring}.
-El mismo est\'a dividido en $64$ secciones y une tanto los segmentos del directorio de tags con los cores y los controladores de memoria principal, utilizando una topolog\'ia de anillo bidireccional, contando con un anillo para datos, uno para direcciones y uno para confirmaciones~(\textit{acknowledgements}).
-
-Cuando ocurre un \textit{miss} de cache L2, la direcci\'on es enviada al anillo de direcciones.
-Si la l\'inea de cache es de otro core, se env\'ia un \emph{request} de \textit{forwarding} y los datos son enviados por el anillo de datos.
-Si ning\'un core tiene esa l\'inea de cache, se env\'ia un pedido a uno de los varios controladores de memoria.
-Cada uno de estos controladores maneja un subconjunto del espacio de direcciones con el prop\'osito de reducir los cuellos de botella y aumentar el ancho de banda.
-
-Cada cache L2 esta dividida en dos bancos, con una latencia de dos ciclos para leer $64$ bytes (una l\'inea) y un ciclo para escribir $64$ bytes.
-
-%Una cosa interesante de esta arquitectura, es que la pol\'itica de cache puede modificarse mediante \textit{hints} al coprocesador. Por defecto la pol\'itica del subsistema
-%de cache es pseudo-LRU (\textit{Least Recently Used}). Antes de escribir una l\'inea de cache el procesador debe leerla a su propia
-%cache (pol\'itica conocida como RFO, \textit{Read For Ownership}). Dado que esto puede implicar que datos \'utiles de cache
-%sean removidos para dejar lugar a datos que solo se van a escribir, la arquitectura da soporte a stores \textit{streameados},
-%que pasan de largo a los caches. Tambi\'en se dispone de un \textit{prefetcher} por hardware.
-
-\subsection{Arquitectura del set de instrucciones}
-
-Si bien la base del conjunto de instrucciones de la arquitectura del Xeon Phi es la P54C de Pentium (\texttt{IA-32}), nuevas instrucciones se han incluido con el prop\'osito de mejorar la capacidad del procesador para c\'omputo de alta \performance{}.
-Estas operaciones incluyen implementaciones por \textit{hardware} de operaciones comunes en HPC: rec\'iproco de un valor, ra\'iz cuadrada, exponenciaci\'on, FMA, etc.
-Tambi\'en incluyen operaciones m\'as relacionadas con la memoria, como por ejemplo accesos no secuenciales (\textit{scatter and gather}) y stores que no pasen por cache, de manera de aprovechar mejor el ancho de banda de memoria que permite la arquitectura.
-
-El dise\~no de las instrucciones vectoriales es ternario, con dos operandos fuentes y uno destino codificados en la instrucci\'on.
-Esta configuraci\'on permite una mejora de hasta $20\%$ sobre la configuraci\'on usual binaria de otras arquitecturas SIMD (como por ejemplo \texttt{SSE} o \texttt{AVX})~\cite{BookXeonPhi}.
-
-Una expansi\'on adicional para aprovechar los registros amplios son los registros de m\'ascara~(\textit{mask registers}).
-Estos registros de $16$ bits se utilizan en varias de las instrucciones vectoriales para habilitar o deshabilitar elementos de los $16$ (como m\'aximo) que tiene un registro SIMD del Xeon Phi como parte de un c\'omputo, contribuyendo a la generalidad de las instrucciones adicionales de la arquitectura.
-Si un elemento no estuviera en el registro de m\'ascara, el valor resultado de la operaci\'on sobre los dos elementos correspondientes de los operandos fuentes es escrito en el lugar correspondiente al operando destino. Esta herramienta permite evitar usar condicionales sobre los operandos y tener que dejar de usar registros vectoriales.
-
-La adici\'on de instrucciones sobre memoria no secuencial~(\textit{scatter and gather}) resultan interesantes por su utilizaci\'on en HPC.
-Tambi\'en, con el prop\'osito de permitir un control m\'as fino de las caches, los operandos en memoria para operaciones vectoriales permiten la inclusi\'on de un atributo denominado \textit{eviction hint} para indicar que estos datos son importantes y es preferible no retirarlos de la cache para traer otros.
-
-Por \'ultimo, la unidad vectorial implementa un \textit{prefetcher} por software, tanto para los caches L1 y L2.
-Estos pueden combinarse con instrucciones de \textit{gather} y \textit{scatter} para disminuir los accesos a memoria y los \textit{stalls} en el retiro de instrucciones.
-
-La mayor parte de estas caracter\'isticas son invisibles al programador, pero son aprovechadas por los compiladores para producir c\'odigo m\'as eficiente y que utilice mejor la arquitectura.
-
-\subsection{Organizaci\'on de la memoria}
-
-La memoria principal del Xeon Phi consiste de $8$ GB de RAM GDDR5 en la placa dividida en bancos.
-Los cores y la memoria principal se comunican mediante el uso de ocho controladores, conectados con un anillo bidireccional de dos canales a $5.5$ GB/s.
-El tama\~no de una transferencia realizada es de $4$ bytes.
-Esto da un l\'imite de ancho de banda te\'orico de $352$ GB/s pero detalles de implementaci\'on de los chips limitan este valor a 200 GB/s\cite{BookXeonPhi}.
-%todo{verificar qque los n\'umeros de transferencia sean en Bytes y no en bits - como usualmente es}
-%Respuesta(jpdarago): verificado es con B: https://software.intel.com/en-us/xeon-phi-starter-kit
-
-Los controladores reciben los pedidos mediante el anillo de direcciones y los convierten en comandos para GDDR5, retornando finalmente los datos en el anillo de datos.
-Tambi\'en reorganizan los pedidos que se env\'ian de manera que se hagan en un orden conveniente a la memoria principal.
-Adem\'as, los dispositivos GDDR5 tienen el espacio de direcciones interlineado entre distintos bancos de memoria para distribuir mejor la carga de pedidos y aprovechar todo el ancho de banda.
-
-\subsection{Conexi\'on Host - Coprocesador}
-
-El Xeon Phi se conecta con su host mediante el uso de un bus PCI Express 2.0 de $16$ l\'ineas.
-Las transferencias pueden ser mediante I/O (Entrada/Salida) programada o usando DMA (\textit{Direct Memory Access}), que no requiere el procesador.
-Este bus permite la transferencia no solo al host sino a otros coprocesadores, permitiendo tener m\'ultiples placas en una misma computadora.
-La velocidad de transferencia alcanzada es de m\'as de 6 GB/s.
-La DMA ocurre a velocidad de \textit{clock} del procesador, y los ocho canales de DMA pueden transferir en paralelo.
-Cada transacci\'on de DMA es entre $64$ y $256$ bytes.
-
-Siendo que el coprocesador dispone de su propio sistema operativo basado en Linux, lo cual incluye una implementaci\'on de los protocolos necesarios para utilizar TCP/IP para la transferencia de mensajes en red, el bus PCI se puede utilizar para comunicar el sistema operativo del host con el del Xeon Phi a trav\'es de protocolos como SSH (\textit{Secure SHell}). Esto facilita la administraci\'on de la placa, la transferencia de c\'odigo y datos para ejecuci\'on, y el uso del coprocesador como nodo de c\'omputo adicional en un esquema de cluster.
-
-Como el Xeon Phi es aut\'onomo con respecto al sistema operativo del host, no cuenta con acceso a perif\'ericos y, en particular, a dispositivos de almacenamiento.
-Para esto se puede utilizar un sistema NFS~(\textit{Network File System}) con el prop\'osito de almacenar datos en el host que sean visibles desde el coprocesador.
-
-\subsection{Modos de ejecuci\'on}
-
-Existen tres m\'etodos para ejecutar una aplicaci\'on en el coprocesador.
-
-\begin{enumerate}
-    \item \textbf{Nativo}: El Xeon Phi ejecuta el programa directamente. Esto se debe a la presencia de BusyBox Linux como sistema operativo, lo cual da soporte de sistema de archivos y entorno de ejecuci\'on. El programa puede ser enviado al Xeon Phi desde el host y, por defecto, se utiliza un sistema de archivos montado sobre la propia RAM.
-\item \textbf{Offloading}: El \textit{host} puede delegar la ejecuci\'on de ciertas porciones de c\'odigo al coprocesador.
-    Esto requiere que los datos necesarios para el c\'omputo sean copiados del \textit{host} a la placa Xeon Phi, pudiendo implicar que el bus puede resultar un cuello de botella
-    importante (puesto que los datos de entrada y la salida deben ser movidos al Xeon Phi y recuperados al finalizar el c\'omputo).
-\item \textbf{Sim\'etrico}: En este modo de ejecuci\'on se piensa al Xeon Phi y su host como dos nodos en un \textit{cluster} de c\'omputo. El bus PCIe act\'ua como una red de alta velocidad.
-    Este modo es especialmente interesante si se dispone de m\'as de un Xeon Phi en un mismo host y se utiliza una interfaz de intercambio de mensajes entre ellos como por ejemplo MPI~(\textit{Message Passing Interface}).
-\end{enumerate}
-
-\subsection{Herramientas de desarrollo y profiling}
-
-El desarrollo de aplicaciones para el Xeon Phi es, por dise\~no, muy similar al desarrollo de aplicaciones para las arquitecturas de la linea Xeon de Intel.
-Esto se debe a la existencia de compiladores de C, C++ y Fortran (los lenguajes m\'as usados en el \'ambito de HPC) que pueden producir c\'odigo para el Xeon Phi, y la presencia de un sistema operativo y \textit{stack} de aplicaciones que facilitan la tarea de ejecuci\'on y mantenimiento del c\'odigo.
-A diferencia de \nvidia{} CUDA, no es necesario el uso de un lenguaje de programaci\'on diferente.
-
-Los distintos modos de uso para el Xeon Phi reciben soporte de diversas bibliotecas.
-El uso mediante \textit{offloading}, por ejemplo, es provisto mediante el uso de \texttt{pragmas} y opciones de compilaci\'on que permiten indicar qu\'e c\'omputo y c\'omo deben ser transferidos a la placa.
-Estos pragmas permiten control fino de c\'omo enviar los datos a la placa, si deben ser transmitidos de vuelta de la placa, etc.
-
-Asimismo los compiladores de Intel pueden generar c\'odigo para la arquitectura MIC, el cual se puede ejecutar directamente sobre el Xeon Phi a trav\'es del sistema operativo.
-
-Por \'ultimo, Intel tambi\'en provee soporte a OpenMP, MPI, Thread Building Blocks, etc. Bibliotecas ya existentes como la \texttt{MKL}~(\textit{Math Kernel Library}), que implementa las conocidas rutinas de \texttt{BLAS} y \texttt{LAPACK}, tambi\'en tienen su versi\'on dise\~nada para Xeon Phi e, incluso, pueden utilizarlo de manera transparente.
-
-\subsection{Idoneidad para la tarea}
-
-Siendo que el mercado principal para Xeon Phi son las aplicaciones de c\'omputo cient\'ifico, esto hace que LIO sea una posible candidata al uso de esta tecnolog\'ia.
-
-Otros aspectos que hacen interesante la adaptaci\'on de una aplicaci\'on para utilizar el Xeon Phi son la existencia de una gran cantidad de c\'odigo ya implementado en C++ y Fortran, el cual ya puede ser ejecutado en el Xeon Phi sin requerir m\'as que una recompilaci\'on de los archivos fuente, al menos seg\'un lo que indica el fabricante Intel~\cite{IntelXeonPhiWhitePaper}.
-
-El c\'odigo existente en LIO tiene una \performance{} fuertemente atada al costo en procesamiento del c\'omputo %\todo{que significa atada al computo asociado, hay computo no asociado, se pelearon?},
-siendo esta tarea altamente paralelizable (como se demostr\'o en las implementaciones ya realizadas usando CUDA) y vectorizable.
-Estas son las caracter\'isticas que requiere un problema para que tenga sentido ser considerado para Xeon Phi.
-
-Por \'ultimo, al tener aspectos muy similares, una implementaci\'on que escale tanto en t\'erminos de vectorizaci\'on como en cantidad de procesadores en el caso de una
-arquitectura como la l\'inea \texttt{x86-64} de Intel deber\'ia, al menos en teor\'ia, hacer buen uso de las prestaciones de la arquitectura MIC, con lo cual el trabajo invertido en
-optimizar el c\'odigo apuntado a CPUs multicore sigue la misma l\'inea que lo necesario para optimizar para Xeon Phi~\cite{Jeffers}.
-Esto es ventajoso ya que el esfuerzo no se duplica para desarrollar dos implementaciones diferentes.
+% 
+% El problema de QM/MM enfrentado en este trabajo cuenta con m\'ultiples operaciones matem\'aticas de gran volumen de c\'alculos.
+% En particular, las operaciones matriciales constituyen los principales cuellos de botella en esta aplicaci\'on.
+% Estas operaciones se realizan para varios grupos dentro de una grilla de integraci\'on (ecuaci\'on~\ref{eq:xc}), los cuales se pueden realizar de manera independiente (y por lo tanto en paralelo).
+% 
+% Para obtener los valores num\'ericos de densidad buscados en los puntos, se deben obtener las derivadas primeras y segundas, lo cual implica hacer m\'ultiples operaciones de multiplicaci\'on matricial.
+% Este tipo de problemas est\'a estudiado fuertemente en la literatura debido a la multiplicidad de aplicaciones de diferentes campos que requieren de operaciones de \'algebra lineal.
+% 
+% En nuestro caso, para un sistema se requieren miles de estas multiplicaciones entre matrices, algunas con matrices de m\'as de $500^2$ elementos.
+% Como LIO es un proyecto de resoluci\'on num\'erica de QM/MM, los problemas enfrentados son casi, en su totalidad, operaciones de punto flotante.
+% Luego, dadas las caracter\'isticas de contar con un fuerte nivel de paralelismo en los cuellos de botella y de ser operaciones mayormente de punto flotante, 
+% se determin\'o que el uso de GPGPU para este problema era promisorio, en comparaci\'on con arquitecturas de prop\'osito general con menos poder de c\'omputo. 
+% La exploraci\'on original de esta arquitectura trajo buenos resultados, por lo que se prosigui\'o su an\'alisis como un camino prometedor~\cite{TesisNitsche}.

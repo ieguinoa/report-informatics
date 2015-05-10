@@ -126,6 +126,9 @@ En la figura \ref{blockSize} se ve el efecto de la variación en el tamaño de l
 
 En la implementación
 
+Esto se debe a las propiedades que tienen los accesos a memoria global en GPU. Los warps se construyen agrupando threads de un mismo bloque por columnas. 
+En nuestro caso, utilizamos como standar bloques de 1024x1 y al tener columnas con 1 solo elemento, los warps se van formando con elementos consecutivos de una fila. es decir, los warps se forman
+
 \begin{figure}[htbp]
 \centering
 \begin{subfigure}[b]{\plotwidthtres}

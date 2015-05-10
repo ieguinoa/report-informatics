@@ -11,7 +11,7 @@
 % \usepackage{sub figure}
 % \usepackage{amsthm}
 % \usepackage{booktabs}
-% \usepackage{color}
+\usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{float}
 % \usepackage{pdfpages}
@@ -33,15 +33,59 @@
 
 \definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
 
-\lstset{language=C++,
-  basicstyle=\small\sffamily,
-  columns=fullflexible,
-  upquote=true,
-  extendedchars=true,
-  texcl=true,
-  mathescape=true,
-  showspaces=false
+\definecolor{Brown}{cmyk}{0,0.81,1,0.60}
+\definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
+\definecolor{CadetBlue}{cmyk}{0.62,0.57,0.23,0}
+% \definecolor{lightlightgray}{gray}{0.9}
+\colorlet{lightlightgray}{gray!5}
+% \lstset{language=C++,
+%   basicstyle=\small\sffamily,
+%   columns=fullflexible,
+%   upquote=true,
+%   extendedchars=true,
+%   texcl=true,
+%   numbers=left,   
+%   mathescape=true,
+%   showspaces=false
+% }
+
+\lstset{
+language=C,                             % Code langugage
+basicstyle=\footnotesize\ttfamily,                   % Code font, Examples: \footnotesize, \ttfamily
+keywordstyle=\color{OliveGreen},        % Keywords font ('*' = uppercase)
+commentstyle=\color{gray},              % Comments font
+numbers=left,                           % Line nums position
+numberstyle=\tiny,                      % Line-numbers fonts
+stepnumber=1,                           % Step between two line-numbers
+numbersep=5pt,                          % How far are line-numbers from code
+backgroundcolor=\color{lightlightgray}, % Choose background color
+frame=none,                             % A frame around the code
+tabsize=2,                              % Default tab size
+captionpos=b,                           % Caption-position = bottom
+breaklines=true,                        % Automatic line breaking?
+breakatwhitespace=false,                % Automatic breaks only at whitespace?
+showspaces=false,                       % Dont make spaces visible
+showtabs=false,                         % Dont make tabls visible
+columns=flexible,                       % Column format
+morekeywords={__global__, __device__},  % CUDA specific keywords
 }
+
+% 
+% \lstdefinestyle{customc}{
+%   belowcaptionskip=1\baselineskip,
+%   breaklines=true,
+%   frame=L,
+%   xleftmargin=\parindent,
+%   language=C,
+%   showstringspaces=false,
+%   basicstyle=\footnotesize\ttfamily,
+%   columns=fixed,
+%   numbers=left,
+%   keywordstyle=\bfseries\color{green!40!black},
+%   commentstyle=\itshape\color{purple!40!black},
+%   identifierstyle=\color{blue},
+%   stringstyle=\color{orange},
+% }
 
 \hypersetup{
     colorlinks,
@@ -170,7 +214,9 @@
 \appendix
 %% Cap'itulos incluidos despues del comando \appendix aparecen como ap'endices
 %% de la tesis.
+\include{sistemas}
 \include{equipamiento}
+
 %\include{apendiceB}
 %\include{apendiceC}
 

@@ -23,67 +23,68 @@ Si bien es un factor importante, este ya ha sido estudiado usando otras implemen
 dado que es el software con el cual evaluaremos luego la calidad numérica lograda, utilizaremos, entonces, un esquema similar de precisión para nuestra implementación.
 
 
-Las arquitecturas de placas de v ́ıdeo est ́an dise ̃
-nadas en torno al poder de c ́omputo. Las
-decisiones tomadas por los dise ̃
-nadores de las GPUs se concentran alrededor de paralelismo
-a lo ancho, poniendo un gran  ́enfasis en la cantidad de n ́
-ucleos. En consecuencia, se dispone
-de menor cantidad de espacio f ́ısico para m ́as memoria.
-Esta decisi ́
-on implica que la amplia mayor ́ıa de la memoria de la GPU se encuentra
-localizada afuera del chip. Por lo tanto, esconder la gran latencia que tiene al acceder a la
-misma es parte importante del paradigma de programaci ́on para GPGPUs.
+\section{Esquema general de la implementación sobre GPU}
+El esquema general utilizado para implementar el algoritmo sobre GPU es el explicado en \cite{friedrichs2009accelerating}, siguiendo el esquema explicado en detalle en el capítulo previo. 
+Sin embargo, en el trabajo mencionado, el potencial incluye componentes de interacción de unión entre partículas, por lo que los calculos requeridos son algo distintos. 
+En esta sección se explica, entonces, cuales son las variantes que utilizamos para realizar cada paso.
 
+Para el primer paso de calculo de distancias entre partículas, la implementación es bastante directa. La granularidad usada es de 1 thread por cada par de partículas y se usaron tamaños de bloques fijos de 1024x1.
+% Usando este esquema, con cualquier placa actual es posible lanzar en paralelo el calculo de todas las distancias para sistemas de hasta Xxx partículas. 
+Teniendo en cuenta que el cálculo a realizar es  simple, no presenta posibilidades de divergencia es importante centrar la atención en el esquema de acceso a memoria para logar un uso óptimo de los recursos.
+
+Las arquitecturas de placas de v\'ideo est\'an dise\~nadas en torno al poder de c\'omputo.
+Las decisiones tomadas por los dise\~nadores de las GPUs se concentran alrededor de paralelismo a lo ancho, poniendo un gran \'enfasis en la cantidad de n\'ucleos.
+En consecuencia, se dispone de menor cantidad de espacio f\'isico para m\'as memoria.
+
+Esta decisi\'on implica que la amplia mayor\'ia de la memoria de la GPU se encuentra localizada afuera del chip.
+Por lo tanto, esconder la gran latencia que tiene al acceder a la misma es parte importante del paradigma de programaci\'on para GPGPUs.
+
+Es cr\'itico, adem\'as, que los accesos a memoria sean a direcciones m\'ultiplos de $16$, esto se conoce como \textit{accesos alineados}.
+El t\'ermino \emph{coalescencia de memoria} se define en GPU como la organizaci\'on de los accesos a memoria de manera secuencial, ordenada y predecible.
+Cuando la GPU accede a memoria de manera alineada, puede traer $16$, $32$ o $64$ elementos de 32 bits en una sola lectura~\cite{cudaProgrammingGuide}, suficiente para cada uno de los \threads{} del warp.
+Si, en cambio, no se respeta la alineaci\'on de la memoria o los \threads{} tienen un patr\'on de pedidos impredecible, entonces se deber\'an serializar los accesos y separar en m\'ultiples transacciones a memoria global para satisfacerlos.
+Este problema se agrava si se deben hacer accesos frecuentes por cientos de \threads{}, como es el caso de los bloques con gran nivel de paralelismo expl\'icito.
+% Esta propiedad es muy importante para la implementación del método de dinámica molecular, ya que 
+Un análisis de esto se muestra en el próximo capítulo, cuando se evalúan los efectos del tamaño de bloque.
+
+
+El paso correspondiente al calculo de las fuerzas entre particulas es quizas el mas complicado de implementar, y el número de implementaciones existentes en la literatura es muy diversa, 
+principalmente debido a que los calculos a realizar dependen de las interacciones que se estan utilizando y estás dan lugar a una gran variedad de posibles optimizaciones \cite{friedrichs2009accelerating}\cite{gotz2012routine}\cite{salomon2013routine}.
+
+
+En el caso de interacciones \textit{non-bond}, como las que se analizan en nuestro trabajo, la principal optimizacion deriva de la propiedad de simetría que presenta el potencial de interaccion.
+Es decir, la interacción entre una partícula a y b tiene el mismo modulo pero signo opuesto que el valor entre b y a. 
+Esto tiene una implicación relevante en el calculo que debe realizarse ya que solo deberán calcularse interacciones para la mitad de las combinaciones entre partículas, reduciendo así considerablemente el número de cálculos.
+
+Para hacer uso de la propiedad de simetria, entonces, el calculo de la fuerza resultante de la interaccion solo se realiza sobre $\frac{N^2}{2}$ pares, y el resto se deriva negando este valor.
+
+% Para descomponer las componentes el cálculo se realiza usando un thread por cada par de partículas.
+
+Para hacer la suma de la fuerza resultante, se utiliza un esquema de reduccion \cite{cudaReductions}:
+Los threads ponen su contribucion al computo realizado en su posicion correspondiente de la memoria compartida, evitando tener que realizar operaciones de sincronización entre ellos. Los valores parciales se reducen,
+luego, con un algoritmo paralelo en arbol: cada thread suma el valor de la posición x con el valor en 2x si este existiera. Esto se repite por la mitad de los threads, hasta que todos los valores hayan sido sumados 
+y el thread 0 del bloque escribe el resultado a la memoria global.
+Un esquema simplificado de esto puede verse en la figura \ref{reduction}
 \begin{figure}[htbp]
    \centering
    \includegraphics[width=\plotwidth]{img/md/reductions.png}
    \caption{}
-   \label{fig:dbs-runtime}
+   \label{reduction}
 \end{figure}
 
-
-\section{Esquema general de la implementación sobre GPU}
-El esquema general utilizado para implementar el algoritmo sobre GPU es el explicado en \cite{friedrichs2009accelerating}. Sin embargo, en el trabajo mencionado, el potencial incluye componentes de interacción de unión entre partículas, 
-por lo que los calculos requeridos son algo distintos. En esta sección se explica, entonces, cuales son las variantes que utilizamos para realizar cada paso.
-
-Para el primer paso de calculo de distancias entre partículas, la implementación es bastante directa. La granularidad usada es de 1 thread por cada par de partículas y se usaron tamaños de bloques fijos dd 1024x1.
-Usando este esquema, con cualquier placa actual es posible lanzar en paralelo el calculo de todas las distancias para sistemas de hasta Xxx partículas. Teniendo en cuenta  que  el cálculo a realizar es muy simple, no presenta posibilidades de divergencia y dado el esquema de acceso a memoria, el kernel hace un uso óptimo de los recursos.
-
-El paso correspondiente al calculo de las fuerzas entre particulas es quizas el mas complicado de implementar, y el numero de implementaciones existentes en la literatura es muy diversa, principalmente debido a que los calculos a realizar dependen de las interacciones que se estan utilizando y estás dan lugar a una gran variedad de posibles optimizaciones
-\cite{friedrichs2009accelerating}\cite{gotz2012routine}\cite{salomon2013routine}
-(citar los papers de amber y el de Accelerating Molecular Dynamic Simulation on Graphics Processing Units)
+Esta tecnica de reduccion es sumamente conocida para arquitecturas distribuidas, generando la respuesta en O(log 2 n) pasos. La literatura de CUDA sugiere tecnicas adicionales para minimizar aun mas el tiempo empleado en esta reducción. 
+Sin embargo, al realizarse a lo sumo seis operaciones, no es necesario aplicarlas en nuestro caso particular.
 
 
-% El calculo del potencial de interacción tiene una particularidad y es que este valor(y por lo tanto su derivada) es simétrico??? Es decir, la interacción entre una partícula a y b tiene el mismo modulo pero signo opuesto q el valor entre b y a. Esto tiene una implicación relevante en el calculo q debe realizarse ya que solo deberán calcularse interacciones para la mitad de los pares de partículas...reduciendo así considerablemente el número de cálculos.
-En el caso de interacciones non-bond, como las que se analizan en nuestro trabajo, la principal optimizacion deriva de la propiedad simetrica que presenta el potencial de interaccion, y por lo tanto la fuerza resultante, son simetricas
+Los pasos siguientes son bastante directos. La aceleración se calcula en base a la fuerza resultante usando un thread por cada partícula.
+La actualización de coordenadas también se realiza usando un thread para cada partícula. El esquema de threads utilizado asegura acceso coalescente a las matrices de datos asociadas al sistema.
 
-En nuestra implementación, esta parte es central ya que da lugar luego a diversas modificaciones. El presente trabajo, entonces, intenta seguir una implementacion estandar de forma tal que las modificaciones evaluadas tengan un carácter mas general y no dependan de ninguna
-
-Para hacer uso de la propiedad de simetria, entonces, el calculo de la fuerza resultante de la interaccion solo se realiza sobre N2/2 pares, y el resto se deriva negando este valor.
+Para el caso de condiciones periódicas, sin embargo, hay un paso extra que se debe considerar
 
 
-Para descomponer las componentes el cálculo se realiza usando un thread por cada par de partículas.
-Y para hacer la suma de la fuerza resultante, se utiliza un esquema de reduccion \cite{cudaReductions}:
-Los threads ponen su contribucion al computo realizado en su posicion correspondiente de la memoria compartida, evitando tener que realizar operaciones de sincronizaci ́on entre ellos. Los valores parciales se reducen,
-luego, con un algoritmo paralelo en  ́arbol: cada thread suma el valor de la posici ́on x con el valor en 2 · x si este existiera. Esto se repite por la mitad de los threads, hasta que todos los valores hayan sido sumados 
-y el thread 0 del bloque escribe el resultado a la memoria global.
-Esta tecnica de reducci on es sumamente conocida para arquitecturas distribuidas, generando la respuesta en O(log 2 n) pasos. La literatura de CUDA [38] sugiere t ́ecnicas adicionales para minimizar aun mas el tiempo empleado en esta r
-educci ́on. Sin embargo, al realizarse a lo sumo seis operaciones, no es necesario aplicarlas en nuestro caso particular.
-
-
-Los pasos siguientes son, bastante directos.
-La aceleración se calcula en base a la fuerza resultante usando un thread por cada partícula.
-La actualización de coordenadas también se realiza usando un thread para cada partícula. El esquema de threads utilizado asegura acceso coalescente a 
-
-
-
-
-\section{Implementación usando tabla de derivadas}
-\section{Implementacion sobre CPU}
+\section{Implementación usando tabla de potenciales}
 % \subsubsection{Tabla sobre memoria global}
 % \subsubsection{Tabla sobre memoria de textura}
-Con el fin de poder hacer una comparación real de los aspectos asociados a la performance se desarrolló además una implementación que realiza el cálculo de fuerzas(o solo el cálculo de derivadas???) sobre CPU.
 
 Esta implementación solo modifica la forma en que se calcula la derivada del potencial, la cual se ejecuta ahora sobre la CPU, por lo tanto los datos de distancia y potenciales deben estar accesibles en memoria para que este cálculo pueda ser realizado.
 
@@ -97,8 +98,63 @@ la memoria de textura provee el ajuste automatico en los limites de la tabla. Ad
 
 
 
+\begin{figure}[htbp]
+    \begin{lstlisting}
+    __global__ void potentialsMode_texture_kernel(double* dEr, double* r, double cut, int* item_to_type, int num_samples_r, int num_types, int width, int height)
+{
+      /* Elemento de la matriz a calcular */
+      /** particula 2 **/
+      unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;	
+      /** particula 1 **/
+      unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;	
+      float erre= r[y*width+x]; 
+      float result;
+      /* Dentro del bloque correspondiente */
+      if(x >= width || y >= height) {return;}
+      if(x == y || erre  >= cut) 
+	{
+	result=0;
+	}
+	else{
+       /* valor del Potencial para la distancia r,
+       *  para el tipo de partícula correspondiente */
+      
+      /** type of particles **/
+      //this one decides which subMatrix to use
+      float t_o_p_1 = (float) item_to_type[y] * num_types;	
+      
+      //this one decides which row on these
+      float t_o_p_2 = (float) item_to_type[x] + 0.5 + t_o_p_1;	
+      
+      /** Convierto r a subíndice de matriz de lennard-jones **/
+      /** r = (MAX-MIN) * X / N  + MIN    **/
+      /** x = (r-MIN) * N / (MAX-MIN)     **/
+      
+      // convert  r  to   x
+      float index_x = (float)((double) (erre - MIn) * (double) num_samples_r / DIST + 0.5);	
+	
+      double E_r_up = (double) tex2D( texRef, index_x + DIF_FINITAS_DELTA, t_o_p_2 );
+      double E_r_dwn = (double) tex2D( texRef, index_x - DIF_FINITAS_DELTA, t_o_p_2 );
+      
+      double r_dif = DIST * 2 * (DIF_FINITAS_DELTA) / num_samples_r;
+      result = (E_r_up - E_r_dwn) / (r_dif); 
+      }
+      //WRITE RESULTS
+      dEr[y*width+x]= result;
+         
+}
+    \end{lstlisting}
+    \caption{Kernel utilizado para el cálculo de fuerzas a partir de una tabla de potenciales en textura}
+    \label{code:sum-matrix-bench-code}
+\end{figure}
+
+
+
 \section{Implementación usando tabla de derivadas}
 % \subsubsection{Tabla sobre memoria global}
 % \subsubsection{Tabla sobre memoria de textura}
 
+\section{Implementacion sobre CPU}
+
+Con el fin de poder hacer una comparación real de los aspectos asociados a la performance se desarrolló además una implementación que realiza el cálculo de fuerzas sobre CPU.
 

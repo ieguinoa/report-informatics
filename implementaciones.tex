@@ -10,16 +10,18 @@ Aca describo el kernel y aspectos relevantes de las versiones implementadas:
 
 En este capítulo se describen los kernels implementados, incluyendo las variantes evaluadas. Además, se detalla cómo se tuvieron en cuenta los aspectos de performance expuestos en el capítulo 2.
 
-Si bien las modificaciones están centradas puntualmente en la etapa de cálculo de las fuerzas individuales, y la evaluación sobre la performance se realizará teniendo en cuenta este paso, 
-se describen aspectos de implementación de todo el método ya que son relevantes para evaluar luego la correctitud numérica de las variables químicas, la cual depdende de la iteración global del método.
-Se describen, entonces, algunas optimizaciones que , si bien no son , formaron parte de la investigación realizada para este trabajo.
+Si bien las modificaciones están centradas puntualmente en la etapa de cálculo de las fuerzas individuales (y la evaluación sobre la performance se realizará teniendo en cuenta este paso),
+se describen aspectos de implementación de todo el método ya que son relevantes para evaluar luego la correctitud numérica de las variables químicas, la cual depdende de todos los pasos en la iteración global.
+Se describen, entonces, algunas optimizaciones que no son determinantes de la performance resultante pero igualmente formaron parte de la investigación realizada para este trabajo.
 
 
 \section{Consideraciones previas}
 
-Una de las primeras decisiones que se deben considerar es la precisión que se utilizará para realizar los cálculos y acumular resultados. Dadas las caracterísiticas de la arquitectura GPU, esta decisión afectará la eficiencia de cualquier cálculo a realizar y por lo tanto es uno de los factores mas importantes a analizar.
-
-Si bien es un factor importante, este ya ha sido estudiado usando otras implementaciones del método.  En particular, se ha estudiado usando Amber\cite{le2013spfp}. El trabajo mencionado analiza un esquema mixto que implica almacenar los calculos de fuerzas entre particulas utilizando precisión simple y acumular en variables de precisión doble la suma de todos los aportes que componen la fuerza sobre una partícula. Asumiendo los resultados en performance y correctitud encontrados en Amber y,
+Una de las primeras decisiones que se deben considerar es la precisión que se utilizará para realizar los cálculos y acumular resultados. 
+Dadas las caracterísiticas de la arquitectura GPU, esta decisión afectará la eficiencia de cualquier cálculo a realizar y por lo tanto es uno de los factores mas importantes a analizar.
+Debido a esto, estas propiedades ya han sido estudiadas usando distintas implementaciones del método. En particular, se ha estudiado usando Amber\cite{le2013spfp}. 
+El trabajo mencionado analiza un esquema mixto que implica almacenar los calculos de fuerzas entre particulas utilizando precisión simple y acumular en variables de precisión doble
+la suma de todos los aportes que componen la fuerza sobre una partícula. Asumiendo los resultados en performance y correctitud encontrados en Amber y,
 dado que es el software con el cual evaluaremos luego la calidad numérica lograda, utilizaremos, entonces, un esquema similar de precisión para nuestra implementación.
 
 
@@ -86,7 +88,6 @@ Para el caso de condiciones periódicas, sin embargo, hay un paso extra que se d
 % \subsubsection{Tabla sobre memoria global}
 % \subsubsection{Tabla sobre memoria de textura}
 
-Esta implementación solo modifica la forma en que se calcula la derivada del potencial, la cual se ejecuta ahora sobre la CPU, por lo tanto los datos de distancia y potenciales deben estar accesibles en memoria para que este cálculo pueda ser realizado.
 
 Se implementaron variantes equivalentes para el calculo usando la ecuación derivada, usando una tabla de valores potenciales, y usando una tabla de valores de derivada.
 Deberán tenerse en cuenta a la hora de usar esta implementación todos los aspectos asociados a la transferencia de datos entre la memoria del dispositivo y la memoria del host. En el próximo capitulo se verá como esta implementación es utilizada para demostrar las ventajas q aporta la arquitectura GPU.
@@ -159,6 +160,7 @@ __global__ void potentialsMode_texture_kernel
 % \subsubsection{Tabla sobre memoria de textura}
 
 
+
 \begin{figure}[htbp]
     \begin{lstlisting}
 __global__ void direct_derivativeMode_E_r (
@@ -215,3 +217,4 @@ __global__ void direct_derivativeMode_E_r (
 
 Con el fin de poder hacer una comparación real de los aspectos asociados a la performance se desarrolló además una implementación que realiza el cálculo de fuerzas sobre CPU.
 
+Esta implementación solo modifica la forma en que se calcula la derivada del potencial, la cual se ejecuta ahora sobre la CPU, por lo tanto los datos de distancia y potenciales deben estar accesibles en memoria para que este cálculo pueda ser realizado.

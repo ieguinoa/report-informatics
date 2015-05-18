@@ -1,16 +1,18 @@
 \chapter{Resultados}
-\section{Propiedades de los sistemas de evaluación}
+\section{Consideraciones previas}
 % ACA DEBERIA DECIR LAS CARACTERISTICAS DE LOS SISTEMAS Y CUALQUIER COSA DE LA EJECUCION QUE TENGA ALGO QUE VER CON EL SISTEMA QUE SE ESTÁ UTILIZANDO
 
 Los tiempos de ejecuci\'on se midieron utilizando el reloj est\'andar de alta precisi\'on para Linux (\texttt{clock\_gettime}~\cite{LinuxDocumentation}), 
 
+Varios aspectos de los sistemas de prueba son relevantes para hacer una correcto análisis de los resultados. En el apéndice \ref{sistemas} se detalla la forma en que los sistemas de partículas fueron construidos y las propiedades de estos.
 
-Claramente, el factor mas importante del sistema que afectará a la ejecución es el número total de partículas de éste. Los tamaños de sistemas utilizados fueron tres, y para 
-
-Además del tamaño, hay otros factores del sistema que se tuvieron en cuenta para realizar una correcta evaluación y que deben ser 
-Para tener en cuenta cualquier posible diferencia relacionada a los tipos de partículas, la asignación de tipos se hizo de forma aleatoria entre un total de 37 tipos existentes.
-
-Además de las posiciones y tipos de particulas, es posible especificar velocidades iniciales....
+% 
+% Claramente, el factor mas importante del sistema que afectará a la ejecución es el número total de partículas de éste. Los tamaños de sistemas utilizados fueron tres, y para 
+% 
+% Además del tamaño, hay otros factores del sistema que se tuvieron en cuenta para realizar una correcta evaluación y que deben ser 
+% Para tener en cuenta cualquier posible diferencia relacionada a los tipos de partículas, la asignación de tipos se hizo de forma aleatoria entre un total de 37 tipos existentes.
+% 
+% Además de las posiciones y tipos de particulas, es posible especificar velocidades iniciales....
 
 En cuanto a los parámetros de ejecución se debe tener en cuenta que a medida que la simulación avanza, las partículas 
 se deben tener en cuenta, entonces, dos aspectos que asocian la ejecucion con los parametros del sistema:
@@ -26,10 +28,10 @@ Todos estos factores deben ser tenidos en cuenta a la hora de evaluar las implem
 En las próximas secciones, cuando sea relevante, se especificarán las propiedades del sistema y de la ejecucion que se utilizaron.
 
 
-\section{Performance}
+% \section{Performance}
+\section{Evaluación de las implementaciones}
 Los sistemas detallados en la sección anterior se utilizaron para evaluar las distintas implementaciones en cuanto a performance..
 
-\subsection{Evaluación de las implementaciones}
 
 % PRIMER GRAFICO DEBERÍA IR EL TIEMPO DE EJECUCION DE LAS 3 IMPLEMENTACIONES PARA LOS DISTINTOS SISTEMAS (PERIODICO)
 % GRAFICO DE BARRA CON LAS 3 IMPLEMENTACIONES AGRUPADAS EN 3(O 2) SISTEMAS DE PRUEBAS **PERIODICO -  CANTIDAD FIJA DE PASOS*
@@ -58,7 +60,7 @@ En la figura \ref{time-compare-cpu}
  \label{time-compare-cpu}
 \end{figure}
 
-\subsubsection{Efectos de la periodicidad}
+\subsection{Efectos de la periodicidad}
 
 
 % DESPUES EXPLICAR COMO AFECTA LA (NO)PERIODICIAD A LA EJECUCION Y MOSTRA EL GRAFICO DE TIEMPO DE EJECUCION DE LAS 3 IMPLEMENTACIONES PARA LOS DISTINTOS SISTEMAS (***NO** PERIODICO)
@@ -77,19 +79,19 @@ En el caso de condiciones periódicas(usando el cutoff máximo), todas las part�
 \begin{subfigure}[b]{\plotwidthtres}
    \includegraphics[width=\textwidth]{plots/NOperiodic/comparacion-NOperiodico.png}
    \caption{Condiciones no periódicas}
-   \label{compar-1iter}
+   \label{compar-1iter-promedio}
  \end{subfigure}
 \begin{subfigure}[b]{\plotwidthtres}
    \includegraphics[width=\textwidth]{plots/NOperiodic/comparacion-periodico.png}
    \caption{Condiciones periódicas}
-   \label{compar-niter}
+   \label{compar-niter-promedio}
  \end{subfigure}
  \caption{Comparaci\'on de tiempos de ejecuci\'on promedio por iteración para condiciones periódicas y no periódicas}
  \label{periodic-effects}
 \end{figure}
 
 
-\subsubsection{Efectos del cutoff}
+\subsection{Efectos del cutoff}
 Se realiza una evaluación del efecto del cutoff en el tiempo de ejecución
 % GRAFICO SCATTER DE LAS 3 IMPLEMENTACIONES vs AUMENTO EN EL CUTOFF 
 En la figura \ref{time-vs-cut} se ve el efecto del cutoff sobre el tiempo de ejecución del cálculo de fuerzas de interacción.
@@ -255,6 +257,7 @@ Implementación 3	 & 3.00E-05	 		& 3.00E-04 			& 		 \\ \bottomrule
 
 \subsubsection{Efectos del limite superior de la tabla}
 
+En la figura \ref{time-vs-cut-error-superior} se ven los errores al aumentar el valor absoluto en el indice superior de la tabla, manteniendo fijo el número total de elementos de la tabla 
 \begin{figure}[htbp]
 \centering
 \begin{subfigure}[b]{\plotwidthtres}
@@ -268,7 +271,7 @@ Implementación 3	 & 3.00E-05	 		& 3.00E-04 			& 		 \\ \bottomrule
    \label{compar-niter}
  \end{subfigure}
  \caption{Comparacion de efectos en el error del calculo de fuerzas para sistemas de distinto tamaño}
- \label{time-vs-cut}
+ \label{time-vs-cut-error-superior}
 \end{figure}
 
 

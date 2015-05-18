@@ -130,7 +130,7 @@ mismo, por lo cual los c\'alculos intermedios en operaciones como FMA (\textit{F
 %que se ejecutan, e cuenta con ~\cite{NvidiaFermi} predicaci\'on en todas las instrucciones de la ISA.
 
 
-\section{Organizaci\'on de la memoria}
+\section{Organizaci\'on de la memoria} \label{esquemaMemoria}
 
 %La arquitectura CUDA esta enfocada a procesamiento de grandes cantidades de datos
 %de puntos flotante. El procesador GPGPU cuenta con cientos de ALU sincronizadas
@@ -208,10 +208,13 @@ Cuando un \thread{} lee esta memoria, se retransmite a los dem\'as \threads{} de
 Si, en cambio, los \threads{} leen distintas direcciones, los accesos se serializan.
 Cuando hay un \emph{miss} de esta memoria, la lectura tiene el costo de una lectura de memoria global.
 
-La cache de textura es una cache sobre la memoria global que presenta no solo localidad espacial, como la mayor\'ia de las caches de procesadores normales (es decir, la cache contiene una porci\'on consecutiva de la memoria principal), sino que se le puede agregar el concepto de dimensiones, para poder modelar datos en m\'as de una dimensi\'on.
+La cache de textura es una cache sobre la memoria global que presenta no solo localidad espacial, como la mayor\'ia de las caches de procesadores normales (es decir, la cache contiene una porci\'on consecutiva de la memoria principal),
+sino que se le puede agregar el concepto de dimensiones, para poder modelar datos en m\'as de una dimensi\'on.
 Esto se adapta de muy bien a los problemas de gr\'aficos en 2D y 3D, y es una herramienta clave a la hora de minimizar los accesos a matrices no solo por filas sino por columnas.
-Esta cache se debe definir en momento de compilaci\'on en el c\'odigo, ya que tiene l\'imites espaciales (necesarios para poder definir \'areas de memoria sobre la cual operar) y a su vez se debe acceder a los datos subyacentes a trav\'es de funciones espec\'ificas.
-Una caracter\'istica adicional de esta cache es que como necesita resolver estos accesos no convencionales a la memoria, cuenta con una unidad propia de resoluci\'on de direcciones. Esta unidad tiene limitantes en cuanto a sus posibilidades, ya que no posee un ancho de banda suficiente como para resolver todos los accesos a memoria globales que podr\'ian surgir, por lo cual su uso debe ser criterioso.
+Esta cache se debe definir en momento de compilaci\'on en el c\'odigo, ya que tiene l\'imites espaciales (necesarios para poder definir \'areas de memoria sobre la cual operar) 
+y a su vez se debe acceder a los datos subyacentes a trav\'es de funciones espec\'ificas.
+Una caracter\'istica adicional de esta cache es que como necesita resolver estos accesos no convencionales a la memoria, cuenta con una unidad propia de resoluci\'on de direcciones. 
+% Esta unidad tiene limitantes en cuanto a sus posibilidades, ya que no posee un ancho de banda suficiente como para resolver todos los accesos a memoria globales que podr\'ian surgir, por lo cual su uso debe ser criterioso.
 
 
 \section{Esquema de paralelismo}
@@ -391,6 +394,8 @@ El método de dinámica molecular tratado en este trabajo es un problema que imp
 El cálculo de fuerzas, la suma de todas las fuerzas parciales y la actualización de coordenadas son todos cálculos que se deben resolver para todas las partículas de forma individual. 
 Esto implica una gran cantidad de cálculos pero además una gran cantidad de datos que deben ser actualizados en cada paso de la simulación.
 En particular, la gran cantidad de accesos necesarios para actualizar constantemente los datos asociados a cada partícula constituye un cuello de botella en este tipo de aplicaciones.
+
+Para el esquema de modificaciones que se va a plantear en este trabajo, es de gran utilidad el 
 
 Dadas las caracter\'isticas de contar con un fuerte nivel de paralelismo y de ser operaciones mayormente de punto flotante, hace ya algún tiempo 
 las arquitecturas GPU se convirtieron en estándar para la aplicación de métodos de DM, tal como se vió en el capítulo 1.

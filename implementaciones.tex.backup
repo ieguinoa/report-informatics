@@ -53,18 +53,25 @@ escribir una enorme cantidad de datos en memoria. La organización de los acceso
 
 \subsubsection{Propiedades avanzadas de la cache de textura} \label{texturaDetallado}
 
-El centro de las modificaciones planteadas está en el uso de valores tabulados, por lo tanto, independientemente del tamaño y las propiedades de la tabla, teniendo en cuenta que 
-Para implementar este mecanismo hay varias propiedades del sistema de memoria que se puede usar y que se deben analizar, principalmente asociadas a la cache de textura.
-En primer lugar, la localidad y el concepto de dimensiones que introduce este espacio de memoria lo hace óptimo para accesos a estructuras de datos, principalmente en 2 dimensiones.
+El centro de las modificaciones planteadas está en el uso de valores tabulados, por lo tanto, independientemente del tamaño y las propiedades de la tabla, teniendo en cuenta que se accederá una gran cantidad de veces a estos datos, 
+es importante que este acceso sea ejecutado de manera sumamente eficiente.
+Para implementar este mecanismo hay varias propiedades del sistema de memoria que se puede usar y que se deben analizar, principalmente asociadas a la cache de textura. 
 
-En el capítulo 1 (sección \ref{esquemaMemoria}) se menciono, además, que los accesos a memoria global a través de la cache de textura se resuelven mediante una unidad propia de resoluci\'on de direcciones. 
-Esto también será relevante en nuestra implementación ya que evita tener que realizar cálculos extra para resolver los accesos a la tabla.
-Asociado a esto, hay algunas propiedades más que no se mencionaron previamente, pero que son de gran importancia para este trabajo(y para cualquier implementación que requiera del uso de valores tabulados). 
-Principalmente, los diferentes modos de direccionamiento que permite el acceso a los datos, y los filtros que se pueden aplicar sobre éstos al leerlos son relevantes.
+Además del incremento en la eficiencia que provee tener un esquema de memoria cache, la localidad y el concepto de dimensiones que introduce la textura la hacen óptima para accesos a estructuras de datos, 
+en particular organizados en 2 dimensiones. En el capítulo 2(sección \ref{esquemaMemoria}) se mencionó, además, que los accesos a memoria global a través de la cache de textura se resuelven mediante una unidad propia de resoluci\'on de direcciones. 
+Esto también será relevante en nuestra implementación, ya que evita tener que realizar cálculos extra para resolver los accesos a la tabla.
 
+Por otro lado, hay algunas propiedades que no se mencionaron previamente pero que son de gran importancia para este trabajo(y para cualquier implementación que requiera del uso de valores tabulados). 
+Las mas relevantes son los diferentes modos de direccionamiento que permite la textura en el acceso a los datos, y los filtros que se pueden aplicar sobre éstos al leerlos. 
+
+Los modos de direccionamiento permiten definir como se manejan los accesos a memoria que caen fuera del rango de entradas de la tabla.
+En nuestro algoritmo, las tablas contendrán siempre valores resultantes de ecuaciones continuas, por lo que el esquema más natural será asignar el mayor o el menor valor de la tabla cuando se exceda el limite superior o no se alcance el limite inferior, respectivamente. 
+Este modo de direccionamiento se conoce como \textit{clamp}.
+% Además de este modo de direccionamiento, conocido como clamp, existen otras formas de 
 % DIRECCIONAMIENTO *****************
 % The addressing mode. It is valid to call the device functions of Section B.8 with coordinates that are out of range. 
 % The addressing mode defines what happens in that case. The default addressing mode is to clamp the coordinates to the valid range: [0, N) for non-normalized coordinates and [0.0, 1.0) for normalized coordinates.
+% NOSOTROS USAMOS ESTE MODO CLAMP
 % If the border mode is specified instead, texture fetches with out-of-range texture coordinates return zero. For normalized coordinates, the warp mode and the mirror mode are also available. 
 % When using the wrap mode, each coordinate x is converted to frac(x)=x floor(x) where floor(x) is the largest integer not greater than x. 
 % When using the mirror mode, each coordinate x is converted to frac(x) if floor(x) is even and 1-frac(x) if floor(x) is odd. 
@@ -77,9 +84,9 @@ Principalmente, los diferentes modos de direccionamiento que permite el acceso a
 % The filtering mode which specifies how the value returned when fetching the texture is computed based on the input texture coordinates.
 % Linear texture filtering may be done only for textures that are configured to return floating-point data. It performs low-precision interpolation between neighboring texels. 
 % When enabled, the texels surrounding a texture fetch location are read and the return value of the texture fetch is interpolated based on where the texture coordinates fell between the texels.
-En cuanto a los distintos filtros que se pueden aplicar, los más simples son el modo puntual, que devuelve el valor con el indice más cercano, y el modo lineal, 
-que realiza una interpolación lineal entre el valor superior e inferior en el arreglo(en el caso de 1D). 
-Este último filtro es el que aplicaremos para nuestra aproximación, ya que provee una mayor precisión en los resultados para la función con la que estamos trabajando.
+En cuanto a los distintos filtros que se pueden aplicar, los más usuales son el modo puntual, que devuelve el valor con el indice más cercano, y el modo lineal, 
+que realiza una interpolación lineal entre el valor superior e inferior en el arreglo (en el caso de 1D). 
+Este último filtro es el que aplicaremos para nuestra aproximación, ya que provee una mayor precisión en los resultados para la función con la que estamos trabajando, y utilizando un menor número de elementos en la tabla.
 
 
 
@@ -90,20 +97,23 @@ Este último filtro es el que aplicaremos para nuestra aproximación, ya que pro
 
 
 \section{Implementación base sobre GPU}
-El esquema general utilizado para implementar el algoritmo sobre GPU es el explicado en \cite{friedrichs2009accelerating}. 
-Sin embargo, en el trabajo mencionado, el potencial incluye componentes de interacción de unión entre partículas, por lo que los cálculos requeridos son algo distintos.
 En el capítulo previo se explicaron en detalle los pasos del algoritmo y las ecuaciones a resolver. En esta sección nos centraremos en las variantes de implementación que utilizamos para cada paso.
 
-Para el cálculo de distancias entre partículas, la implementación es bastante directa. La granularidad usada es de un thread por cada par interacción(cada par de partículas) y se usaron tamaños de bloques fijos de $1024\times1$ 
-(este tamaño de bloques se mantiene para todos los kernels del algoritmo).
+El esquema general utilizado para implementar el algoritmo sobre GPU es el explicado en \cite{friedrichs2009accelerating}. 
+Sin embargo, en el trabajo mencionado, el potencial incluye componentes de interacción de unión entre partículas, por lo que los cálculos requeridos son algo distintos. 
+Se hará hincapié, entonces, en detallar las diferencias en nuestra implementación.
+
+Para el cálculo de distancias entre partículas, la implementación es bastante directa. La granularidad usada es de un thread por cada par interacción(cada par de partículas) y se usaron tamaños de bloques fijos de $1024\times1$.
+Este tamaño de bloques se mantiene como \textit{default} en nuestro algoritmo, solo se detallarán las situaciones en las que este valor se modifica.
+Teniendo en cuenta que el cálculo a realizar es simple y no presenta posibilidades de divergencia, es importante centrar la atención en el esquema de acceso a memoria para logar un uso óptimo de los recursos.
+La elección del tamaño de bloques persigue este objetivo.
 % [1024,1].
 % Usando este esquema, con cualquier placa actual es posible lanzar en paralelo el calculo de todas las distancias para sistemas de hasta Xxx partículas. 
-Teniendo en cuenta que el cálculo a realizar es  simple y no presenta posibilidades de divergencia, es importante centrar la atención en el esquema de acceso a memoria para logar un uso óptimo de los recursos.
 
 El paso correspondiente al cálculo de las fuerzas entre partículas es, quizás, el más complicado de implementar. El número de implementaciones existentes en la literatura es muy diversa, 
 principalmente debido a que los cálculos a realizar dependen del modelo de interacción subyacente, dando lugar a una gran variedad de posibles optimizaciones \cite{friedrichs2009accelerating}\cite{gotz2012routine}\cite{salomon2013routine}.
 
-En el caso de interacciones \textit{non-bond}, como las que se analizan en nuestro trabajo, la principal optimización deriva de la propiedad de simetría que presenta el potencial de interacción.
+En el caso de interacciones \textit{non-bond}, como las que se analizan en nuestro trabajo, la principal optimización deriva de la propiedad de simetría que presenta la función potencial.
 Es decir, la interacción entre un par de partículas $a$ y $b$ tiene el mismo módulo pero signo opuesto que el valor de ésta entre $b$ y $a$. 
 Esto tiene una implicación relevante en el número de cálculos que deben realizarse ya que sólo deberán calcularse interacciones para la mitad de las combinaciones entre partículas, reduciendo así considerablemente el número de cálculos.
 
@@ -111,9 +121,10 @@ Haciendo uso de la propiedad de simetría, entonces, el cálculo de la fuerza re
 
 % Para descomponer las componentes el cálculo se realiza usando un thread por cada par de partículas.
 
-La suma de la fuerza resultante se realiza mediante un esquema de reducción \cite{cudaReductions}. Los threads ponen el resultado de cada interacción individual en su posición correspondiente de la memoria compartida,
-evitando tener que realizar operaciones de sincronización entre ellos. Los valores parciales se reducen, luego, con un algoritmo paralelo en árbol: cada thread suma el valor de la posición x con el valor en 2x si este existiera. Esto se repite por la mitad de los threads, hasta que todos los valores hayan sido sumados 
-y el thread 0 del bloque escribe el resultado a la memoria global.
+La suma de la fuerza resultante total para cada partícula se realiza mediante un esquema de reducción \cite{cudaReductions}. 
+Los threads ponen el resultado de cada interacción individual en su posición correspondiente de la memoria compartida, evitando tener que realizar operaciones de sincronización entre ellos. 
+Los valores parciales se reducen, luego, con un algoritmo paralelo en árbol: cada thread suma el valor de la posición x con el valor en 2x si este existiera. 
+Esto se repite por la mitad de los threads, hasta que todos los valores hayan sido sumados y el thread 0 del bloque escribe el resultado a la memoria global.
 Un esquema simplificado de esto puede verse en la figura \ref{reduction}
 \begin{figure}[htbp]
    \centering
@@ -145,7 +156,7 @@ Es necesario asegurar un esquema de acceso a memoria apropiado para la gran cant
 % ****ACA PONGO LAS CARACTERISTICAS QUE OFRECE LA GPU Y QUE PUEDEN SER USADAS APROVECHANDO QUE HOY EN DIA LA MAYORIA DEL SOFT. ESTA IMPLEMENTADO SOBRE GPU*****
 
 Dado que esta modificación plantea reemplazar cálculos por la obtención de los resultados directamente desde memoria, 
-para entender su implementación se debe hacer foco en la organización de la memoria en la GPU, en particular en las propiedades de la cache de textura detalladas en la sección \ref{texturaDetallado}.
+para entender su implementación se debe hacer foco en la organización de la memoria en la GPU, en particular en las propiedades de la cache de textura presentadas en \ref{texturaDetallado} y que se detallaron en las secciones previas de este capítulo.
 
 
 
@@ -241,8 +252,9 @@ La mayor parte de éste se puede entender directamente ya que está en el lengua
 % \subsubsection{Tabla sobre memoria global}
 % \subsubsection{Tabla sobre memoria de textura}
 
-
-El kernel que permite calcular los valores de derivada del potencial utilizando esta tabla se encuentra detallado en la figura \ref{code:derivativesKernel}
+Teniendo en cuenta las consideraciones expresadas hasta ahora acerca de la implementación de una tabla en memoria de GPU, no es
+El kernel que permite calcular los valores de derivada del potencial utilizando esta tabla se encuentra detallado en la figura \ref{code:derivativesKernel}.
+El esquema general es similar al del kernel descrito anteriormente, la diferencia fundamental está en la línea 42, donde se ve que la obtención del resultado se logra con un sólo \textit{fetch} de memoria.
 
 \begin{figure}[htbp]
     \begin{lstlisting}
@@ -296,7 +308,7 @@ __global__ void direct_derivativeMode_E_r (
 
 
 
-\section{Implementacion sobre CPU}
+\section{Implementación sobre CPU}
 
 Con el fin de poder hacer una comparación real de los aspectos asociados a la performance se desarrolló además una implementación que realiza el cálculo de fuerzas sobre CPU.
 

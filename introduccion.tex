@@ -234,7 +234,7 @@ Además, la forma funcional implica que existe, al menos débilmente, entre todo
 El cálculo de este potencial representa así la mayor parte del costo computacional asociado a la simulación. 
 
 
-\subsection{Condiciones de frontera}
+\subsection{Condiciones de frontera} \label{frontera}
 
 Hasta aquí hemos definido al sistema como el conjunto de átomos sobre los cuales realizamos la simulación. 
 Sin embargo, los sistemas reales tienen, en términos prácticos, un tamaño infinito. 
@@ -256,8 +256,8 @@ Como resultado de esto, cada partícula perteneciente al conjunto de simulación
 
 Al parecer, el número de interacciones (y por lo tanto la cantidad de cálculos a realizar) se incrementará enormemente con esta nueva condición. 
 Sin embargo, esto puede evitarse si se utiliza un potencial con un rango finito, dado que en este caso se pueden ignorar las interacciones entre partículas separadas por una distancia mayor a cierto valor de \textit{cutoff}.
-En este caso, teniendo un valor de cutoff $R_{c}$ y definiendo una caja de simulaciún cuyo lado menor tenga una longitud $L_m$: 
-Si hacemos cumplir que $L_m>2R_{c}$, entonces se verá que, como máximo, solo una de las imágenes de cada particula quedará dentro del rango del cutoff y por lo tanto debera ser considerada.
+En este caso, teniendo un valor de cutoff $R_{c}$ y definiendo una caja de simulación cuyo lado menor tenga una longitud $L_m$: 
+Si hacemos cumplir que $L_m>2R_{c}$, entonces se verá que, como máximo, solo una de las imágenes de cada particula quedará dentro del rango del cutoff y por lo tanto deberá ser considerada.
 Este método, conocido como el criterio de imagen mínima, permite limitar el número de cálculos necesarios considerando solo la imagen mas cercana e ignorando el resto. 
 De esta forma se puede cumplir con las características infinitas del sistema real y las propiedades impuestas por el potencial, logrando una mejor aproximación en la simulación.
 La figura \ref{minimage} muestra una representación gráfica de este método. 

@@ -31,9 +31,9 @@ En las siguientes secciones del capítulo, se explican las modificaciones que es
 El algoritmo base sigue la especificación que se detalló en el capítulo 1(figura \ref{esquemaMD}). 
 
 El primer paso de la iteración implica calcular la fuerza que actúa sobre cada partícula. 
-El cálculo de la fuerza entre \textbf{cada par} de partículas responde a la siguiente ecuación: \begin{equation} \label{fuerza}\vec{F}(r)=\dfrac{\partial U(r)}{ \partial(r)}\end{equation}
-                                                                                                                                                   
-Por lo tanto, para realizar este cálculo en forma discreta, primero debemos conocer el valor de \textit{r}, es decir, la distancia entre cada par de partículas.
+El cálculo de la fuerza entre \textbf{cada par} de partículas responde a la siguiente ecuación: \begin{equation} \label{fuerza}\vec{F}(r)=\dfrac{\partial U(r)}{ \partial r}\end{equation}
+  
+Por lo tanto, para obtener el valor de la fuerza puntual entre las partículas, primero debemos conocer el valor de \textit{r}, es decir, la distancia entre cada par de estas. 
 El cálculo necesario para obtener estas distancias es simplemente la resta entre los componentes de las coordenadas de cada partícula, lo que hace que sea fácilmente paralelizable 
 ya que las posiciones son totalmente independientes entre si. 
 
@@ -42,18 +42,18 @@ En el caso que se estén utilizando condiciones periódicas de borde, la distanc
 A partir de las distancias entre las partículas, la ecuación \ref{fuerza} permite obtener la fuerza resultante de la interacción entre ellas, conociendo la función potencial.
 Este valor corresponde a la fuerza en la dirección de $\vec{r}$, es decir, la dirección del vector distancia. 
 Para poder obtener la suma total de las fuerzas que actúan sobre una partícula, como resultado de interacciones con todos los demás elementos del sistema,
-es necesario sumar todos los aportes. Esto implica sumar fuerzas con distintas direcciones(distintos vectores distancia), lo que se traduce en una suma de los componentes x,y,z de los distintos vectores. 
+es necesario sumar todos los aportes. Esto implica sumar fuerzas con distintas direcciones(distintos vectores distancia), lo que se traduce en una suma de los componentes \textit{x,y,z} de los distintos vectores. 
 Por lo tanto, el cálculo de la fuerza total que actúa sobre una partícula se divide en tres pasos:
 
 \begin{itemize}
 \item En un primer paso se calcula el valor de la fuerza entre cada par de partículas de acuerdo a la ecuación \ref{fuerza}, desarrollando la derivada para el potencial de Lennard-Jones:
 
 \begin{equation} 
-  \vec{F}(r)=\dfrac{\partial(U(r)) }{ \partial(r)}  =  24\epsilon \bigg(\dfrac{{\sigma}^{6}}{{r}^{7}} - \dfrac{2{\sigma}^{12}} {{r}^{13}}\bigg)
+  \vec{F}(r)=\dfrac{\partial(U(r)) }{ \partial r}  =  24\epsilon \bigg(\dfrac{{\sigma}^{6}}{{r}^{7}} - \dfrac{2{\sigma}^{12}} {{r}^{13}}\bigg)
 \end{equation}
 
 
-\item En un segundo paso se descompone esta fuerza en sus 3 componentes (x,y,z): \begin{equation}                                                                                
+\item En un segundo paso se descompone esta fuerza en sus 3 componentes \textit{x,y,z}: \begin{equation}                                                                                
 F_i=\vec{F}(r)\dfrac{\partial r}{\partial i}  \hspace{30pt} \textit{para i= x,y,z}
                                                                                  \end{equation}
 
@@ -67,18 +67,21 @@ F^j_i=\sum F_i	\hspace{30pt} \textit{para i= x,y,z}
 
 
 % CALCULO DE LA ACELERACION/CAMBIO EN LA VELOCIDAD
-Una vez obtenida la fuerza que actúa sobre cada partícula(componetes \textit{x,y,z}), se puede calcular la aceleración(\textit{a}=cambio en la velocidad) resultante de ésta y actualizar la velocidad de la partícula de acuerdo al cambio ocurrido.
+Una vez obtenida la fuerza que actúa sobre cada partícula(componetes \textit{x,y,z}), se puede calcular la aceleración(\textit{a}=cambio en la velocidad) resultante de ésta,
+y actualizar la velocidad de la partícula de acuerdo al cambio ocurrido.
 La velocidad estará dada por:
  \begin{equation} 
     v(t+dt)= v(t) + a\times dt =  v(t) + \bigg(\frac{F}{masa}\bigg)\times dt
 % velocity[i] = Vt + ( (force[i]*dtx) / m[type] );
  \end{equation}
 
-Nuevamente, la velocidad depende de propiedades de la partícula (velocidad anterior, fuerza y masa) y el cálculo es totalmente independiente para las distintas partículas.  
+Nuevamente, la velocidad depende de variables individuales de cada elemento (velocidad anterior, fuerza y masa) y el cálculo es totalmente independiente para las distintas partículas.  
+
+
 
 
 % PASO DE ACTUALIZACION DE CORDENADA
-El proceso de actualización de coordenadas deberá calcular para cada partícula su nueva posición, la cual estará dada en función de las coordenadas anteriores, la velocidad que se calculó previamente en la iteración y el \textit{step} en el tiempo. 
+El proceso de actualización de coordenadas deberá calcular para cada partícula su nueva posición, la cual estará dada en función de las coordenadas anteriores, la velocidad que se calculó previamente en la iteración y el \textit{step} en el tiempo(\textit{dt}). 
 La ecuación que se debe resolver en este paso es:
 \begin{equation} 
     Pos_x(t+dt)= Pos_x(t) + (v_x \times dt)
@@ -88,8 +91,15 @@ La ecuación que se debe resolver en este paso es:
 Claramente, este cálculo es totalmente independiente entre las partículas y por lo tanto puede paralelizarse por completo.
 
 El tiempo se ejecución para esta serie de pasos limita su aplicación sobre algunos problemas biológicos de interés, no sólo por la complejidad intrínseca del algoritmo ($N^2$), sino porque, aún en arquitecturas altamente paralelas como
-las GPUs (cuyo número de unidades de cálculo ha crecido exponencialmente), no es tan simple obtener el máximo de performance teórico de la arquitectura. Estas limitaciones para poder realizar todos los cálculos con la máxima eficiencia se deben, principalmente,
-a la baja performance en los accesos a memoria. Es necesario, entonces, realizar aproximaciones extra para acercarse a este límite.
+las GPUs (cuyo número de unidades de cálculo ha crecido exponencialmente), no es tan simple obtener el máximo de performance teórico de la arquitectura. 
+Estas limitaciones para poder realizar todos los cálculos con la máxima eficiencia se deben, principalmente, a la baja performance en los accesos a memoria. 
+Es necesario, entonces, realizar aproximaciones extra para acercarse a este límite.
+
+Es importante aclarar que las modificaciones que se plantean están centradas en la etapa del cálculo de fuerzas, el contexto de éste se mantiene siempre igual.
+Se debe tener en cuenta que la implementación de esta modificación requerirá una carga extra de acceso a memoria, por lo tanto, es necesaro analizar alternativas posibles para que estos accesos se logren de manera eficiente.
+Incluso teniendo esto en cuenta, la forma de implementar y utilizar esta tabla debería ser bastante directa, pero es necesario hacer un análisis exhaustivo de los posibles errores en los resultados.
+
+Por otro lado, aún cuando el objetivo de este trabajo se centra en estudiar la eficienca de las implementaciones sobre GPUs, la solución aqui planteada puede ser implementada en distintas arquitecturas.
 
 
 
@@ -97,55 +107,60 @@ a la baja performance en los accesos a memoria. Es necesario, entonces, realizar
 
 
 Basándose en la forma funcional del potencial mostrada en el capítulo 1(figura \ref{lennardimage}), es razonable pensar que, utilizando una tabla que contenga los resultados de esta ecuación en un rango definido de valores de \textit{r}, y, 
-aún sin tener ésta un tamaño excesivo, es posible utilizarla para obtener una estimación bastante aproximada de la interacción entre dos partículas. 
+aún sin tener ésta un tamaño excesivo, será posible obtener una estimación bastante aproximada de la interacción entre dos partículas. 
 
-Utilizando esta tabla, para obtener el valor de la energía potencial de interacción entre un par de partículas simplemente se debe recuperar el resultado asociado a la distancia(\textit{r}) que existe entre éstas(o el valor tabulado más cercano).
+Utilizando esta tabla, para obtener el valor de la energía potencial de interacción entre un par de partículas simplemente se debe recuperar el resultado asociado a la distancia(\textit{r}) entre estas(o el valor tabulado más cercano).
 % Esta propiedad se deriva directamente de las características de la función y es independiente del esquema de dinámica molecular.
 
 
 % Teniendo este tipo de valores almacenados es posible utilizarlos para calcular tanto las fuerzas resultantes (necesarias para la evolucion de la simulacion) como el valor de la enegia potencial total, el cual puede ser requerido por el usuario como resultado de la simulacion.
-Para insertar este método dentro del algoritmo de dinámica molecular, se debe poder obtener el valor de la fuerza para la distancia correspondiente.
+Para insertar este método dentro del algoritmo de dinámica molecular debemos analizar primero la forma de obtener, a partir de éste, el valor de la fuerza para la distancia correspondiente.
 % En la sección anterior se mostró como el algoritmo utiliza este potencial para obtener la interacción entre cada par de particulas y derivar la fuerza resultante. 
-Como se mostró previamente, para obtener este valor es necesario conocer la derivada de la función potencial para la distancia entre los átomos.
-Utilizando la tabla conteniendo valores del potencial se puede estimar el valor de la derivada mediante la técnica de derivación numerica. 
-Para esto se obtienen primero dos valores de potencial a partir de la tabla, correspondientes a distancias de $r\pm h$ (donde x es un valor discreto definido en base al tamaño total de la tabla).
+Como se mostró previamente, conociendo la derivada del potencial en función de la distancia entre los átomos, la fuerza se obtiene a partir de la ecuación \ref{fuerza}.
+
+Implementando una tabla que contenga valores del potencial, se puede estimar el valor de la derivada mediante la técnica de derivación numérica. 
+Para esto se obtienen primero dos valores de potencial a partir de la tabla, correspondientes a distancias de $r\pm h$ (donde h es un valor discreto definido en base a la forma funcional y el tamaño total de la tabla).
 La aproximación de la derivada se calcula entonces como:
 
 \begin{equation}
- V'(r) \approx \frac{V(r+h)-V(r-h)}{2h}
+ U'(r) \approx \frac{U(r+h)-U(r-h)}{2h}
 \end{equation}
 
-Utilizando estas aproximaciones sería posible simplificar considerablemente el cálculo de las fuerzas resultantes del potencial si se lo aplica dentro de un esquema de dinámica molecular.
+Utilizando estas aproximaciones, aplicadas dentro de un esquema de dinámica molecular, sería posible simplificar considerablemente el paso correspondiente al cálculo de las fuerzas resultantes entre las partículas.
 
-La aproximación de la derivada por el método de derivación numérica entrega resultados aceptables con un determinado error. 
+La aproximación del valor de la derivada por el método de derivación numérica entrega resultados aceptables con un determinado error. 
+El uso de valores tabulados tiene, a su vez, un error asociado que depende principalmente del tamaño de la tabla.
 La utilización del método junto con el esquema de valores tabulados implica, entonces, una doble fuente de error. 
 
-El algoritmo de dinámica molecular utiliza la fuerza para modificar la posición de las partículas y, por lo tanto, el valor del potencial en la próxima iteración. 
+El algoritmo de dinámica molecular utiliza la fuerza para modificar la posición de las partículas influyendo, a su vez, sobre el valor que tendrá el potencial en la próxima iteración. 
 De esta forma, los errores resultantes del método serán propagados a lo largo de una simulación que, normalmente, involucra miles de pasos.
 Una parte importante de aplicar esta aproximación será, entonces, asegurar la correctitud numérica de los resultados, 
-principalmente de los efectos que se acumulan a lo largo de una simulación que involucra una gran cantidad de pasos y que genera la propagación de los errores.
+principalmente la estabilidad a lo largo de una simulación que involucra una gran cantidad de pasos y que genera la propagación de los errores.
 
 
 Como se vió previamente, la ecuación del potencial de Lennard-Jones (ecuación \ref{lennardEquation}) depende directamente de \textit{r} y de los valores de $\epsilon$ y $\sigma$ de ambas partículas.
-La tabla que se utilizará tendrá, entonces, tres dimensiones. En una dimensión el valor del potencial variará en función de \textit{r}.
+Para implementar este método se necesitará, entonces, una tabla con tres dimensiones. En una dimensión el valor del potencial variará en función de \textit{r}.
 Las otras dos dimensiones representan una matriz que contiene todas las combinaciones de pares $\epsilon$-$\sigma$.
 
 Una ventaja adicional de tener tabulados los valores del potencial es que permite calcular muy fácilmente el valor de la energía potencial total asociada a una conformación puntual del sistema.
+Para esto solo se debe recuperar los valores de la tabla asociados a cada interacción encontrada en el sistema y luego obtener la suma de estos.
 Si bien la salida principal del método es la trayectoria que sigue cada partícula, suele adjuntarse, además, el valor de $E_tot$ asociado a la conformación del sistema cada cierta cantidad de pasos. 
 Este valor es utilizado durante el proceso de análisis posterior que se realiza sobre los resultados.
 
 
-Las modificaciones planteadas están centradas en la etapa del cálculo de fuerzas, el contexto de éste se mantiene siempre igual.
-Se debe tener en cuenta que la implementación de esta modificación requerirá una carga extra de acceso a memoria, por lo tanto, hay que analizar las alternativas posibles para que estos accesos se logren de manera eficiente.
-Incluso teniendo esto en cuenta, la forma de implementar y utilizar esta tabla debería ser bastante directa, pero es necesario hacer un análisis exhaustivo de los posibles errores que se comenten al hacer los cálculos
-
-Aún cuando el objetivo de este trabajo se centra en estudiar la eficienca de las implementaciones sobre GPU, la solución aqui planteada puede ser implementada en distintas arquitecturas.
-
 \section{Valores tabulados de la derivada}
 
-Como se mencionó en el capítulo 1, el resultado más importante de la simulación es la trayectoria resultante ya que es la base de la simulación y se debe calcular siempre.
-Dado que el valor mas importante que se obtiene a partir del potencial de L-J es la fuerza resultante de la interacción, se podría pensar que sería mas conveniente, en lugar de tabular valores del potencial,
-mantener en una tabla los valores de la derivada. De esta forma, para obtener la fuerza correspondiente se busca el valor en la tabla asociado a la distancia \textit{r} entre las partículas (o el valor tabulado mas cercano). 
+Como se mencionó en el capítulo 1, el método de dinámica molecular está centrado en calcular la evolución del sistema a lo largo del tiempo, es decir, las posiciones en el espacio de todos sus elementos describiendo una trayectoria. 
+Además de ser la base de la simulación y que, por lo tanto, necesita ser resuelta para guiar la evolución del sistema, la trayectoria resultante es utilizada luego para obtener las conclusiones químicas relevantes del sistema analizado. 
+En este contexto, el potencial de L-J es utilizado unicamente para obtener, a través de su derivada, la fuerza generada mediante las interacciones entre partículas. 
+
+Se podría pensar que, una forma mas eficiente de aprovechar el sistema de valores tabulados, sería mantener en una tabla los valores de la derivada, en lugar de almacenar valores resultantes del potencial. 
+De esta forma, para obtener la fuerza correspondiente se busca el valor en la tabla asociado a la distancia \textit{r} entre las partículas (o el valor tabulado mas cercano). 
+
+% ya que es la base de la simulación, se debe obtener siempre, y a partir de ella se realizan luego las conclusiones químicas relevantes.
+% Para poder obtener esta trayectoria, el potencial de L-J s
+% Dado que el valor mas importante que se obtiene a partir del potencial de L-J es la fuerza resultante de la interacción, 
+% se podría pensar que sería mas conveniente, en lugar de tabular valores del potencial,
 
 Las ventajas de esta nueva aproximación son claras: se reduce el error, ya que los valores tabulados fueron calculado directamente mediante la ecuación asociada a la derivada, 
-y se reduce la complejidad del acceso a memoria, ya que sólo se requiere obtener un valor para obtener el resultado.
+y se reduce la complejidad del acceso a memoria, ya que sólo se requiere leer un valor de la tabla para obtener el resultado de la derivación.

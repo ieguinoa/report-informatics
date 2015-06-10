@@ -1,10 +1,18 @@
 \chapter{Resultados}
-\section{Consideraciones previas}
-% ACA DEBERIA DECIR LAS CARACTERISTICAS DE LOS SISTEMAS Y CUALQUIER COSA DE LA EJECUCION QUE TENGA ALGO QUE VER CON EL SISTEMA QUE SE ESTÁ UTILIZANDO
+En este capítulo se presentan algunos de los resultados obtenidos para las distintas implementaciones, tanto de tiempo de cómputo como de calidad numérica en los resultados.
 
-Los tiempos de ejecuci\'on se midieron utilizando el reloj est\'andar de alta precisi\'on para Linux (\texttt{clock\_gettime}~\cite{LinuxDocumentation}), 
 
-Varios aspectos de los sistemas de prueba son relevantes para hacer una correcto análisis de los resultados. En el apéndice \ref{sistemas} se detalla la forma en que los sistemas de partículas fueron construidos y las propiedades de estos.
+Los sistemas utilizados para las evaluaciones se detallan en el apéndice \ref{sistemas}. 
+Por otro lado, en la primera sección de este capítulo se describen algunas consideraciones generales acerca de los sistemas y parámetros de ejecución que se deben tener en cuenta para hacer una correcta interpretación de los resultados.
+% dad varios aspectos de los sistemas de prueba son relevantes para hacer una correcto análisis de los resultados,
+
+Para todas las mediciones de tiempos de ejecuci\'on se utilizó el reloj est\'andar de alta precisi\'on para Linux (\texttt{clock\_gettime}~\cite{LinuxDocumentation}). 
+% El equipamiento utilizado para las pruebas se detallan en el apéndice \ref{equipamiento}. 
+Los detalles del hardware utilizado se encuentran en el apéndice \ref{equipamiento}. 
+Las pruebas correspondientes a los tiempos de ejecución se realizan midiendo exclusivamente el tiempo de la etapa de cálculo de fuerzas, sobre la cual se plantearon las modificaciones.
+
+% PONER ALGO MAS DE QUE ASPECTOS SON RELEVANTES
+% En el apéndice \ref{sistemas} se detalla la forma en que los sistemas de partículas fueron construidos y las propiedades de estos.
 
 % 
 % Claramente, el factor mas importante del sistema que afectará a la ejecución es el número total de partículas de éste. Los tamaños de sistemas utilizados fueron tres, y para 
@@ -14,31 +22,63 @@ Varios aspectos de los sistemas de prueba son relevantes para hacer una correcto
 % 
 % Además de las posiciones y tipos de particulas, es posible especificar velocidades iniciales....
 
-En cuanto a los parámetros de ejecución se debe tener en cuenta que a medida que la simulación avanza, las partículas 
-se deben tener en cuenta, entonces, dos aspectos que asocian la ejecucion con los parametros del sistema:
--las velocidades iniciales(ya descrito antes)
--el largo de la simulación y el uso de periocidad: es importante tener en cuenta que, si no se usa periodicidad, luego de cierto punto las particulas . 
+% En cuanto a los parámetros de ejecución, se debe tener en cuenta que a medida que la simulación avanza, las partículas son libres de difundir y éste es el resultado natural de una simulación en el vacío.
+\section{Consideraciones previas}
+Para poder evaluar correctamente el tiempo de ejecución asociado a una simulación, se debe tener en cuenta como afectan los parámetros utilizados.
 
-Este efecto se verá en cualquier simulación independientemente de las propiedades del sistema inicial y, claramente es algo a tener en cuenta ya que afecta la correcta evaluación, la aproximación que usamos es aplicar condiciones periódicas de contorno en todas las simulaciones, independientemente del tamaño del sistema.
-Al usar condiciones periodicas 
-El tamaño de la caja es, entonces, otro factor importante . De esta forma, a menos que se especifique lo contraro, se define como tamaño de la caja al valor de cutoff/2.
+Como se explicó en los capítulos previos, la combinación de \textit{cutoff} y tamaño/configuración del sístema define el número total de interacciones que se deben calcular y, por lo tanto, 
+el número de cálculos a realizar en una iteración. El valor de \textit{cutoff} es constante durante toda la ejecución, sin embargo, la configuración del sistema (posiciones relativas de las partículas) obviamente no lo es.
 
-Todos estos factores deben ser tenidos en cuenta a la hora de evaluar las implementaciones. 
-, las situaciones mencionadas que afectan a la ejecucion sirven para demostrar propiedades de las implementaciones y como ejecuciones de control, para 
-En las próximas secciones, cuando sea relevante, se especificarán las propiedades del sistema y de la ejecucion que se utilizaron.
+Es importante tener en cuenta que, si no se usan condiciones periódicas, dadas las características del potencial que estamos usando,
+el sistema no tiene ninguna restricción para expandirse a medida que la simulación avanza. Este es el resultado natural de una simulación en el vacío sobre un sistema de partículas sin enlaces químicos entre ellas.
+Esto genera que una mayor cantidad de elementos quede fuera del rango de \textit{cutoff} y, por lo tanto, la cantidad cálculos varíe, disminuyendo a lo largo de la ejecución.
+
+El cambio en la configuración del sistema, a su vez, está afectado por las condiciones iniciales. Las posiciones y velocidades iniciales del sistema pueden hacer que la expansión ocurra más rápidamente. 
+Una configuración inicial en condiciones de alta tempratura (distribución de velocidaddes con un mayor valor medio) genera este tipo de efecto. 
+
+Por otro lado, en el caso de usar condiciones periódicas hay otro parámetro que debe ser considerado, es el tamaño de la \textit{caja} de simulación. 
+Como se puede ver de lo explicado en \ref{frontera}, si definimos una caja de simulación de lado $L_m=2R_{cut}$ , habrá una y solo una imagen de cada partícula dentro del rango de cutoff.
+De esta forma, independientemente de la evolución del sistema, el número de interacciones que deben evaluarse será siempre constante a lo largo de la simulación.
+
+% El tamaño de la caja es, entonces, otro factor importante. De esta forma, a menos que se especifique lo contrario, se define como tamaño de la caja al valor de cutoff/2.
+
+Todos estos factores deben ser tenidos en cuenta a la hora de analizar los resultados, principalmente aquellos que evalúan tiempos de ejecución. 
+En las próximas secciones, cuando sea relevante, se especificarán las propiedades del sistema y de la ejecución que se utilizaron en cada prueba.
+ 
+% \begin{itemize}
+%  \item El tamaño del sistema, como se   claramente genera una mayor cantidad de calculos a realizar.... 
+%  \item Las velocidades y posiciones iniciales ..... . En el apéndice \ref{sistemas} el proceso para asignar velocidades inciales a los sistemas de prueba utilizados.
+%  \item el largo de la simulación y el uso de periocidad: es importante tener en cuenta que, si no se usa periodicidad, luego de cierto punto las particulas . 
+%  se debe tener en cuenta que a medida que la simulación avanza, las partículas son libres de difundir y éste es el resultado natural de una simulación en el vacío.
+%  
+% \end{itemize}
+
+
+% Este efecto se verá en cualquier simulación independientemente de las propiedades del sistema inicial y, claramente es algo a tener en cuenta ya que afecta la correcta evaluación, la aproximación que usamos es aplicar condiciones periódicas de contorno en todas las simulaciones, independientemente del tamaño del sistema.
+% Al usar condiciones periodicas 
+
+% , las situaciones mencionadas que afectan a la ejecucion sirven para demostrar propiedades de las implementaciones y como ejecuciones de control, para 
 
 
 % \section{Performance}
-\section{Evaluación de las implementaciones}
-Los sistemas detallados en la sección anterior se utilizaron para evaluar las distintas implementaciones en cuanto a performance..
+\section{Evaluación de la performance}
+% Los sistemas detallados en la sección anterior se utilizaron para evaluar las distintas implementaciones en cuanto a performance..
 
 
 % PRIMER GRAFICO DEBERÍA IR EL TIEMPO DE EJECUCION DE LAS 3 IMPLEMENTACIONES PARA LOS DISTINTOS SISTEMAS (PERIODICO)
 % GRAFICO DE BARRA CON LAS 3 IMPLEMENTACIONES AGRUPADAS EN 3(O 2) SISTEMAS DE PRUEBAS **PERIODICO -  CANTIDAD FIJA DE PASOS*
 % *****PUEDO METER LO DE CPU TAMBIEN ACA  ****
 
-En la figura \ref{time-compare} se puede ver los resultados en tiempo evaluados para todas las implementaciones detalladas en el capítulo previo.
-Las evaluaciones miden el tiempo de ejecución del paso correspondiente al cálculo de fuerzas.
+La figura \ref{time-compare} muestra la mejora en el tiempo de ejecución obtenida para las distintas implementaciones.
+Como puede verse, la implementación que utiliza valores del potencial en una tabla logra una pequeña mejora con respecto a la implementación base, y el uso de alcanza mas del doble de esta mejora en el tiempo.
+
+Estos resultados son los esperados basándose en las consideraciones que planteamos cuando se describieron las implementaciones. 
+
+Se muestra, además, en la figura \ref{time-compare-cpu}, una comparación de las mejoras que se obtienen con respecto a la implementación del cálculo de fuerzas sobre CPU. 
+El objetivo es demostrar la escala en la cual se encuentran las distintas implementaciones sobre GPU, con respecto a la implementación utilizando CPU(y sus posibles variantes). 
+Esta gran mejora en el tiempo es lo que ha impulsado el uso actual de la arquitectura GPU como estándar en este tipo de aplicaciones.
+
+% Las evaluaciones miden el tiempo de ejecución del paso correspondiente al cálculo de fuerzas.
 
 
 
@@ -50,7 +90,6 @@ Las evaluaciones miden el tiempo de ejecución del paso correspondiente al cálc
 \end{figure}
 
 
-En la figura \ref{time-compare-cpu}
 
 
 \begin{figure}[htbp]

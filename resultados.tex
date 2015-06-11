@@ -1,15 +1,22 @@
 \chapter{Resultados}
-En este capítulo se presentan algunos de los resultados obtenidos para las distintas implementaciones, tanto de tiempo de cómputo como de calidad numérica en los resultados.
+En este capítulo se presentan algunos de los resultados obtenidos utilizando las distintas implementaciones.
+Las evaluaciones realizadas y los resultados presentados, se encuentran divididos en dos secciones:
 
+En primer lugar se evalúa el tiempo de ejecución de las distintas implementaciones analizando la optimización lograda, lo cual dará una idea de las posibles ventajas que proveen en cuanto a eficiencia, 
+intentando explicar, además, cuáles son los casos en los cuales se pueden aprovechar estas.
+Todas las pruebas correspondientes a los tiempos de ejecución se realizan midiendo exclusivamente el tiempo de la etapa de cálculo de fuerzas, sobre la cual se plantearon las modificaciones.
+Para todas las mediciones se utilizó el reloj est\'andar de alta precisi\'on para Linux (\texttt{clock\_gettime}~\cite{LinuxDocumentation}). 
+
+En segundo lugar se analizan distintas fuentes de error en los resultados, las cuales se han mencionado durante el desarrollo de este trabajo a medida que se presentaban las aproximaciones utilizadas en los cálculos. 
+La calidad numérica se analiza para cálculos individuales y para ejecuciones prolongadas siguiendo el esquema de dinámica molecular.
+Se estudian también los efectos de distintas variables en las implementaciones que afectan esta propiedad.
 
 Los sistemas utilizados para las evaluaciones se detallan en el apéndice \ref{sistemas}. 
 Por otro lado, en la primera sección de este capítulo se describen algunas consideraciones generales acerca de los sistemas y parámetros de ejecución que se deben tener en cuenta para hacer una correcta interpretación de los resultados.
 % dad varios aspectos de los sistemas de prueba son relevantes para hacer una correcto análisis de los resultados,
 
-Para todas las mediciones de tiempos de ejecuci\'on se utilizó el reloj est\'andar de alta precisi\'on para Linux (\texttt{clock\_gettime}~\cite{LinuxDocumentation}). 
 % El equipamiento utilizado para las pruebas se detallan en el apéndice \ref{equipamiento}. 
 Los detalles del hardware utilizado se encuentran en el apéndice \ref{equipamiento}. 
-Las pruebas correspondientes a los tiempos de ejecución se realizan midiendo exclusivamente el tiempo de la etapa de cálculo de fuerzas, sobre la cual se plantearon las modificaciones.
 
 % PONER ALGO MAS DE QUE ASPECTOS SON RELEVANTES
 % En el apéndice \ref{sistemas} se detalla la forma en que los sistemas de partículas fueron construidos y las propiedades de estos.
@@ -23,22 +30,22 @@ Las pruebas correspondientes a los tiempos de ejecución se realizan midiendo ex
 % Además de las posiciones y tipos de particulas, es posible especificar velocidades iniciales....
 
 % En cuanto a los parámetros de ejecución, se debe tener en cuenta que a medida que la simulación avanza, las partículas son libres de difundir y éste es el resultado natural de una simulación en el vacío.
-\section{Consideraciones previas}
+\section{Consideraciones previas}\label{introResultados}
 Para poder evaluar correctamente el tiempo de ejecución asociado a una simulación, se debe tener en cuenta como afectan los parámetros utilizados.
 
-Como se explicó en los capítulos previos, la combinación de \textit{cutoff} y tamaño/configuración del sístema define el número total de interacciones que se deben calcular y, por lo tanto, 
+Como se explicó en los capítulos previos, la combinación de \textit{cutoff} y tamaño-configuración del sístema define el número total de interacciones presentes y, por lo tanto, 
 el número de cálculos a realizar en una iteración. El valor de \textit{cutoff} es constante durante toda la ejecución, sin embargo, la configuración del sistema (posiciones relativas de las partículas) obviamente no lo es.
 
-Es importante tener en cuenta que, si no se usan condiciones periódicas, dadas las características del potencial que estamos usando,
+Es importante tener en cuenta, entonces, que si no se usan condiciones periódicas, dadas las características del potencial que estamos usando,
 el sistema no tiene ninguna restricción para expandirse a medida que la simulación avanza. Este es el resultado natural de una simulación en el vacío sobre un sistema de partículas sin enlaces químicos entre ellas.
-Esto genera que una mayor cantidad de elementos quede fuera del rango de \textit{cutoff} y, por lo tanto, la cantidad cálculos varíe, disminuyendo a lo largo de la ejecución.
+Esto genera que una mayor cantidad de elementos quede fuera del rango de \textit{cutoff} y, por lo tanto, la cantidad de cálculos varíe, disminuyendo a lo largo de la ejecución.
 
 El cambio en la configuración del sistema, a su vez, está afectado por las condiciones iniciales. Las posiciones y velocidades iniciales del sistema pueden hacer que la expansión ocurra más rápidamente. 
 Una configuración inicial en condiciones de alta tempratura (distribución de velocidaddes con un mayor valor medio) genera este tipo de efecto. 
 
 Por otro lado, en el caso de usar condiciones periódicas hay otro parámetro que debe ser considerado, es el tamaño de la \textit{caja} de simulación. 
-Como se puede ver de lo explicado en \ref{frontera}, si definimos una caja de simulación de lado $L_m=2R_{cut}$ , habrá una y solo una imagen de cada partícula dentro del rango de cutoff.
-De esta forma, independientemente de la evolución del sistema, el número de interacciones que deben evaluarse será siempre constante a lo largo de la simulación.
+Como se puede ver de lo explicado en \ref{frontera}, si definimos una caja de simulación de lado $L_m=2R_{cut}$ , habrá una y sólo una imagen de cada partícula dentro del rango de cutoff.
+De esta forma, sea cual sea la evolución del sistema, el número de interacciones que deben evaluarse será siempre constante a lo largo de la simulación.
 
 % El tamaño de la caja es, entonces, otro factor importante. De esta forma, a menos que se especifique lo contrario, se define como tamaño de la caja al valor de cutoff/2.
 
@@ -70,12 +77,13 @@ En las próximas secciones, cuando sea relevante, se especificarán las propieda
 % *****PUEDO METER LO DE CPU TAMBIEN ACA  ****
 
 La figura \ref{time-compare} muestra la mejora en el tiempo de ejecución obtenida para las distintas implementaciones.
-Como puede verse, la implementación que utiliza valores del potencial en una tabla logra una pequeña mejora con respecto a la implementación base, y el uso de alcanza mas del doble de esta mejora en el tiempo.
+Como puede verse, la implementación que utiliza valores tabulados del potencial logra disminuir el tiempo de ejecución con respecto a la implementación base, 
+mientras que la modificación para que se utilicen directamente valores tabulados de la derivada duplica esta mejora.
 
-Estos resultados son los esperados basándose en las consideraciones que planteamos cuando se describieron las implementaciones. 
+Estos resultados son los esperados basándose en las consideraciones que planteamos cuando se describieron las distintas modificaciones. 
 
-Se muestra, además, en la figura \ref{time-compare-cpu}, una comparación de las mejoras que se obtienen con respecto a la implementación del cálculo de fuerzas sobre CPU. 
-El objetivo es demostrar la escala en la cual se encuentran las distintas implementaciones sobre GPU, con respecto a la implementación utilizando CPU(y sus posibles variantes). 
+Se muestra, además, en la figura \ref{time-compare-cpu}, una comparación de las mejoras en la eficiencia que se obtienen con respecto a la implementación del cálculo de fuerzas sobre CPU. 
+El objetivo es demostrar la escala en la cual se encuentran las distintas implementaciones sobre GPU, con respecto a la implementación utilizando CPU (y sus posibles variantes). 
 Esta gran mejora en el tiempo es lo que ha impulsado el uso actual de la arquitectura GPU como estándar en este tipo de aplicaciones.
 
 % Las evaluaciones miden el tiempo de ejecución del paso correspondiente al cálculo de fuerzas.
@@ -105,13 +113,17 @@ Esta gran mejora en el tiempo es lo que ha impulsado el uso actual de la arquite
 % DESPUES EXPLICAR COMO AFECTA LA (NO)PERIODICIAD A LA EJECUCION Y MOSTRA EL GRAFICO DE TIEMPO DE EJECUCION DE LAS 3 IMPLEMENTACIONES PARA LOS DISTINTOS SISTEMAS (***NO** PERIODICO)
 % DEBERIA MOSTRAR UN GRAFICO QUE DE ALGUNA FORMA COMPARE LAS IMPLEMENTACIONES PARA 1 SOLA ITERACION Y PARA UN NUMERO X DE ITERACIONES (PERIODICO con max. cutoff Y NO PERIODICO) 
 % Y DECIR QUE A MEDIDA QUE SE EJECUTA, LOS ATOMOS SE 'ESCAPAN' DE LA CAJA NO PERIODICA PERO LA EJECUCION PERIODICA SIEMPRE MANTIENE EL NUMERO DE ATOMOS SOBRE LOS CUALES CALCULAR LA FUERZA
-En la figura \ref{periodic-effects} se ven los efectos mencionados. Se muestra la ejecución de las diferentes implementaciones para un mismo sistema(X átomos). 
-A partir de las distintas ejecuciones se calcularon los tiempos promedios por iteración. 
-Se ve que en el caso de tener condiciones no periódicas, al evolucionar la ejecución la expansión del sistema disminuye el número de particulas que se encuentran dentro del radio definido por el cutoff.
-Esto genera una disminución en el numero de interacciones que se deben calcular y por lo tanto se reduce el tiempo promedio por iteración. 
-En otras condiciones iniciales, o para diferrentes sistemas de interacción, el tiempo promedio podría aumentar.
+En la figura \ref{periodic-effects} se ven los efectos mencionados al inicio de este capítulo, acerca del impacto de la evolución del sistema sobre el costo computacional de cada iteración.
 
-En el caso de condiciones periódicas(usando el cutoff máximo), todas las partículas del sistema se mantienen dentro del radio de iteracción y por lo tanto el número de 
+% A partir de las distintas ejecuciones se calcularon los tiempos promedios por iteración. 
+Se muestra el tiempo por iteración al inicio de la simulación(iteración 1) y luego de 1000 pasos de ejecución(iteración 1000).
+Los resultados corresponden a la ejecución de las diferentes implementaciones para un mismo sistema(X átomos), utilizando distintas condiciones de borde. 
+Se ve que en el caso de tener condiciones no periódicas, al evolucionar la ejecución, el proceso de expansión del sistema disminuye el número de partículas que se encuentran dentro del radio definido por el \textit{cutoff}.
+Esto genera una disminución en el numero de interacciones que se deben calcular y por lo tanto se reduce el tiempo por iteración. 
+En otras condiciones iniciales, o para diferentes esquemas(potenciales) de interacción, el tiempo promedio podría aumentar.
+
+En el caso de condiciones periódicas(usando el \textit{cutoff} máximo), 
+todas las partículas del sistema se mantienen dentro del radio de iteracción y por lo tanto el número de cálculos necesarios se mantiene constante, lo que se ve reflejado en el tiempo de ejecución asociado a la iteración.
 
 \begin{figure}[htbp]
 \centering
@@ -125,15 +137,33 @@ En el caso de condiciones periódicas(usando el cutoff máximo), todas las part�
    \caption{Condiciones periódicas}
    \label{compar-niter-promedio}
  \end{subfigure}
- \caption{Comparaci\'on de tiempos de ejecuci\'on promedio por iteración para condiciones periódicas y no periódicas}
+ \caption{Comparaci\'on de tiempos de ejecuci\'on por iteración para condiciones de borde periódicas y no periódicas}
  \label{periodic-effects}
 \end{figure}
 
 
+
+
 \subsection{Efectos del cutoff}
-Se realiza una evaluación del efecto del cutoff en el tiempo de ejecución
+En la sección \ref{introResultados} se mencionaron algunos efectos que se pueden ver en el tiempo de ejecución, asociados al valor de \textit{cutoff} en simulaciones bajo distintas condiciones de periodicidad. 
+Para demostrar estos efectos, se realizan un conjunto de simulaciones para los distintas implementaciones a lo largo de 1000 iteraciones.
+Los resultados pueden verse en la figura \ref{time-vs-cut}. 
+
+En el caso de simulaciones en condiciones de periodicidad, el tiempo de ejecución aumenta constantemente a medida que se incrementa el \textit{cutoff}. 
+Esto se deduce de las consideraciones detalladas a lo largo de las secciones previas, al aumentar el número de interacciones que se tienen en cuenta aumentará también el costo computacional asociado.
+El valor máximo que tomará el \textit{cutoff} será $R_{cut}=\frac{L_m}{2}$, donde $L_m$ es el largo máximo de la caja, tal como se describe en el capítulo 1.
+
+Un resultado interesante se presenta en las simulaciones bajo condiciones no periódicas, y es esta particularidad lo que me llevó a presentar estas demostraciones.
+Como se ve en la figura \ref{time-vs-cut-NOperiodic}, el tiempo de ejecución aumenta con el valor de \textit{cutoff} hasta cierto punto (aprox. hasta la mitad del tamaño inicial del sistema), y luego tiende a disminuir.
+Este último efecto, si bien no se analizó en mayor detalle, puede ser explicado teniendo en cuenta que las partículas que luego de cierto tiempo de simulación quedan fuera del rango de \textit{cutoff} 
+hacen que se pierda la coalescencia en los accesos a memoria, aumentando así el tiempo de ejecución. 
+Por otro lado, al aumentar el rango de cobertura(mayor \textit{cutoff}, el accceso coalescente se mantiene durante mayor cantidad de iteraciones.
+
+
+
+% una evaluación del efecto del cutoff en el tiempo de ejecución
 % GRAFICO SCATTER DE LAS 3 IMPLEMENTACIONES vs AUMENTO EN EL CUTOFF 
-En la figura \ref{time-vs-cut} se ve el efecto del cutoff sobre el tiempo de ejecución del cálculo de fuerzas de interacción.
+% En la figura \ref{time-vs-cut} se ve el efecto del cutoff sobre el tiempo de ejecución del cálculo de fuerzas de interacción.
 
 % \begin{figure}[htbp]
 % \centering
@@ -149,14 +179,14 @@ En la figura \ref{time-vs-cut} se ve el efecto del cutoff sobre el tiempo de eje
 \begin{subfigure}[b]{\plotwidthtres}
    \includegraphics[width=\textwidth]{plots/timeVsCut/timeComparison-periodic.png}
    \caption{Condiciones de periodicidad}
-   \label{compar-1iter}
+   \label{time-vs-cut-periodic}
  \end{subfigure}
 \begin{subfigure}[b]{\plotwidthtres}
    \includegraphics[width=\textwidth]{plots/timeVsCut/timeComparison-NOperiodic.png}
    \caption{Condiciones NO periódicas}
-   \label{compar-niter}
+   \label{time-vs-cut-NOperiodic}
  \end{subfigure}
- \caption{Comparaci\'on de tiempos de ejecuci\'on bajo condiciones de periodicidad y NO-periódicas}
+ \caption{Comparaci\'on de tiempos de ejecuci\'on bajo condiciones de periodicidad y NO-periódicas. 1000 iteraciones}
  \label{time-vs-cut}
 \end{figure}
 
@@ -165,10 +195,26 @@ En la figura \ref{time-vs-cut} se ve el efecto del cutoff sobre el tiempo de eje
 
 En la figura \ref{blockSize} se ve el efecto de la variación en el tamaño de los bloques para las distintas implementaciones.
 
-En la implementación
+La evaluación es similar a la realizada en la sección anterior para medir el efecto del \textit{cutoff}, pero en su lugar se evaluaron tres esquemas de bloques distintos: 
+un primera prueba con bloques de 512x1 threads, una prueba con bloques de 1x512, y una última con bloques de 1x1 threads.
 
-Esto se debe a las propiedades que tienen los accesos a memoria global en GPU. Los warps se construyen agrupando threads de un mismo bloque por columnas. 
-En nuestro caso, utilizamos como standar bloques de 1024x1 y al tener columnas con 1 solo elemento, los warps se van formando con elementos consecutivos de una fila. es decir, los warps se forman
+El patrón resultante de los tiempos de ejecución puede ser explicado si se tiene en cuenta la forma de acceder a la memoria implementada en las distintas variantes del algoritmo.
+En las implementaciones realizadas, los threads se identifican segun la posición dentro de la matriz de bloques, primero según su índice en el eje \textit{x} y luego de acuerdo a su índice en el eje \textit{y}.
+Además, los threads con identificadores contiguos acceden a posiciones contiguas de memoria. 
+
+Por otro lado, se debe tener en cuenta la forma en que se construyen los warps. Estos se construyen agrupando threads de un mismo bloque por columnas y luego por filas, y los accesos a memoria se organizan buscando coalescencia a nivel de warps.
+
+% Esto se debe a las propiedades que tienen los accesos a memoria global en GPU. Los warps 
+
+De acuerdo a estas propiedades, si los bloques se forman agrupando threads en filas de 1 sola columna(bloques de 1x512), el orden de identificación global de los threads no coincide con el de agrupación de estos en warps. 
+Por lo tanto, los accesos serán desordenados y no se logrará coalescencia en los accesos a memoria.
+Esto marca la diferencia que se ve entre los esquemas de 512x1 y 1x512.
+
+% pero acceden de acuerdo a su posición en $y$, no se mantendrá la coalescencia en los accesos a memoria.
+
+En el caso de bloques de 1x1, su baja performance probablemente se deba a que excede la capacidad de manejo de bloques que tienen las unidades de ejecución. 
+
+% En nuestro caso, utilizamos como standar bloques de 1024x1 y al tener columnas con 1 solo elemento, los warps se van formando con elementos consecutivos de una fila. es decir, los warps se forman
 
 \begin{figure}[htbp]
 \centering
@@ -190,6 +236,14 @@ En nuestro caso, utilizamos como standar bloques de 1024x1 y al tener columnas c
  \caption{Efectos de la variación en los tamaños de bloque para las distintas implementaciones.}
  \label{blockSize}
 \end{figure}
+
+
+
+
+
+
+
+
 
 
 \section{Calidad numérica}
@@ -317,7 +371,7 @@ En la figura \ref{time-vs-cut-error-superior} se ven los errores al aumentar el 
 
 
 
-\subsection{Estabilidad de la simulación}
+% \subsection{Estabilidad de la simulación}
 % GRAFICO
 % Acá debería mostrar como la energia se mantiene constante cuando hago una simulacion larga (distintos valores de tamano de tabla	)
 

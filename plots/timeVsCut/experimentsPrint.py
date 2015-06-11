@@ -19,8 +19,8 @@ def timeVsCut():
 	     timesd.append(float(d))
 	     timesa.append(float(a))		
         params = {
-            'xlabel': u"Cutoff",
-            'ylabel': u"Tiempo(seg)",
+            'xlabel': u"Cutoff [A]",
+            'ylabel': u"Tiempo [s]",
             'xdata': cutoffs,
             'ydata': [timesp,timesa,timesd],
             'label': [u'Tabla potenciales',u'Analítico',u'Tabla derivadas'],
@@ -38,8 +38,8 @@ def timeVsCut():
 	     timesd.append(float(d))
 	     timesa.append(float(a))		
         params = {
-            'xlabel': "Cutoff",
-            'ylabel': "Tiempo(seg)",
+            'xlabel': "Cutoff [A]",
+            'ylabel': "Tiempo [s]",
             'xdata': cutoffs,
             'ydata': [timesp,timesa,timesd],
             'label': [u'Tabla potenciales',u'Analítico',u'Tabla derivadas'],

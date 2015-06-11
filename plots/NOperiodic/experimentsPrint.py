@@ -39,7 +39,7 @@ def comparacionTiempos1Niteraciones():
       'values': comparison,
       'ticks': labels,
       'filename': u'comparacion-periodico.png',
-      'ylabel': u'Tiempo por iteración [ms]',
+      'ylabel': u'Tiempo de ejecución iteración X [ms]',
       'loc': 'left'
   }
 
@@ -70,7 +70,7 @@ def comparacionTiempos1Niteraciones():
       'values': comparison,
       'ticks': labels,
       'filename': u'comparacion-NOperiodico.png',
-      'ylabel': u'Tiempo promedio por iteración [ms]',
+      'ylabel': u'Tiempo de ejecución iteración X [ms]',
       'loc': 'left'
   }
 
@@ -107,7 +107,7 @@ def comparacionTiemposFinalNOperiodic():
       'values': comparison,
       'ticks': labels,
       'filename': u'comparacion-1iter.png',
-      'ylabel': u'Tiempo de ejecución [ms]',
+      'ylabel': u'Tiempo de ejecución iteración X [ms]',
       'loc': 'left'
   }
 
@@ -138,7 +138,7 @@ def comparacionTiemposFinalNOperiodic():
       'values': comparison,
       'ticks': labels,
       'filename': u'comparacion-Niter.png',
-      'ylabel': u'Tiempo de ejecución [ms]',
+      'ylabel': u'Tiempo de ejecución iteración X [ms]',
       'loc': 'left'
   }
 
